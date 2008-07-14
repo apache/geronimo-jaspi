@@ -89,7 +89,6 @@ public class AuthConfigFactoryImplTest extends TestCase {
         assertNotNull(factory.getConfigProvider("layer4", "appContext4", null));
         assertNull(factory.getConfigProvider("layer4", "bad", null));
         assertNull(factory.getConfigProvider("bad", "appContext4", null));
-//        assertNull(factory.getConfigProvider(null, null, null));
         factory.removeRegistration(registrationID);
         assertNull(factory.getRegistrationContext(registrationID));
     }
@@ -99,10 +98,8 @@ public class AuthConfigFactoryImplTest extends TestCase {
         String registrationID = factory.registerConfigProvider(DummyProvider.class.getName(), null, "layer5", null, "description");
 
         assertNotNull(factory.getConfigProvider("layer5", "appContext5", null));
-//        assertNotNull(factory.getConfigProvider("layer5", null, null));
         assertNotNull(factory.getConfigProvider("layer5", "bad", null));
         assertNull(factory.getConfigProvider("bad", "appContext5", null));
-//        assertNull(factory.getConfigProvider(null, null, null));
         factory.removeRegistration(registrationID);
         assertNull(factory.getRegistrationContext(registrationID));
     }
@@ -112,10 +109,8 @@ public class AuthConfigFactoryImplTest extends TestCase {
         String registrationID = factory.registerConfigProvider(DummyProvider.class.getName(), null, null, "appContext6", "description");
 
         assertNotNull(factory.getConfigProvider("layer6", "appContext6", null));
-//        assertNull(factory.getConfigProvider("layer6", null, null));
         assertNull(factory.getConfigProvider("layer6", "bad", null));
         assertNotNull(factory.getConfigProvider("bad", "appContext6", null));
-//        assertNull(factory.getConfigProvider(null, null, null));
         factory.removeRegistration(registrationID);
         assertNull(factory.getRegistrationContext(registrationID));
     }
@@ -125,7 +120,6 @@ public class AuthConfigFactoryImplTest extends TestCase {
         String registrationID = factory.registerConfigProvider(DummyProvider.class.getName(), null, null, null, "description");
 
         assertNotNull(factory.getConfigProvider("layer7", "appContext7", null));
-//        assertNotNull(factory.getConfigProvider("layer7", null, null));
         assertNotNull(factory.getConfigProvider("layer7", "bad", null));
         assertNotNull(factory.getConfigProvider("bad", "appContext7", null));
         assertNotNull(factory.getConfigProvider("bad", "bad", null));

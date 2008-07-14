@@ -35,13 +35,15 @@ import javax.xml.bind.Unmarshaller;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.xml.sax.SAXException;
+import org.apache.geronimo.components.jaspi.ClassLoaderLookup;
 
 /**
- * @version $Rev:$ $Date:$
+ * @version $Rev$ $Date$
  */
 public class JaspiXmlUtil {
     public static final XMLInputFactory XMLINPUT_FACTORY = XMLInputFactory.newInstance();
     public static final JAXBContext JASPI_CONTEXT;
+    private static ConfigProviderMapAdapter configProviderMapAdapter = new ConfigProviderMapAdapter();
 
     static {
         try {
@@ -51,8 +53,13 @@ public class JaspiXmlUtil {
         }
     }
 
+    public static void registerClassLoaderLookup(ClassLoaderLookup classLoaderLookup) {
+        configProviderMapAdapter = new ConfigProviderMapAdapter();
+    }
+
     public static void writeJaspi(JaspiType metadata, Writer out) throws XMLStreamException, JAXBException {
         Marshaller marshaller = JASPI_CONTEXT.createMarshaller();
+        marshaller.setAdapter(configProviderMapAdapter);
         marshaller.setProperty("jaxb.formatted.output", true);
         JAXBElement<JaspiType> element = new ObjectFactory().createJaspi(metadata);
         marshaller.marshal(element, out);
@@ -66,6 +73,7 @@ public class JaspiXmlUtil {
 
     public static JaspiType loadJaspi(XMLStreamReader in) throws ParserConfigurationException, IOException, SAXException, JAXBException, XMLStreamException {
         Unmarshaller unmarshaller = JASPI_CONTEXT.createUnmarshaller();
+        unmarshaller.setAdapter(configProviderMapAdapter);
         JAXBElement<JaspiType> element = unmarshaller.unmarshal(in, JaspiType.class);
         JaspiType rbac = element.getValue();
         return rbac;

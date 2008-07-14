@@ -11,9 +11,13 @@ package org.apache.geronimo.components.jaspi.model;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import org.apache.geronimo.components.jaspi.model.ConfigProviderType;
 
@@ -46,7 +50,9 @@ public class JaspiType
 {
 
     private final static long serialVersionUID = 12343L;
-    protected List<ConfigProviderType> configProvider;
+
+    @XmlJavaTypeAdapter(ConfigProviderMapAdapter.class)
+    protected Map<String, ConfigProviderType> configProvider;
 
     /**
      * Gets the value of the configProvider property.
@@ -70,9 +76,9 @@ public class JaspiType
      * 
      * 
      */
-    public List<ConfigProviderType> getConfigProvider() {
+    public Map<String, ConfigProviderType> getConfigProvider() {
         if (configProvider == null) {
-            configProvider = new ArrayList<ConfigProviderType>();
+            configProvider = new HashMap<String, ConfigProviderType>();
         }
         return this.configProvider;
     }
