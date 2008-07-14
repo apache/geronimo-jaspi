@@ -285,4 +285,13 @@ public class ConfigProviderType
         }
 
     }
+
+    public static String getRegistrationKey(String layer, String appContext) {
+        return layer + "/" + appContext;
+    }
+
+    public String getRegistrationKey() {
+        return getRegistrationKey(getMessageLayer(), getAppContext());
+    }
+
 }
