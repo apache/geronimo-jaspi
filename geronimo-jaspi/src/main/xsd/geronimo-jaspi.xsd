@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Licensed to the Apache Software Foundation (ASF) under one or more
+    contributor license agreements.  See the NOTICE file distributed with
+    this work for additional information regarding copyright ownership.
+    The ASF licenses this file to You under the Apache License, Version 2.0
+    (the "License"); you may not use this file except in compliance with
+    the License.  You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+-->
+
+<xs:schema targetNamespace="http://geronimo.apache.org/xml/ns/geronimo-jaspi"
+           xmlns:jaspi="http://geronimo.apache.org/xml/ns/geronimo-jaspi"
+           xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:jaxb="http://java.sun.com/xml/ns/jaxb"
+           xmlns:xjc="http://java.sun.com/xml/ns/jaxb/xjc"
+           elementFormDefault="qualified"
+           attributeFormDefault="unqualified"
+           jaxb:extensionBindingPrefixes="xjc"
+           jaxb:version="2.0">
+
+
+    <xs:annotation>
+        <xs:appinfo>
+            <jaxb:globalBindings>
+                <xjc:serializable uid="12343"/>
+            </jaxb:globalBindings>
+        </xs:appinfo>
+    </xs:annotation>
+
+    <xs:annotation>
+        <xs:documentation>
+            This is an XML Schema Definition for Geronimo JASPI implementation configurations.
+        </xs:documentation>
+    </xs:annotation>
+
+    <xs:element name="jaspi" type="jaspi:jaspiType">
+        <xs:annotation>
+            <xs:documentation>
+                The jaspi element is the root element of the jaspi configuration file.
+            </xs:documentation>
+        </xs:annotation>
+    </xs:element>
+
+    <xs:complexType name="jaspiType">
+        <xs:sequence>
+            <xs:element name="configProvider" type="jaspi:configProviderType" minOccurs="0" maxOccurs="unbounded">
+                <xs:annotation>
+                    <xs:documentation>
+                        Reference to configProvider element defined later in this xsd.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+    <!--<xs:complexType name="emptyType"/>-->
+
+
+    <xs:complexType name="configProviderType">
+        <xs:sequence>
+            <xs:annotation>
+                <xs:documentation>
+                    configProviderType configures a AuthConfigProvider
+                </xs:documentation>
+            </xs:annotation>
+
+            <xs:element name="messageLayer" type="xs:string" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>
+                        The attribute provide the name-value pair of
+                        various attributes for this GBean. The value of
+                        the attributes is specified by value of this
+                        element.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="appContext" type="xs:string" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>
+                        The xml-attribute specifies the value of
+                        particular attribute in XML format, which will
+                        be interpreted by a component running in the
+                        system, which convert it to single value for
+                        this attribute.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="description" type="xs:string" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>
+                        The "reference" element specifies the value of a
+                        particular reference for this GBean in simplest
+                        form. It holds the reference to the GBean that
+                        matches the single pattern specified here, if no
+                        value is specified it will refer to all the
+                        matching GBeans.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="className" type="xs:string">
+                <xs:annotation>
+                    <xs:documentation>
+                        The "references" element specifies the value of
+                        a particular reference for this GBean matching
+                        multiple pattern elements.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="properties"
+                        type="xs:string" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>
+                        The xml-reference specifies the value of
+                        particular reference in XML format, which will
+                        be interpreted by a component running in the
+                        system, which convert it to single value for
+                        this reference.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="persistent" type="xs:boolean" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>
+                        The element "dependency" is used to resolve
+                        dependencies at GBean level. This is normally
+                        only used if for some reason the GBeans within a
+                        module must be started in a certain order that
+                        is not reflected in the references between them.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+</xs:schema>

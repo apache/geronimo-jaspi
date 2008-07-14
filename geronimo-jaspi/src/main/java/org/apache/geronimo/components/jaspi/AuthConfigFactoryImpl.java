@@ -16,10 +16,10 @@
  */
 package org.apache.geronimo.components.jaspi;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.security.PrivilegedActionException;
-import java.security.PrivilegedExceptionAction;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -30,6 +30,14 @@ import javax.security.auth.message.AuthException;
 import javax.security.auth.message.config.AuthConfigFactory;
 import javax.security.auth.message.config.AuthConfigProvider;
 import javax.security.auth.message.config.RegistrationListener;
+import javax.xml.bind.JAXBException;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.stream.XMLStreamException;
+
+import org.apache.geronimo.components.jaspi.model.ConfigProviderType;
+import org.apache.geronimo.components.jaspi.model.JaspiType;
+import org.apache.geronimo.components.jaspi.model.JaspiXmlUtil;
+import org.xml.sax.SAXException;
 
 /**
  * Implementation of the AuthConfigFactory. 
@@ -37,8 +45,14 @@ import javax.security.auth.message.config.RegistrationListener;
 public class AuthConfigFactoryImpl extends AuthConfigFactory {
 
     private static ClassLoader contextClassLoader;
-    private Map<String, Context> registrations = new HashMap<String, Context>();
-    
+    private final Map<String, ConfigProviderType> registrations = new HashMap<String, ConfigProviderType>();
+    private JaspiType jaspiType = new JaspiType();
+
+    private final ClassLoaderLookup classLoaderLookup;
+    private final File configFile;
+    private static final File DEFAULT_CONFIG_FILE = new File("config/jaspi.xml");
+    public static File staticConfigFile = DEFAULT_CONFIG_FILE;
+
     static {
         contextClassLoader = java.security.AccessController
                         .doPrivileged(new java.security.PrivilegedAction<ClassLoader>() {
@@ -47,9 +61,20 @@ public class AuthConfigFactoryImpl extends AuthConfigFactory {
                             }
                         });
     }
-    
-    public AuthConfigFactoryImpl() throws AuthException {
+
+    public AuthConfigFactoryImpl(ClassLoaderLookup classLoaderLookup, File configFile) throws AuthException {
+        this.classLoaderLookup = classLoaderLookup;
+        this.configFile = configFile;
         loadConfig();
+    }
+
+    public AuthConfigFactoryImpl() throws AuthException {
+        this(new ClassLoaderLookup() {
+
+            public ClassLoader getClassLoader(String name) {
+                return contextClassLoader;
+            }
+        }, staticConfigFile);
     }
     
     public synchronized String[] detachListener(RegistrationListener listener, String layer, String appContext) throws SecurityException {
@@ -58,8 +83,8 @@ public class AuthConfigFactoryImpl extends AuthConfigFactory {
             sm.checkPermission(new AuthPermission("detachAuthListener"));
         }
         List<String> ids = new ArrayList<String>();
-        for (Map.Entry<String, Context> entry : registrations.entrySet()) {
-            Context ctx = entry.getValue();
+        for (Map.Entry<String, ConfigProviderType> entry : registrations.entrySet()) {
+            ConfigProviderType ctx = entry.getValue();
             if ((layer == null || layer.equals(ctx.getMessageLayer())) &&
                     (appContext == null || appContext.equals(ctx.getAppContext()))) {
                 if (ctx.getListeners().remove(listener)) {
@@ -71,7 +96,13 @@ public class AuthConfigFactoryImpl extends AuthConfigFactory {
     }
 
     public synchronized AuthConfigProvider getConfigProvider(String layer, String appContext, RegistrationListener listener) {
-        Context ctx = registrations.get(getRegistrationKey(layer, appContext));
+        if (layer == null) {
+            throw new NullPointerException("messageLayer");
+        }
+        if (appContext == null) {
+            throw new NullPointerException("appContext");
+        }
+        ConfigProviderType ctx = registrations.get(getRegistrationKey(layer, appContext));
         if (ctx == null) {
             ctx = registrations.get(getRegistrationKey(null, appContext));
         }
@@ -96,8 +127,8 @@ public class AuthConfigFactoryImpl extends AuthConfigFactory {
 
     public synchronized String[] getRegistrationIDs(AuthConfigProvider provider) {
         List<String> ids = new ArrayList<String>();
-        for (Map.Entry<String, Context> entry : registrations.entrySet()) {
-            Context ctx = entry.getValue();
+        for (Map.Entry<String, ConfigProviderType> entry : registrations.entrySet()) {
+            ConfigProviderType ctx = entry.getValue();
             if (provider == null ||
                     provider.getClass().getName().equals(ctx.getProvider().getClass().getName())) {
                 ids.add(entry.getKey());
@@ -119,7 +150,7 @@ public class AuthConfigFactoryImpl extends AuthConfigFactory {
         if (sm != null) {
             sm.checkPermission(new AuthPermission("registerAuthConfigProvider"));
         }
-        return registerConfigProvider(authConfigProvider, layer, appContext, description, false, null);
+        return registerConfigProvider(authConfigProvider, layer, appContext, description, false, null, null);
     }
 
     public synchronized String registerConfigProvider(final String className, final Map constructorParam, String layer, String appContext, String description) throws AuthException, SecurityException {
@@ -127,47 +158,42 @@ public class AuthConfigFactoryImpl extends AuthConfigFactory {
         if (sm != null) {
             sm.checkPermission(new AuthPermission("registerAuthConfigProvider"));
         }
-        AuthConfigProvider authConfigProvider;
-        try {
-            authConfigProvider = java.security.AccessController
-            .doPrivileged(new PrivilegedExceptionAction<AuthConfigProvider>() {
-                public AuthConfigProvider run() throws ClassNotFoundException, SecurityException, NoSuchMethodException, IllegalArgumentException, InstantiationException, IllegalAccessException, InvocationTargetException  {
-                    Class<? extends AuthConfigProvider> cl = (Class<? extends AuthConfigProvider>) Class.forName(className, true, contextClassLoader);
-                    Constructor<? extends AuthConfigProvider> cnst = cl.getConstructor(Map.class);
-                    return cnst.newInstance(constructorParam);
-                }
-            });
-        } catch (PrivilegedActionException e) {
-            Exception inner = e.getException();
-            if (inner instanceof InstantiationException) {
-                throw (AuthException) new AuthException("AuthConfigFactory error:"
-                                + inner.getCause().getMessage()).initCause(inner.getCause());
-            } else {
-                throw (AuthException) new AuthException("AuthConfigFactory error: " + inner).initCause(inner);
-            }
-        } catch (Exception e) {
-            throw (AuthException) new AuthException("AuthConfigFactory error: " + e).initCause(e);
-        }
-        String key = registerConfigProvider(authConfigProvider, layer, appContext, description, true, constructorParam);
+        String key = registerConfigProvider(null, layer, appContext, description, true, constructorParam, className);
         saveConfig();
         return key;
     }
 
-    private String registerConfigProvider(AuthConfigProvider provider, String layer, String appContext, String description, boolean persistent, Map<String, String> constructorParam) throws AuthException {
+    private String registerConfigProvider(AuthConfigProvider provider, String layer, String appContext, String description, boolean persistent, Map<String, String> constructorParam, String className) throws AuthException {
         String key = getRegistrationKey(layer, appContext);
         // Get or create context
-        Context ctx = registrations.get(key);
+        ConfigProviderType ctx = registrations.get(key);
         if (ctx == null) {
-            ctx = new Context(layer, appContext, persistent);
+            ctx = new ConfigProviderType(layer, appContext, persistent);
         } else {
             if (persistent != ctx.isPersistent()) {
                 throw new IllegalArgumentException("Cannot change the persistence state");
             }
         }
         // Create provider
-        ctx.setProvider(provider);
         ctx.setDescription(description);
         registrations.put(key, ctx);
+        if (persistent) {
+            if (provider != null) {
+                throw new IllegalStateException("Config provider supplied but should be created");
+            }
+            ctx.setClassName(className);
+            ctx.setProperties(constructorParam);
+            ctx.createAuthConfigProvider(classLoaderLookup);
+            if (!jaspiType.getConfigProvider().contains(ctx)) {
+                jaspiType.getConfigProvider().add(ctx);
+            }
+        } else {
+            if (provider == null) {
+                throw new IllegalStateException("No config provider to set");
+            }
+            ctx.setProvider(provider);
+        }
+
         // Notify listeners
         List<RegistrationListener> listeners = ctx.getListeners();
         for (RegistrationListener listener : listeners) {
@@ -182,7 +208,13 @@ public class AuthConfigFactoryImpl extends AuthConfigFactory {
         if (sm != null) {
             sm.checkPermission(new AuthPermission("removeAuthRegistration"));
         }
-        Context ctx = registrations.remove(registrationID);
+        ConfigProviderType ctx = registrations.remove(registrationID);
+        jaspiType.getConfigProvider().remove(ctx);
+        try {
+            saveConfig();
+        } catch (AuthException e) {
+            throw new SecurityException(e);
+        }
         if (ctx != null) {
             List<RegistrationListener> listeners = ctx.getListeners();
             for (RegistrationListener listener : listeners) {
@@ -198,68 +230,47 @@ public class AuthConfigFactoryImpl extends AuthConfigFactory {
     }
     
     private void loadConfig() throws AuthException {
-        // TODO: load configuration file
+        try {
+            FileReader in = new FileReader(configFile);
+            try {
+                jaspiType = JaspiXmlUtil.loadJaspi(in);
+                for (ConfigProviderType configProviderType: jaspiType.getConfigProvider()) {
+                    String key = getRegistrationKey(configProviderType.getMessageLayer(), configProviderType.getAppContext());
+                    configProviderType.createAuthConfigProvider(classLoaderLookup);
+                    registrations.put(key, configProviderType);
+                }
+            } finally {
+                in.close();
+            }
+        } catch (ParserConfigurationException e) {
+            throw (AuthException)new AuthException("Could not read config").initCause(e);
+        } catch (IOException e) {
+            throw (AuthException)new AuthException("Could not read config").initCause(e);
+        } catch (SAXException e) {
+            throw (AuthException)new AuthException("Could not read config").initCause(e);
+        } catch (JAXBException e) {
+            throw (AuthException)new AuthException("Could not read config").initCause(e);
+        } catch (XMLStreamException e) {
+            throw (AuthException)new AuthException("Could not read config").initCause(e);
+        }
     }
     
     private void saveConfig() throws AuthException {
-        // TODO: save configuration file
-    }
-    
-    private static class Context implements RegistrationContext {
-
-        private final String layer;
-        private final String appContext;
-        private final List<RegistrationListener> listeners = new ArrayList<RegistrationListener>();
-        private String description;
-        private AuthConfigProvider provider;
-        private final boolean persistent;
-        private Map<String, String> constructorParam;
-        
-        public Context(String layer, String appContext, boolean persistent) {
-            this.layer = layer;
-            this.appContext = appContext;
-            this.persistent = persistent;
-        }
-        
-        public String getAppContext() {
-            return appContext;
-        }
-
-        public String getMessageLayer() {
-            return layer;
-        }
-
-        public boolean isPersistent() {
-            return persistent;
-        }
-
-        public String getDescription() {
-            return description;
-        }
-
-        public List<RegistrationListener> getListeners() {
-            return listeners;
-        }
-        
-        public AuthConfigProvider getProvider() {
-            return provider;
-        }
-
-        public void setProvider(AuthConfigProvider provider) {
-            this.provider = provider;
-        }
-
-        public void setDescription(String description) {
-            this.description = description;
-        }
-
-        public Map<String, String> getConstructorParam() {
-            return constructorParam;
-        }
-
-        public void setConstructorParam(Map<String, String> constructorParam) {
-            this.constructorParam = constructorParam;
+        try {
+            FileWriter out = new FileWriter(configFile);
+            try {
+                JaspiXmlUtil.writeJaspi(jaspiType, out);
+            } finally {
+                out.close();
+            }
+        } catch (IOException e) {
+            throw (AuthException)new AuthException("Could not write config").initCause(e);
+        } catch (XMLStreamException e) {
+            throw (AuthException)new AuthException("Could not write config").initCause(e);
+        } catch (JAXBException e) {
+            throw (AuthException)new AuthException("Could not write config").initCause(e);
         }
     }
     
+
 }
