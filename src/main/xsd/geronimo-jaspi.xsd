@@ -75,42 +75,28 @@
             <xs:element name="messageLayer" type="xs:string" minOccurs="0">
                 <xs:annotation>
                     <xs:documentation>
-                        The attribute provide the name-value pair of
-                        various attributes for this GBean. The value of
-                        the attributes is specified by value of this
-                        element.
+                        messageLayer specifies the type of message this configProvider works with, e.g Http
                     </xs:documentation>
                 </xs:annotation>
             </xs:element>
             <xs:element name="appContext" type="xs:string" minOccurs="0">
                 <xs:annotation>
                     <xs:documentation>
-                        The xml-attribute specifies the value of
-                        particular attribute in XML format, which will
-                        be interpreted by a component running in the
-                        system, which convert it to single value for
-                        this attribute.
+                        appContext is the name of the application in some profile-specified format
                     </xs:documentation>
                 </xs:annotation>
             </xs:element>
             <xs:element name="description" type="xs:string" minOccurs="0">
                 <xs:annotation>
                     <xs:documentation>
-                        The "reference" element specifies the value of a
-                        particular reference for this GBean in simplest
-                        form. It holds the reference to the GBean that
-                        matches the single pattern specified here, if no
-                        value is specified it will refer to all the
-                        matching GBeans.
+                        description of the config provider
                     </xs:documentation>
                 </xs:annotation>
             </xs:element>
             <xs:element name="className" type="xs:string">
                 <xs:annotation>
                     <xs:documentation>
-                        The "references" element specifies the value of
-                        a particular reference for this GBean matching
-                        multiple pattern elements.
+                        class name of the config provider implementation
                     </xs:documentation>
                 </xs:annotation>
             </xs:element>
@@ -118,22 +104,14 @@
                         type="xs:string" minOccurs="0">
                 <xs:annotation>
                     <xs:documentation>
-                        The xml-reference specifies the value of
-                        particular reference in XML format, which will
-                        be interpreted by a component running in the
-                        system, which convert it to single value for
-                        this reference.
+                        The standard ConfigProviders take a Map(String, String) as a single constructor argument.
                     </xs:documentation>
                 </xs:annotation>
             </xs:element>
             <xs:element name="persistent" type="xs:boolean" minOccurs="0">
                 <xs:annotation>
                     <xs:documentation>
-                        The element "dependency" is used to resolve
-                        dependencies at GBean level. This is normally
-                        only used if for some reason the GBeans within a
-                        module must be started in a certain order that
-                        is not reflected in the references between them.
+                        whether the configprovider is "persistent". so far it's not clear what this might mean.
                     </xs:documentation>
                 </xs:annotation>
             </xs:element>
