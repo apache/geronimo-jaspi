@@ -24,7 +24,7 @@
         <description>description</description>
         <className>org.apache.geronimo.components.jaspi.providers.DummyProvider</className>
         <properties>foo=bar</properties>
-        <persistent>false</persistent>
+        <persistent>true</persistent>
     </configProvider>
 
 </jaspi>

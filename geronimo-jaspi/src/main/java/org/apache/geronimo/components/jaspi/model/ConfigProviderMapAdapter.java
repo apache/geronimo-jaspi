@@ -20,20 +20,20 @@
 
 package org.apache.geronimo.components.jaspi.model;
 
-import java.util.Map;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.ArrayList;
+import java.util.Map;
 
 import javax.xml.bind.annotation.adapters.XmlAdapter;
 
 import org.apache.geronimo.components.jaspi.ClassLoaderLookup;
 
 /**
- * @version $Rev:$ $Date:$
+ * @version $Rev$ $Date$
  */
 public class ConfigProviderMapAdapter extends XmlAdapter<ConfigProviderType[], Map<String, ConfigProviderType>> {
-
+    public static ClassLoaderLookup staticClassLoaderLookup;
     private final ClassLoaderLookup classLoaderLookup;
 
     public ConfigProviderMapAdapter(ClassLoaderLookup classLoaderLookup) {
@@ -41,33 +41,41 @@ public class ConfigProviderMapAdapter extends XmlAdapter<ConfigProviderType[], M
     }
 
     public ConfigProviderMapAdapter() {
-        ClassLoader testLoader = Thread.currentThread().getContextClassLoader();
-        final ClassLoader cl = testLoader == null? ConfigProviderMapAdapter.class.getClassLoader(): testLoader;
-        classLoaderLookup = new ClassLoaderLookup() {
+        if (staticClassLoaderLookup != null) {
+            this.classLoaderLookup = staticClassLoaderLookup;
+        } else {
+            ClassLoader testLoader = Thread.currentThread().getContextClassLoader();
+            final ClassLoader cl = testLoader == null ? ConfigProviderMapAdapter.class.getClassLoader() : testLoader;
+            classLoaderLookup = new ClassLoaderLookup() {
 
-            public ClassLoader getClassLoader(String name) {
-                return cl;
-            }
-        };
+                public ClassLoader getClassLoader(String name) {
+                    return cl;
+                }
+            };
+        }
     }
 
     public Map<String, ConfigProviderType> unmarshal(ConfigProviderType[] configProviderTypes) throws Exception {
         Map<String, ConfigProviderType> map = new HashMap<String, ConfigProviderType>();
-        for (ConfigProviderType configProviderType: configProviderTypes) {
-            String key = configProviderType.getRegistrationKey();
-            map.put(key, configProviderType);
-            configProviderType.createAuthConfigProvider(classLoaderLookup);
+        if (configProviderTypes != null) {
+            for (ConfigProviderType configProviderType : configProviderTypes) {
+                if (configProviderType != null) {
+                    String key = configProviderType.getRegistrationKey();
+                    map.put(key, configProviderType);
+                    configProviderType.createAuthConfigProvider(classLoaderLookup);
+                }
+            }
         }
         return map;
     }
 
     public ConfigProviderType[] marshal(Map<String, ConfigProviderType> stringConfigProviderTypeMap) throws Exception {
         List<ConfigProviderType> list = new ArrayList<ConfigProviderType>();
-        for (ConfigProviderType configProviderType: stringConfigProviderTypeMap.values()) {
+        for (ConfigProviderType configProviderType : stringConfigProviderTypeMap.values()) {
             if (configProviderType.isPersistent()) {
                 list.add(configProviderType);
             }
         }
-        return list.toArray(new ConfigProviderType[stringConfigProviderTypeMap.size()]);
+        return list.toArray(new ConfigProviderType[list.size()]);
     }
 }
