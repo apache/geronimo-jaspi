@@ -350,25 +350,23 @@
                             </configuration>
                         </plugin>
             -->
-            <!--
-            <plugin>
-                <groupId>org.jvnet.jaxb2.maven2</groupId>
-                <artifactId>maven-jaxb2-plugin</artifactId>
-                <version>0.5</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>generate</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <schemaDirectory>src/main/xsd</schemaDirectory>
-                    <packageName>org.apache.geronimo.components.jaspi.model</packageName>
-                    <extension>true</extension>
-                </configuration>
-            </plugin>
-    -->
+            <!--<plugin>-->
+                <!--<groupId>org.jvnet.jaxb2.maven2</groupId>-->
+                <!--<artifactId>maven-jaxb2-plugin</artifactId>-->
+                <!--<version>0.5</version>-->
+                <!--<executions>-->
+                    <!--<execution>-->
+                        <!--<goals>-->
+                            <!--<goal>generate</goal>-->
+                        <!--</goals>-->
+                    <!--</execution>-->
+                <!--</executions>-->
+                <!--<configuration>-->
+                    <!--<schemaDirectory>src/main/xsd</schemaDirectory>-->
+                    <!--<packageName>org.apache.geronimo.components.jaspi.model</packageName>-->
+                    <!--<extension>true</extension>-->
+                <!--</configuration>-->
+            <!--</plugin>-->
         </plugins>
     </build>
 

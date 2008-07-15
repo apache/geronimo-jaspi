@@ -16,7 +16,7 @@ public class ObjectFactoryJAXB
     private final Map<QName, Class<? extends JAXBObject>> rootElements = new HashMap<QName, Class<? extends JAXBObject>>();
 
     public ObjectFactoryJAXB() {
-        super(ObjectFactory.class, ConfigProviderTypeJAXB.class, JaspiTypeJAXB.class);
+        super(ObjectFactory.class, JaspiTypeJAXB.class, ServerAuthContextTypeJAXB.class, AuthModuleTypeJAXB.class, ServerAuthConfigTypeJAXB.class, TargetTypeJAXB.class, MessagePolicyTypeJAXB.class, ClientAuthContextTypeJAXB.class, ConfigProviderTypeJAXB.class, TargetPolicyTypeJAXB.class, ClientAuthConfigTypeJAXB.class, ProtectionPolicyTypeJAXB.class);
         rootElements.put(new QName("http://geronimo.apache.org/xml/ns/geronimo-jaspi".intern(), "jaspi".intern()), JaspiTypeJAXB.class);
     }
 
