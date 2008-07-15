@@ -24,6 +24,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.io.File;
+import java.io.Writer;
+import java.io.FileWriter;
+import java.io.FileReader;
+import java.net.URL;
 
 import javax.xml.bind.JAXBException;
 import javax.xml.parsers.ParserConfigurationException;
@@ -43,11 +48,17 @@ public class JaxbTest {
     @Test
     public void testLoad() throws Exception {
         String file = "test-jaspi.xml";
-        JaspiType rbac = loadRbac(file);
-        
+        JaspiType jaspi1 = loadJaspi(file);
+        if (jaspi1.getConfigProvider().size() != 1) throw new Exception("expected 1 configprovider, not this: " + jaspi1.getConfigProvider());
+        URL url = getClass().getClassLoader().getResource("test-jaspi.xml");
+        File newFile = new File(new File(url.getPath()).getParentFile(), "test-jaspi-2.xml");
+        Writer writer = new FileWriter(newFile);
+        JaspiXmlUtil.writeJaspi(jaspi1, writer);
+        JaspiType jaspi2 = JaspiXmlUtil.loadJaspi(new FileReader(newFile));
+        if (jaspi2.getConfigProvider().size() != 1) throw new Exception("expected 1 configprovider, not this: " + jaspi2.getConfigProvider());
     }
 
-    private JaspiType loadRbac(String file) throws ParserConfigurationException, IOException, SAXException, JAXBException, XMLStreamException {
+    private JaspiType loadJaspi(String file) throws ParserConfigurationException, IOException, SAXException, JAXBException, XMLStreamException {
         InputStream in = getClass().getClassLoader().getResourceAsStream(file);
         Reader reader = new InputStreamReader(in);
         JaspiType rbac = JaspiXmlUtil.loadJaspi(reader);

@@ -29,10 +29,13 @@ import java.io.ByteArrayOutputStream;
 import javax.xml.bind.annotation.adapters.XmlAdapter;
 
 /**
- * @version $Rev:$ $Date:$
+ * @version $Rev$ $Date$
  */
 public class StringMapAdapter extends XmlAdapter<String, Map<String, String>> {
     public Map<String, String> unmarshal(String s) throws Exception {
+        if (s == null) {
+            return null;
+        }
         Properties properties = new Properties();
         ByteArrayInputStream in = new ByteArrayInputStream(s.getBytes());
         properties.load(in);
@@ -44,6 +47,9 @@ public class StringMapAdapter extends XmlAdapter<String, Map<String, String>> {
     }
 
     public String marshal(Map<String, String> map) throws Exception {
+        if (map == null) {
+            return "";
+        }
         Properties properties = new Properties();
         properties.putAll(map);
         ByteArrayOutputStream out = new ByteArrayOutputStream();

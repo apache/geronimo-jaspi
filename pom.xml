@@ -165,6 +165,7 @@
             <groupId>com.envoisolutions.sxc</groupId>
             <artifactId>sxc-jaxb</artifactId>
         </dependency>
+
         <dependency>
             <groupId>org.codehaus.woodstox</groupId>
             <artifactId>wstx-asl</artifactId>
@@ -196,8 +197,6 @@
             <classifier>jdk15</classifier>
             <scope>test</scope>
         </dependency>
-
-
 
     </dependencies>
     <build>
@@ -243,25 +242,25 @@
         </pluginManagement>
 
         <plugins>
-            <!--
-                     <plugin>
-                      <groupId>com.envoisolutions.sxc</groupId>
-                      <artifactId>sxc-jaxb-maven-plugin</artifactId>
-                      <version>0.8-SNAPSHOT</version>
-                      <executions>
-                        <execution>
-                          <configuration>
-                            <classes>
-                              <class>org.apache.geronimo.components.jaspi</class>
-                            </classes>
-                          </configuration>
-                          <goals>
-                            <goal>generate</goal>
-                          </goals>
-                      </execution>
-                    </executions>
-                  </plugin>
-            -->
+
+            <!--<plugin>-->
+                <!--<groupId>com.envoisolutions.sxc</groupId>-->
+                <!--<artifactId>sxc-jaxb-maven-plugin</artifactId>-->
+                <!--<version>0.8-SNAPSHOT</version>-->
+                <!--<executions>-->
+                    <!--<execution>-->
+                        <!--<configuration>-->
+                            <!--<classes>-->
+                                <!--<class>org.apache.geronimo.components.jaspi.model</class>-->
+                            <!--</classes>-->
+                        <!--</configuration>-->
+                        <!--<goals>-->
+                            <!--<goal>generate</goal>-->
+                        <!--</goals>-->
+                    <!--</execution>-->
+                <!--</executions>-->
+            <!--</plugin>-->
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-enforcer-plugin</artifactId>

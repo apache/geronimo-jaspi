@@ -23,6 +23,7 @@ package org.apache.geronimo.components.jaspi.model;
 import java.io.Writer;
 import java.io.Reader;
 import java.io.IOException;
+import java.util.Collections;
 
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
@@ -47,7 +48,9 @@ public class JaspiXmlUtil {
 
     static {
         try {
-            JASPI_CONTEXT = JAXBContext.newInstance(JaspiType.class);
+//            JASPI_CONTEXT = JAXBContext.newInstance(JaspiType.class);
+            JASPI_CONTEXT = com.envoisolutions.sxc.jaxb.JAXBContextImpl.newInstance(new Class[] {JaspiType.class}, Collections.singletonMap("com.envoisolutions.sxc.generate", "false"));
+
         } catch (JAXBException e) {
             throw new RuntimeException("Could not create jaxb contexts for plugin types", e);
         }
