@@ -93,27 +93,284 @@
                     </xs:documentation>
                 </xs:annotation>
             </xs:element>
-            <xs:element name="className" type="xs:string">
-                <xs:annotation>
-                    <xs:documentation>
-                        class name of the config provider implementation
-                    </xs:documentation>
-                </xs:annotation>
-            </xs:element>
-            <xs:element name="properties"
-                        type="xs:string" minOccurs="0">
-                <xs:annotation>
-                    <xs:documentation>
-                        The standard ConfigProviders take a Map(String, String) as a single constructor argument.
-                    </xs:documentation>
-                </xs:annotation>
-            </xs:element>
+            <xs:choice>
+                <xs:sequence>
+                    <xs:element name="className" type="xs:string">
+                        <xs:annotation>
+                            <xs:documentation>
+                                class name of the config provider implementation
+                            </xs:documentation>
+                        </xs:annotation>
+                    </xs:element>
+                    <xs:element name="properties"
+                                type="xs:string" minOccurs="0">
+                        <xs:annotation>
+                            <xs:documentation>
+                                The standard ConfigProviders take a Map(String, String) as a single constructor argument.
+                            </xs:documentation>
+                        </xs:annotation>
+                    </xs:element>
+                </xs:sequence>
+
+                <xs:sequence>
+                    <xs:element name="clientAuthConfig" type="jaspi:clientAuthConfigType" minOccurs="0" maxOccurs="unbounded">
+                        <xs:annotation>
+                            <xs:documentation>
+                                configures a ClientAuthConfig
+                            </xs:documentation>
+                        </xs:annotation>
+                    </xs:element>
+                    <xs:element name="serverAuthConfig" type="jaspi:serverAuthConfigType" minOccurs="0" maxOccurs="unbounded">
+                        <xs:annotation>
+                            <xs:documentation>
+                                configures a ServerAuthConfig
+                            </xs:documentation>
+                        </xs:annotation>
+                    </xs:element>
+                </xs:sequence>
+            </xs:choice>
+
             <xs:element name="persistent" type="xs:boolean" minOccurs="0">
                 <xs:annotation>
                     <xs:documentation>
                         whether the configprovider is "persistent". so far it's not clear what this might mean.
                     </xs:documentation>
                 </xs:annotation>
+            </xs:element>
+            <xs:element name="classLoaderName" type="xs:string" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>
+                        name of classloader to load any needed classes (e.g. custom config providers, modules, policy stuff)
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="clientAuthConfigType">
+        <xs:sequence>
+            <xs:element name="messageLayer" type="xs:string" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>
+                        messageLayer specifies the type of message this configProvider works with, e.g Http
+                        defaults to parents value if missing
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="appContext" type="xs:string" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>
+                        appContext is the name of the application in some profile-specified format
+                        defaults to parents value if missing
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="authenticationContextID" type="xs:string">
+                <xs:annotation>
+                    <xs:documentation>
+                        the constant value to be returned from getAuthContextID(MessageInfo messageInfo)
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="protected" type="xs:boolean">
+                <xs:annotation>
+                    <xs:documentation>
+                        value to be returned from isProtected.  Meaning unknown.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="clientAuthContext" type="jaspi:clientAuthContextType" minOccurs="0" maxOccurs="unbounded">
+                <xs:annotation>
+                    <xs:documentation>
+                        configuration of a client auth context
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="clientAuthContextType">
+        <xs:sequence>
+            <xs:element name="messageLayer" type="xs:string" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>
+                        messageLayer specifies the type of message this configProvider works with, e.g Http
+                        defaults to parents value if missing
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="appContext" type="xs:string" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>
+                        appContext is the name of the application in some profile-specified format
+                        defaults to parents value if missing
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="authenticationContextID" type="xs:string">
+                <xs:annotation>
+                    <xs:documentation>
+                        the constant value to be returned from getAuthContextID(MessageInfo messageInfo)
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="clientAuthModule" type="jaspi:authModuleType" minOccurs="0" maxOccurs="unbounded">
+                <xs:annotation>
+                    <xs:documentation>
+                        client auth module in this auth context
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="serverAuthConfigType">
+        <xs:sequence>
+            <xs:element name="messageLayer" type="xs:string" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>
+                        messageLayer specifies the type of message this configProvider works with, e.g Http
+                        defaults to parents value if missing
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="appContext" type="xs:string" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>
+                        appContext is the name of the application in some profile-specified format
+                        defaults to parents value if missing
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="authenticationContextID" type="xs:string">
+                <xs:annotation>
+                    <xs:documentation>
+                        the constant value to be returned from getAuthContextID(MessageInfo messageInfo)
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="protected" type="xs:boolean">
+                <xs:annotation>
+                    <xs:documentation>
+                        value to be returned from isProtected.  Meaning unknown.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="serverAuthContext" type="jaspi:serverAuthContextType" minOccurs="0" maxOccurs="unbounded">
+                <xs:annotation>
+                    <xs:documentation>
+                        configuration of a server auth context
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="serverAuthContextType">
+        <xs:sequence>
+            <xs:element name="messageLayer" type="xs:string" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>
+                        messageLayer specifies the type of message this configProvider works with, e.g Http
+                        defaults to parents value if missing
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="appContext" type="xs:string" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>
+                        appContext is the name of the application in some profile-specified format
+                        defaults to parents value if missing
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="authenticationContextID" type="xs:string">
+                <xs:annotation>
+                    <xs:documentation>
+                        the constant value to be returned from getAuthContextID(MessageInfo messageInfo)
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="serverAuthModule" type="jaspi:authModuleType" minOccurs="0" maxOccurs="unbounded">
+                <xs:annotation>
+                    <xs:documentation>
+                        server auth module in this auth context
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+
+    <xs:complexType name="authModuleType">
+        <xs:sequence>
+            <xs:element name="className" type="xs:string">
+                <xs:annotation>
+                    <xs:documentation>
+                        class name of auth module
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="requestPolicy" type="jaspi:messagePolicyType">
+
+            </xs:element>
+            <xs:element name="responsePolicy" type="jaspi:messagePolicyType">
+
+            </xs:element>
+            <xs:element name="options"
+                        type="xs:string" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>
+                        initialization options as a string-string map
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="messagePolicyType">
+         <xs:sequence>
+              <xs:element name="targetPolicy" type="jaspi:targetPolicyType" minOccurs="0" maxOccurs="unbounded">
+                  <xs:annotation>
+                      <xs:documentation>
+                          target policy for the message policy
+                      </xs:documentation>
+                  </xs:annotation>
+              </xs:element>
+         </xs:sequence>
+        <xs:attribute name="mandatory" type="xs:boolean">
+            <xs:annotation>
+                <xs:documentation>
+                    supplies the isMandatory value of the policy
+                </xs:documentation>
+            </xs:annotation>
+
+        </xs:attribute>
+    </xs:complexType>
+
+    <xs:complexType name="targetPolicyType">
+        <xs:sequence>
+            <xs:element name="protectionPolicy" type="jaspi:protectionPolicyType">
+
+            </xs:element>
+            <xs:element name="target" type="jaspi:targetType" minOccurs="0" maxOccurs="unbounded">
+
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="protectionPolicyType">
+        <xs:sequence>
+            <xs:element name="className" type="xs:string">
+
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="targetType">
+        <xs:sequence>
+            <xs:element name="className" type="xs:string">
+
             </xs:element>
         </xs:sequence>
     </xs:complexType>

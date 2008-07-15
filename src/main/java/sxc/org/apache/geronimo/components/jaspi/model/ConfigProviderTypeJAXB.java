@@ -1,6 +1,8 @@
 
 package sxc.org.apache.geronimo.components.jaspi.model;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import javax.xml.XMLConstants;
 import javax.xml.namespace.QName;
@@ -11,8 +13,16 @@ import com.envoisolutions.sxc.jaxb.RuntimeContext;
 import com.envoisolutions.sxc.util.Attribute;
 import com.envoisolutions.sxc.util.XoXMLStreamReader;
 import com.envoisolutions.sxc.util.XoXMLStreamWriter;
+import org.apache.geronimo.components.jaspi.model.ClientAuthConfigType;
 import org.apache.geronimo.components.jaspi.model.ConfigProviderType;
+import org.apache.geronimo.components.jaspi.model.ServerAuthConfigType;
 import org.apache.geronimo.components.jaspi.model.StringMapAdapter;
+
+
+import static sxc.org.apache.geronimo.components.jaspi.model.ClientAuthConfigTypeJAXB.readClientAuthConfigType;
+import static sxc.org.apache.geronimo.components.jaspi.model.ClientAuthConfigTypeJAXB.writeClientAuthConfigType;
+import static sxc.org.apache.geronimo.components.jaspi.model.ServerAuthConfigTypeJAXB.readServerAuthConfigType;
+import static sxc.org.apache.geronimo.components.jaspi.model.ServerAuthConfigTypeJAXB.writeServerAuthConfigType;
 
 @SuppressWarnings({
     "StringEquality"
@@ -28,12 +38,14 @@ public class ConfigProviderTypeJAXB
     private final static FieldAccessor<ConfigProviderType, String> configProviderTypeDescription = new FieldAccessor<ConfigProviderType, String>(ConfigProviderType.class, "description");
     private final static FieldAccessor<ConfigProviderType, String> configProviderTypeClassName = new FieldAccessor<ConfigProviderType, String>(ConfigProviderType.class, "className");
     private final static FieldAccessor<ConfigProviderType, Map<String, String>> configProviderTypeProperties = new FieldAccessor<ConfigProviderType, Map<String, String>>(ConfigProviderType.class, "properties");
+    private final static FieldAccessor<ConfigProviderType, List<ClientAuthConfigType>> configProviderTypeClientAuthConfig = new FieldAccessor<ConfigProviderType, List<ClientAuthConfigType>>(ConfigProviderType.class, "clientAuthConfig");
+    private final static FieldAccessor<ConfigProviderType, List<ServerAuthConfigType>> configProviderTypeServerAuthConfig = new FieldAccessor<ConfigProviderType, List<ServerAuthConfigType>>(ConfigProviderType.class, "serverAuthConfig");
     private final static FieldAccessor<ConfigProviderType, Boolean> configProviderTypePersistent = new FieldAccessor<ConfigProviderType, Boolean>(ConfigProviderType.class, "persistent");
     private final static FieldAccessor<ConfigProviderType, String> configProviderTypeClassLoaderName = new FieldAccessor<ConfigProviderType, String>(ConfigProviderType.class, "classLoaderName");
     private final static StringMapAdapter stringMapAdapterAdapter = new StringMapAdapter();
 
     public ConfigProviderTypeJAXB() {
-        super(ConfigProviderType.class, null, new QName("http://geronimo.apache.org/xml/ns/geronimo-jaspi".intern(), "configProviderType".intern()));
+        super(ConfigProviderType.class, null, new QName("http://geronimo.apache.org/xml/ns/geronimo-jaspi".intern(), "configProviderType".intern()), ClientAuthConfigTypeJAXB.class, ServerAuthConfigTypeJAXB.class);
     }
 
     public static ConfigProviderType readConfigProviderType(XoXMLStreamReader reader, RuntimeContext context)
@@ -64,6 +76,8 @@ public class ConfigProviderTypeJAXB
         ConfigProviderType configProviderType = new ConfigProviderType();
         context.beforeUnmarshal(configProviderType, lifecycleCallback);
 
+        List<ClientAuthConfigType> clientAuthConfig = null;
+        List<ServerAuthConfigType> serverAuthConfig = null;
 
         // Check xsi:type
         QName xsiType = reader.getXsiType();
@@ -111,17 +125,47 @@ public class ConfigProviderTypeJAXB
                 }
 
                 configProviderTypeProperties.setObject(reader, context, configProviderType, properties);
+            } else if (("clientAuthConfig" == elementReader.getLocalName())&&("http://geronimo.apache.org/xml/ns/geronimo-jaspi" == elementReader.getNamespaceURI())) {
+                // ELEMENT: clientAuthConfig
+                ClientAuthConfigType clientAuthConfigItem = readClientAuthConfigType(elementReader, context);
+                if (clientAuthConfig == null) {
+                    clientAuthConfig = configProviderTypeClientAuthConfig.getObject(reader, context, configProviderType);
+                    if (clientAuthConfig!= null) {
+                        clientAuthConfig.clear();
+                    } else {
+                        clientAuthConfig = new ArrayList<ClientAuthConfigType>();
+                    }
+                }
+                clientAuthConfig.add(clientAuthConfigItem);
+            } else if (("serverAuthConfig" == elementReader.getLocalName())&&("http://geronimo.apache.org/xml/ns/geronimo-jaspi" == elementReader.getNamespaceURI())) {
+                // ELEMENT: serverAuthConfig
+                ServerAuthConfigType serverAuthConfigItem = readServerAuthConfigType(elementReader, context);
+                if (serverAuthConfig == null) {
+                    serverAuthConfig = configProviderTypeServerAuthConfig.getObject(reader, context, configProviderType);
+                    if (serverAuthConfig!= null) {
+                        serverAuthConfig.clear();
+                    } else {
+                        serverAuthConfig = new ArrayList<ServerAuthConfigType>();
+                    }
+                }
+                serverAuthConfig.add(serverAuthConfigItem);
             } else if (("persistent" == elementReader.getLocalName())&&("http://geronimo.apache.org/xml/ns/geronimo-jaspi" == elementReader.getNamespaceURI())) {
                 // ELEMENT: persistent
                 Boolean persistent = ("1".equals(elementReader.getElementAsString())||"true".equals(elementReader.getElementAsString()));
-                configProviderTypePersistent.setBoolean(reader, context, configProviderType, persistent);
+                configProviderTypePersistent.setObject(reader, context, configProviderType, persistent);
             } else if (("classLoaderName" == elementReader.getLocalName())&&("http://geronimo.apache.org/xml/ns/geronimo-jaspi" == elementReader.getNamespaceURI())) {
                 // ELEMENT: classLoaderName
                 String classLoaderName = elementReader.getElementAsString();
                 configProviderTypeClassLoaderName.setObject(reader, context, configProviderType, classLoaderName);
             } else {
-                context.unexpectedElement(elementReader, new QName("http://geronimo.apache.org/xml/ns/geronimo-jaspi", "messageLayer"), new QName("http://geronimo.apache.org/xml/ns/geronimo-jaspi", "appContext"), new QName("http://geronimo.apache.org/xml/ns/geronimo-jaspi", "description"), new QName("http://geronimo.apache.org/xml/ns/geronimo-jaspi", "className"), new QName("http://geronimo.apache.org/xml/ns/geronimo-jaspi", "properties"), new QName("http://geronimo.apache.org/xml/ns/geronimo-jaspi", "persistent"), new QName("http://geronimo.apache.org/xml/ns/geronimo-jaspi", "classLoaderName"));
+                context.unexpectedElement(elementReader, new QName("http://geronimo.apache.org/xml/ns/geronimo-jaspi", "messageLayer"), new QName("http://geronimo.apache.org/xml/ns/geronimo-jaspi", "appContext"), new QName("http://geronimo.apache.org/xml/ns/geronimo-jaspi", "description"), new QName("http://geronimo.apache.org/xml/ns/geronimo-jaspi", "className"), new QName("http://geronimo.apache.org/xml/ns/geronimo-jaspi", "properties"), new QName("http://geronimo.apache.org/xml/ns/geronimo-jaspi", "clientAuthConfig"), new QName("http://geronimo.apache.org/xml/ns/geronimo-jaspi", "serverAuthConfig"), new QName("http://geronimo.apache.org/xml/ns/geronimo-jaspi", "persistent"), new QName("http://geronimo.apache.org/xml/ns/geronimo-jaspi", "classLoaderName"));
             }
+        }
+        if (clientAuthConfig!= null) {
+            configProviderTypeClientAuthConfig.setObject(reader, context, configProviderType, clientAuthConfig);
+        }
+        if (serverAuthConfig!= null) {
+            configProviderTypeServerAuthConfig.setObject(reader, context, configProviderType, serverAuthConfig);
         }
 
         context.afterUnmarshal(configProviderType, lifecycleCallback);
@@ -180,8 +224,6 @@ public class ConfigProviderTypeJAXB
             writer.writeStartElement(prefix, "className", "http://geronimo.apache.org/xml/ns/geronimo-jaspi");
             writer.writeCharacters(className);
             writer.writeEndElement();
-        } else {
-            context.unexpectedNullValue(configProviderType, "className");
         }
 
         // ELEMENT: properties
@@ -200,11 +242,41 @@ public class ConfigProviderTypeJAXB
             context.unexpectedNullValue(configProviderType, "properties");
         }
 
+        // ELEMENT: clientAuthConfig
+        List<ClientAuthConfigType> clientAuthConfig = configProviderTypeClientAuthConfig.getObject(configProviderType, context, configProviderType);
+        if (clientAuthConfig!= null) {
+            for (ClientAuthConfigType clientAuthConfigItem: clientAuthConfig) {
+                writer.writeStartElement(prefix, "clientAuthConfig", "http://geronimo.apache.org/xml/ns/geronimo-jaspi");
+                if (clientAuthConfigItem!= null) {
+                    writeClientAuthConfigType(writer, clientAuthConfigItem, context);
+                } else {
+                    writer.writeXsiNil();
+                }
+                writer.writeEndElement();
+            }
+        }
+
+        // ELEMENT: serverAuthConfig
+        List<ServerAuthConfigType> serverAuthConfig = configProviderTypeServerAuthConfig.getObject(configProviderType, context, configProviderType);
+        if (serverAuthConfig!= null) {
+            for (ServerAuthConfigType serverAuthConfigItem: serverAuthConfig) {
+                writer.writeStartElement(prefix, "serverAuthConfig", "http://geronimo.apache.org/xml/ns/geronimo-jaspi");
+                if (serverAuthConfigItem!= null) {
+                    writeServerAuthConfigType(writer, serverAuthConfigItem, context);
+                } else {
+                    writer.writeXsiNil();
+                }
+                writer.writeEndElement();
+            }
+        }
+
         // ELEMENT: persistent
-        Boolean persistent = configProviderTypePersistent.getBoolean(configProviderType, context, configProviderType);
-        writer.writeStartElement(prefix, "persistent", "http://geronimo.apache.org/xml/ns/geronimo-jaspi");
-        writer.writeCharacters(Boolean.toString(persistent));
-        writer.writeEndElement();
+        Boolean persistent = configProviderTypePersistent.getObject(configProviderType, context, configProviderType);
+        if (persistent!= null) {
+            writer.writeStartElement(prefix, "persistent", "http://geronimo.apache.org/xml/ns/geronimo-jaspi");
+            writer.writeCharacters(Boolean.toString(persistent));
+            writer.writeEndElement();
+        }
 
         // ELEMENT: classLoaderName
         String classLoaderName = configProviderTypeClassLoaderName.getObject(configProviderType, context, configProviderType);

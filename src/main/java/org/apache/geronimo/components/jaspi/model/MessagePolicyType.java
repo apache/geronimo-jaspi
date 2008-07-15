@@ -11,29 +11,25 @@ package org.apache.geronimo.components.jaspi.model;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.HashMap;
-
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlType;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
-
-import org.apache.geronimo.components.jaspi.model.ConfigProviderType;
 
 
 /**
- * <p>Java class for jaspiType complex type.
+ * <p>Java class for messagePolicyType complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="jaspiType">
+ * &lt;complexType name="messagePolicyType">
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="configProvider" type="{http://geronimo.apache.org/xml/ns/geronimo-jaspi}configProviderType" maxOccurs="unbounded" minOccurs="0"/>
+ *         &lt;element name="targetPolicy" type="{http://geronimo.apache.org/xml/ns/geronimo-jaspi}targetPolicyType" maxOccurs="unbounded" minOccurs="0"/>
  *       &lt;/sequence>
+ *       &lt;attribute name="mandatory" type="{http://www.w3.org/2001/XMLSchema}boolean" />
  *     &lt;/restriction>
  *   &lt;/complexContent>
  * &lt;/complexType>
@@ -42,45 +38,69 @@ import org.apache.geronimo.components.jaspi.model.ConfigProviderType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "jaspiType", propOrder = {
-    "configProvider"
+@XmlType(name = "messagePolicyType", propOrder = {
+    "targetPolicy"
 })
-public class JaspiType
+public class MessagePolicyType
     implements Serializable
 {
 
     private final static long serialVersionUID = 12343L;
-
-    @XmlJavaTypeAdapter(ConfigProviderMapAdapter.class)
-    protected Map<String, ConfigProviderType> configProvider;
+    protected List<TargetPolicyType> targetPolicy;
+    @XmlAttribute
+    protected Boolean mandatory;
 
     /**
-     * Gets the value of the configProvider property.
+     * Gets the value of the targetPolicy property.
      * 
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
-     * This is why there is not a <CODE>set</CODE> method for the configProvider property.
+     * This is why there is not a <CODE>set</CODE> method for the targetPolicy property.
      * 
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
-     *    getConfigProvider().add(newItem);
+     *    getTargetPolicy().add(newItem);
      * </pre>
      * 
      * 
      * <p>
      * Objects of the following type(s) are allowed in the list
-     * {@link ConfigProviderType }
+     * {@link TargetPolicyType }
      * 
      * 
      */
-    public Map<String, ConfigProviderType> getConfigProvider() {
-        if (configProvider == null) {
-            configProvider = new HashMap<String, ConfigProviderType>();
+    public List<TargetPolicyType> getTargetPolicy() {
+        if (targetPolicy == null) {
+            targetPolicy = new ArrayList<TargetPolicyType>();
         }
-        return this.configProvider;
+        return this.targetPolicy;
+    }
+
+    /**
+     * Gets the value of the mandatory property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link Boolean }
+     *     
+     */
+    public Boolean isMandatory() {
+        return mandatory;
+    }
+
+    /**
+     * Sets the value of the mandatory property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link Boolean }
+     *     
+     */
+    public void setMandatory(Boolean value) {
+        this.mandatory = value;
     }
 
 }
