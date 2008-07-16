@@ -11,10 +11,17 @@ package org.apache.geronimo.components.jaspi.model;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
+import javax.security.auth.message.config.ClientAuthConfig;
+import javax.security.auth.message.config.ClientAuthContext;
+import javax.security.auth.message.AuthException;
+import javax.security.auth.message.MessageInfo;
+import javax.security.auth.Subject;
 
 
 /**
@@ -29,7 +36,7 @@ import javax.xml.bind.annotation.XmlType;
  *       &lt;sequence>
  *         &lt;element name="messageLayer" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
  *         &lt;element name="appContext" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="authenticationContextID" type="{http://www.w3.org/2001/XMLSchema}string"/>
+ *         &lt;element name="authenticationContextID" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
  *         &lt;element name="protected" type="{http://www.w3.org/2001/XMLSchema}boolean"/>
  *         &lt;element name="clientAuthContext" type="{http://geronimo.apache.org/xml/ns/geronimo-jaspi}clientAuthContextType" maxOccurs="unbounded" minOccurs="0"/>
  *       &lt;/sequence>
@@ -49,13 +56,12 @@ import javax.xml.bind.annotation.XmlType;
     "clientAuthContext"
 })
 public class ClientAuthConfigType
-    implements Serializable
+    implements ClientAuthConfig, Serializable
 {
 
     private final static long serialVersionUID = 12343L;
     protected String messageLayer;
     protected String appContext;
-    @XmlElement(required = true)
     protected String authenticationContextID;
     @XmlElement(name = "protected")
     protected boolean _protected;
@@ -95,6 +101,19 @@ public class ClientAuthConfigType
      */
     public String getAppContext() {
         return appContext;
+    }
+
+    public String getAuthContextID(MessageInfo messageInfo) throws IllegalArgumentException {
+        if (authenticationContextID != null) {
+            return authenticationContextID;
+        }
+        for (ClientAuthContextType clientAuthContextType: clientAuthContext) {
+            String authContextID = clientAuthContextType.getAuthenticationContextID(messageInfo);
+            if (authContextID != null) {
+                return authContextID;
+            }
+        }
+        return null;
     }
 
     /**
@@ -141,6 +160,9 @@ public class ClientAuthConfigType
         return _protected;
     }
 
+    public void refresh() throws AuthException, SecurityException {
+    }
+
     /**
      * Sets the value of the protected property.
      * 
@@ -178,4 +200,7 @@ public class ClientAuthConfigType
         return this.clientAuthContext;
     }
 
+    public ClientAuthContext getAuthContext(String authContextID, Subject clientSubject, Map properties) throws AuthException {
+        return null;
+    }
 }

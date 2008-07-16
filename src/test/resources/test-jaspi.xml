@@ -27,4 +27,13 @@
         <persistent>true</persistent>
     </configProvider>
 
+    <configProvider>
+        <messageLayer>Http</messageLayer>
+        <appContext>test-app2</appContext>
+        <description>description2</description>
+        <className>org.apache.geronimo.components.jaspi.providers.DummyProvider</className>
+        <properties>foo=bar</properties>
+        <persistent>true</persistent>
+    </configProvider>
+
 </jaspi>

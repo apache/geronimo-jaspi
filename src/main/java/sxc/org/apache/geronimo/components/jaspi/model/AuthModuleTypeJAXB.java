@@ -1,8 +1,12 @@
 
 package sxc.org.apache.geronimo.components.jaspi.model;
 
+import java.util.Map;
 import javax.xml.XMLConstants;
 import javax.xml.namespace.QName;
+import javax.security.auth.message.module.ClientAuthModule;
+import javax.security.auth.message.module.ServerAuthModule;
+
 import com.envoisolutions.sxc.jaxb.FieldAccessor;
 import com.envoisolutions.sxc.jaxb.JAXBObject;
 import com.envoisolutions.sxc.jaxb.LifecycleCallback;
@@ -12,6 +16,7 @@ import com.envoisolutions.sxc.util.XoXMLStreamReader;
 import com.envoisolutions.sxc.util.XoXMLStreamWriter;
 import org.apache.geronimo.components.jaspi.model.AuthModuleType;
 import org.apache.geronimo.components.jaspi.model.MessagePolicyType;
+import org.apache.geronimo.components.jaspi.model.StringMapAdapter;
 
 
 import static sxc.org.apache.geronimo.components.jaspi.model.MessagePolicyTypeJAXB.readMessagePolicyType;
@@ -20,37 +25,50 @@ import static sxc.org.apache.geronimo.components.jaspi.model.MessagePolicyTypeJA
 @SuppressWarnings({
     "StringEquality"
 })
-public class AuthModuleTypeJAXB
+public class AuthModuleTypeJAXB<T>
     extends JAXBObject<AuthModuleType>
 {
 
-    public final static AuthModuleTypeJAXB INSTANCE = new AuthModuleTypeJAXB();
+    public final static AuthModuleTypeJAXB<ClientAuthModule> CLIENT_INSTANCE = new AuthModuleTypeJAXB<ClientAuthModule>();
+    public final static AuthModuleTypeJAXB<ServerAuthModule> SERVER_INSTANCE = new AuthModuleTypeJAXB<ServerAuthModule>();
     private final static LifecycleCallback lifecycleCallback = new LifecycleCallback(AuthModuleType.class);
     private final static FieldAccessor<AuthModuleType, String> authModuleTypeClassName = new FieldAccessor<AuthModuleType, String>(AuthModuleType.class, "className");
     private final static FieldAccessor<AuthModuleType, MessagePolicyType> authModuleTypeRequestPolicy = new FieldAccessor<AuthModuleType, MessagePolicyType>(AuthModuleType.class, "requestPolicy");
     private final static FieldAccessor<AuthModuleType, MessagePolicyType> authModuleTypeResponsePolicy = new FieldAccessor<AuthModuleType, MessagePolicyType>(AuthModuleType.class, "responsePolicy");
-    private final static FieldAccessor<AuthModuleType, String> authModuleTypeOptions = new FieldAccessor<AuthModuleType, String>(AuthModuleType.class, "options");
+    private final static FieldAccessor<AuthModuleType, Map<String, String>> authModuleTypeOptions = new FieldAccessor<AuthModuleType, Map<String, String>>(AuthModuleType.class, "options");
+    private final static StringMapAdapter stringMapAdapterAdapter = new StringMapAdapter();
 
     public AuthModuleTypeJAXB() {
         super(AuthModuleType.class, null, new QName("http://geronimo.apache.org/xml/ns/geronimo-jaspi".intern(), "authModuleType".intern()), MessagePolicyTypeJAXB.class);
     }
 
-    public static AuthModuleType readAuthModuleType(XoXMLStreamReader reader, RuntimeContext context)
+    public static AuthModuleType<ClientAuthModule> readClientAuthModuleType(XoXMLStreamReader reader, RuntimeContext context)
         throws Exception
     {
-        return INSTANCE.read(reader, context);
+        return CLIENT_INSTANCE.read(reader, context);
     }
 
-    public static void writeAuthModuleType(XoXMLStreamWriter writer, AuthModuleType authModuleType, RuntimeContext context)
+    public static void writeClientAuthModuleType(XoXMLStreamWriter writer, AuthModuleType authModuleType, RuntimeContext context)
         throws Exception
     {
-        INSTANCE.write(writer, authModuleType, context);
+        CLIENT_INSTANCE.write(writer, authModuleType, context);
     }
 
-    public final AuthModuleType read(XoXMLStreamReader reader, RuntimeContext context)
+    public static AuthModuleType<ServerAuthModule> readServerAuthModuleType(XoXMLStreamReader reader, RuntimeContext context)
         throws Exception
     {
+        return SERVER_INSTANCE.read(reader, context);
+    }
 
+    public static void writeServerAuthModuleType(XoXMLStreamWriter writer, AuthModuleType authModuleType, RuntimeContext context)
+        throws Exception
+    {
+        SERVER_INSTANCE.write(writer, authModuleType, context);
+    }
+
+    public final AuthModuleType<T> read(XoXMLStreamReader reader, RuntimeContext context)
+        throws Exception
+    {
         // Check for xsi:nil
         if (reader.isXsiNil()) {
             return null;
@@ -60,7 +78,7 @@ public class AuthModuleTypeJAXB
             context = new RuntimeContext();
         }
 
-        AuthModuleType authModuleType = new AuthModuleType();
+        AuthModuleType<T> authModuleType = new AuthModuleType<T>();
         context.beforeUnmarshal(authModuleType, lifecycleCallback);
 
 
@@ -95,7 +113,16 @@ public class AuthModuleTypeJAXB
                 authModuleTypeResponsePolicy.setObject(reader, context, authModuleType, responsePolicy);
             } else if (("options" == elementReader.getLocalName())&&("http://geronimo.apache.org/xml/ns/geronimo-jaspi" == elementReader.getNamespaceURI())) {
                 // ELEMENT: options
-                String options = elementReader.getElementAsString();
+                String optionsRaw = elementReader.getElementAsString();
+
+                Map<String, String> options;
+                try {
+                    options = stringMapAdapterAdapter.unmarshal(optionsRaw);
+                } catch (Exception e) {
+                    context.xmlAdapterError(elementReader, StringMapAdapter.class, Map.class, Map.class, e);
+                    continue;
+                }
+
                 authModuleTypeOptions.setObject(reader, context, authModuleType, options);
             } else {
                 context.unexpectedElement(elementReader, new QName("http://geronimo.apache.org/xml/ns/geronimo-jaspi", "className"), new QName("http://geronimo.apache.org/xml/ns/geronimo-jaspi", "requestPolicy"), new QName("http://geronimo.apache.org/xml/ns/geronimo-jaspi", "responsePolicy"), new QName("http://geronimo.apache.org/xml/ns/geronimo-jaspi", "options"));
@@ -159,7 +186,13 @@ public class AuthModuleTypeJAXB
         }
 
         // ELEMENT: options
-        String options = authModuleTypeOptions.getObject(authModuleType, context, authModuleType);
+        Map<String, String> optionsRaw = authModuleTypeOptions.getObject(authModuleType, context, authModuleType);
+        String options = null;
+        try {
+            options = stringMapAdapterAdapter.marshal(optionsRaw);
+        } catch (Exception e) {
+            context.xmlAdapterError(authModuleType, "options", StringMapAdapter.class, Map.class, Map.class, e);
+        }
         if (options!= null) {
             writer.writeStartElement(prefix, "options", "http://geronimo.apache.org/xml/ns/geronimo-jaspi");
             writer.writeCharacters(options);

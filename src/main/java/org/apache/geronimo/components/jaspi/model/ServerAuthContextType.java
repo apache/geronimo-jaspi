@@ -11,6 +11,14 @@ package org.apache.geronimo.components.jaspi.model;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.security.auth.Subject;
+import javax.security.auth.message.AuthException;
+import javax.security.auth.message.AuthStatus;
+import javax.security.auth.message.MessageInfo;
+import javax.security.auth.message.module.ServerAuthModule;
+import javax.security.auth.message.module.ClientAuthModule;
+import javax.security.auth.message.config.ServerAuthContext;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -19,9 +27,9 @@ import javax.xml.bind.annotation.XmlType;
 
 /**
  * <p>Java class for serverAuthContextType complex type.
- * 
+ * <p/>
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ * <p/>
  * <pre>
  * &lt;complexType name="serverAuthContextType">
  *   &lt;complexContent>
@@ -36,34 +44,29 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "serverAuthContextType", propOrder = {
-    "messageLayer",
-    "appContext",
-    "authenticationContextID",
-    "serverAuthModule"
-})
+        "messageLayer",
+        "appContext",
+        "authenticationContextID",
+        "serverAuthModule"
+        })
 public class ServerAuthContextType
-    implements Serializable
-{
+        implements ServerAuthContext, Serializable {
 
     private final static long serialVersionUID = 12343L;
     protected String messageLayer;
     protected String appContext;
     @XmlElement(required = true)
     protected String authenticationContextID;
-    protected List<AuthModuleType> serverAuthModule;
+    protected List<AuthModuleType<ServerAuthModule>> serverAuthModule;
 
     /**
      * Gets the value of the messageLayer property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     *         {@link String }
      */
     public String getMessageLayer() {
         return messageLayer;
@@ -71,11 +74,9 @@ public class ServerAuthContextType
 
     /**
      * Sets the value of the messageLayer property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setMessageLayer(String value) {
         this.messageLayer = value;
@@ -83,11 +84,9 @@ public class ServerAuthContextType
 
     /**
      * Gets the value of the appContext property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     *         {@link String }
      */
     public String getAppContext() {
         return appContext;
@@ -95,11 +94,9 @@ public class ServerAuthContextType
 
     /**
      * Sets the value of the appContext property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setAppContext(String value) {
         this.appContext = value;
@@ -107,23 +104,23 @@ public class ServerAuthContextType
 
     /**
      * Gets the value of the authenticationContextID property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     *         {@link String }
      */
     public String getAuthenticationContextID() {
         return authenticationContextID;
     }
 
+    public String getAuthenticationContextID(MessageInfo messageInfo) {
+        return authenticationContextID;
+    }
+
     /**
      * Sets the value of the authenticationContextID property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setAuthenticationContextID(String value) {
         this.authenticationContextID = value;
@@ -131,31 +128,69 @@ public class ServerAuthContextType
 
     /**
      * Gets the value of the serverAuthModule property.
-     * 
-     * <p>
+     * <p/>
+     * <p/>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the serverAuthModule property.
-     * 
-     * <p>
+     * <p/>
+     * <p/>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getServerAuthModule().add(newItem);
      * </pre>
-     * 
-     * 
-     * <p>
+     * <p/>
+     * <p/>
+     * <p/>
      * Objects of the following type(s) are allowed in the list
      * {@link AuthModuleType }
-     * 
-     * 
      */
-    public List<AuthModuleType> getServerAuthModule() {
+    public List<AuthModuleType<ServerAuthModule>> getServerAuthModule() {
         if (serverAuthModule == null) {
-            serverAuthModule = new ArrayList<AuthModuleType>();
+            serverAuthModule = new ArrayList<AuthModuleType<ServerAuthModule>>();
         }
         return this.serverAuthModule;
     }
 
+    public void cleanSubject(MessageInfo messageInfo, Subject subject) throws AuthException {
+        for (AuthModuleType<ServerAuthModule> authModuleType: getServerAuthModule()) {
+            ServerAuthModule serverAuthModule = authModuleType.getAuthModule();
+            serverAuthModule.cleanSubject(messageInfo, subject);
+        }
+    }
+
+    public AuthStatus secureResponse(MessageInfo messageInfo, Subject serviceSubject) throws AuthException {
+        for (AuthModuleType<ServerAuthModule> authModuleType: getServerAuthModule()) {
+            ServerAuthModule serverAuthModule = authModuleType.getAuthModule();
+            AuthStatus result = serverAuthModule.secureResponse(messageInfo, serviceSubject);
+
+            //jaspi spec p 86
+            if (result == AuthStatus.SEND_SUCCESS) {
+                continue;
+            }
+            if (result == AuthStatus.SEND_CONTINUE || result == AuthStatus.SEND_FAILURE) {
+                return result;
+            }
+            throw new AuthException("Invalid AuthStatus " + result + " from server auth module: " + serverAuthModule);
+        }
+        return AuthStatus.SEND_SUCCESS;
+    }
+
+    public AuthStatus validateRequest(MessageInfo messageInfo, Subject clientSubject, Subject serviceSubject) throws AuthException {
+        for (AuthModuleType<ServerAuthModule> authModuleType: getServerAuthModule()) {
+            ServerAuthModule serverAuthModule = authModuleType.getAuthModule();
+            AuthStatus result = serverAuthModule.validateRequest(messageInfo, clientSubject, serviceSubject);
+
+            //jaspi spec p 88
+            if (result == AuthStatus.SUCCESS) {
+                continue;
+            }
+            if (result == AuthStatus.SEND_SUCCESS || result == AuthStatus.SEND_CONTINUE || result == AuthStatus.FAILURE) {
+                return result;
+            }
+            throw new AuthException("Invalid AuthStatus " + result + " from server auth module: " + serverAuthModule);
+        }
+        return AuthStatus.SUCCESS;
+    }
 }
