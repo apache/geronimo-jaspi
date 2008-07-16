@@ -165,7 +165,7 @@
                     </xs:documentation>
                 </xs:annotation>
             </xs:element>
-            <xs:element name="authenticationContextID" type="xs:string">
+            <xs:element name="authenticationContextID" type="xs:string" minOccurs="0">
                 <xs:annotation>
                     <xs:documentation>
                         the constant value to be returned from getAuthContextID(MessageInfo messageInfo)
@@ -208,7 +208,7 @@
                     </xs:documentation>
                 </xs:annotation>
             </xs:element>
-            <xs:element name="authenticationContextID" type="xs:string">
+            <xs:element name="authenticationContextID" type="xs:string" minOccurs="0">
                 <xs:annotation>
                     <xs:documentation>
                         the constant value to be returned from getAuthContextID(MessageInfo messageInfo)
@@ -243,7 +243,7 @@
                     </xs:documentation>
                 </xs:annotation>
             </xs:element>
-            <xs:element name="authenticationContextID" type="xs:string">
+            <xs:element name="authenticationContextID" type="xs:string" minOccurs="0">
                 <xs:annotation>
                     <xs:documentation>
                         the constant value to be returned from getAuthContextID(MessageInfo messageInfo)

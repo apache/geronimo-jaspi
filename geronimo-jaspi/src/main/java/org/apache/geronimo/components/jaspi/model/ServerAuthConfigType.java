@@ -11,10 +11,17 @@ package org.apache.geronimo.components.jaspi.model;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
+import javax.security.auth.message.config.ServerAuthConfig;
+import javax.security.auth.message.config.ServerAuthContext;
+import javax.security.auth.message.AuthException;
+import javax.security.auth.message.MessageInfo;
+import javax.security.auth.Subject;
 
 
 /**
@@ -49,13 +56,12 @@ import javax.xml.bind.annotation.XmlType;
     "serverAuthContext"
 })
 public class ServerAuthConfigType
-    implements Serializable
+    implements ServerAuthConfig, Serializable
 {
 
     private final static long serialVersionUID = 12343L;
     protected String messageLayer;
     protected String appContext;
-    @XmlElement(required = true)
     protected String authenticationContextID;
     @XmlElement(name = "protected")
     protected boolean _protected;
@@ -95,6 +101,19 @@ public class ServerAuthConfigType
      */
     public String getAppContext() {
         return appContext;
+    }
+
+    public String getAuthContextID(MessageInfo messageInfo) throws IllegalArgumentException {
+        if (authenticationContextID != null) {
+            return authenticationContextID;
+        }
+        for (ServerAuthContextType serverAuthContextType: serverAuthContext) {
+            String authContextID = serverAuthContextType.getAuthenticationContextID(messageInfo);
+            if (authContextID != null) {
+                return authContextID;
+            }
+        }
+        return null;
     }
 
     /**
@@ -141,6 +160,9 @@ public class ServerAuthConfigType
         return _protected;
     }
 
+    public void refresh() throws AuthException, SecurityException {
+    }
+
     /**
      * Sets the value of the protected property.
      * 
@@ -178,4 +200,7 @@ public class ServerAuthConfigType
         return this.serverAuthContext;
     }
 
+    public ServerAuthContext getAuthContext(String authContextID, Subject serviceSubject, Map properties) throws AuthException {
+        return null;
+    }
 }

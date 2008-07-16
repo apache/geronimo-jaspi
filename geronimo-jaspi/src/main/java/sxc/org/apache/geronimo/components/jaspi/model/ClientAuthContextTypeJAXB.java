@@ -16,8 +16,8 @@ import org.apache.geronimo.components.jaspi.model.AuthModuleType;
 import org.apache.geronimo.components.jaspi.model.ClientAuthContextType;
 
 
-import static sxc.org.apache.geronimo.components.jaspi.model.AuthModuleTypeJAXB.readAuthModuleType;
-import static sxc.org.apache.geronimo.components.jaspi.model.AuthModuleTypeJAXB.writeAuthModuleType;
+import static sxc.org.apache.geronimo.components.jaspi.model.AuthModuleTypeJAXB.readClientAuthModuleType;
+import static sxc.org.apache.geronimo.components.jaspi.model.AuthModuleTypeJAXB.writeClientAuthModuleType;
 
 @SuppressWarnings({
     "StringEquality"
@@ -98,7 +98,7 @@ public class ClientAuthContextTypeJAXB
                 clientAuthContextTypeAuthenticationContextID.setObject(reader, context, clientAuthContextType, authenticationContextID);
             } else if (("clientAuthModule" == elementReader.getLocalName())&&("http://geronimo.apache.org/xml/ns/geronimo-jaspi" == elementReader.getNamespaceURI())) {
                 // ELEMENT: clientAuthModule
-                AuthModuleType clientAuthModuleItem = readAuthModuleType(elementReader, context);
+                AuthModuleType clientAuthModuleItem = readClientAuthModuleType(elementReader, context);
                 if (clientAuthModule == null) {
                     clientAuthModule = clientAuthContextTypeClientAuthModule.getObject(reader, context, clientAuthContextType);
                     if (clientAuthModule!= null) {
@@ -174,7 +174,7 @@ public class ClientAuthContextTypeJAXB
             for (AuthModuleType clientAuthModuleItem: clientAuthModule) {
                 writer.writeStartElement(prefix, "clientAuthModule", "http://geronimo.apache.org/xml/ns/geronimo-jaspi");
                 if (clientAuthModuleItem!= null) {
-                    writeAuthModuleType(writer, clientAuthModuleItem, context);
+                    writeClientAuthModuleType(writer, clientAuthModuleItem, context);
                 } else {
                     writer.writeXsiNil();
                 }

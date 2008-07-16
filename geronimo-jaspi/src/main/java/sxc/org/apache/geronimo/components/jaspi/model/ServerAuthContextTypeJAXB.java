@@ -3,8 +3,10 @@ package sxc.org.apache.geronimo.components.jaspi.model;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.xml.XMLConstants;
 import javax.xml.namespace.QName;
+
 import com.envoisolutions.sxc.jaxb.FieldAccessor;
 import com.envoisolutions.sxc.jaxb.JAXBObject;
 import com.envoisolutions.sxc.jaxb.LifecycleCallback;
@@ -12,12 +14,10 @@ import com.envoisolutions.sxc.jaxb.RuntimeContext;
 import com.envoisolutions.sxc.util.Attribute;
 import com.envoisolutions.sxc.util.XoXMLStreamReader;
 import com.envoisolutions.sxc.util.XoXMLStreamWriter;
-import org.apache.geronimo.components.jaspi.model.AuthModuleType;
 import org.apache.geronimo.components.jaspi.model.ServerAuthContextType;
-
-
-import static sxc.org.apache.geronimo.components.jaspi.model.AuthModuleTypeJAXB.readAuthModuleType;
-import static sxc.org.apache.geronimo.components.jaspi.model.AuthModuleTypeJAXB.writeAuthModuleType;
+import org.apache.geronimo.components.jaspi.model.AuthModuleType;
+import static sxc.org.apache.geronimo.components.jaspi.model.AuthModuleTypeJAXB.readServerAuthModuleType;
+import static sxc.org.apache.geronimo.components.jaspi.model.AuthModuleTypeJAXB.writeServerAuthModuleType;
 
 @SuppressWarnings({
     "StringEquality"
@@ -98,7 +98,7 @@ public class ServerAuthContextTypeJAXB
                 serverAuthContextTypeAuthenticationContextID.setObject(reader, context, serverAuthContextType, authenticationContextID);
             } else if (("serverAuthModule" == elementReader.getLocalName())&&("http://geronimo.apache.org/xml/ns/geronimo-jaspi" == elementReader.getNamespaceURI())) {
                 // ELEMENT: serverAuthModule
-                AuthModuleType serverAuthModuleItem = readAuthModuleType(elementReader, context);
+                AuthModuleType serverAuthModuleItem = readServerAuthModuleType(elementReader, context);
                 if (serverAuthModule == null) {
                     serverAuthModule = serverAuthContextTypeServerAuthModule.getObject(reader, context, serverAuthContextType);
                     if (serverAuthModule!= null) {
@@ -174,7 +174,7 @@ public class ServerAuthContextTypeJAXB
             for (AuthModuleType serverAuthModuleItem: serverAuthModule) {
                 writer.writeStartElement(prefix, "serverAuthModule", "http://geronimo.apache.org/xml/ns/geronimo-jaspi");
                 if (serverAuthModuleItem!= null) {
-                    writeAuthModuleType(writer, serverAuthModuleItem, context);
+                    writeServerAuthModuleType(writer, serverAuthModuleItem, context);
                 } else {
                     writer.writeXsiNil();
                 }

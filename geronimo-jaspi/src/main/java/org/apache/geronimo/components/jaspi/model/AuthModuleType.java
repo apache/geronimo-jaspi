@@ -9,10 +9,14 @@
 package org.apache.geronimo.components.jaspi.model;
 
 import java.io.Serializable;
+import java.util.Map;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.XmlTransient;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 
 /**
@@ -44,7 +48,7 @@ import javax.xml.bind.annotation.XmlType;
     "responsePolicy",
     "options"
 })
-public class AuthModuleType
+public class AuthModuleType<T>
     implements Serializable
 {
 
@@ -55,7 +59,10 @@ public class AuthModuleType
     protected MessagePolicyType requestPolicy;
     @XmlElement(required = true)
     protected MessagePolicyType responsePolicy;
-    protected String options;
+    @XmlJavaTypeAdapter(StringMapAdapter.class)
+    protected Map<String, String> options;
+    @XmlTransient
+    private T authModule;
 
     /**
      * Gets the value of the className property.
@@ -134,10 +141,10 @@ public class AuthModuleType
      * 
      * @return
      *     possible object is
-     *     {@link String }
+     *     {@link Map<String, String> }
      *     
      */
-    public String getOptions() {
+    public Map<String, String> getOptions() {
         return options;
     }
 
@@ -146,11 +153,18 @@ public class AuthModuleType
      * 
      * @param value
      *     allowed object is
-     *     {@link String }
+     *     {@link Map<String, String> }
      *     
      */
-    public void setOptions(String value) {
+    public void setOptions(Map<String, String> value) {
         this.options = value;
     }
 
+    public void createAuthModule(ClassLoader classLoader) {
+        throw new RuntimeException("NYI");
+    }
+
+    public T getAuthModule() {
+        return authModule;
+    }
 }

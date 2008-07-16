@@ -39,23 +39,25 @@ import org.testng.annotations.Test;
 import org.xml.sax.SAXException;
 
 /**
- * @version $Rev:$ $Date:$
+ * @version $Rev$ $Date$
  */
 
 public class JaxbTest {
     public static final XMLInputFactory XMLINPUT_FACTORY = XMLInputFactory.newInstance();
 
+    private final int count = 2;
+
     @Test
     public void testLoad() throws Exception {
         String file = "test-jaspi.xml";
         JaspiType jaspi1 = loadJaspi(file);
-        if (jaspi1.getConfigProvider().size() != 1) throw new Exception("expected 1 configprovider, not this: " + jaspi1.getConfigProvider());
+        if (jaspi1.getConfigProvider().size() != count) throw new Exception("expected " + count + " configprovider, not this: " + jaspi1.getConfigProvider());
         URL url = getClass().getClassLoader().getResource("test-jaspi.xml");
         File newFile = new File(new File(url.getPath()).getParentFile(), "test-jaspi-2.xml");
         Writer writer = new FileWriter(newFile);
         JaspiXmlUtil.writeJaspi(jaspi1, writer);
         JaspiType jaspi2 = JaspiXmlUtil.loadJaspi(new FileReader(newFile));
-        if (jaspi2.getConfigProvider().size() != 1) throw new Exception("expected 1 configprovider, not this: " + jaspi2.getConfigProvider());
+        if (jaspi2.getConfigProvider().size() != count) throw new Exception("expected " + count + " configprovider, not this: " + jaspi2.getConfigProvider());
     }
 
     private JaspiType loadJaspi(String file) throws ParserConfigurationException, IOException, SAXException, JAXBException, XMLStreamException {
