@@ -23,6 +23,7 @@ import javax.security.auth.message.AuthException;
 import javax.security.auth.message.config.AuthConfigFactory;
 import javax.security.auth.message.config.RegistrationListener;
 import javax.security.auth.message.config.AuthConfigFactory.RegistrationContext;
+import javax.security.auth.callback.CallbackHandler;
 
 import junit.framework.TestCase;
 
@@ -35,6 +36,8 @@ public class AuthConfigFactoryImplTest extends TestCase {
     protected void setUp() throws Exception {
         URL url = getClass().getClassLoader().getResource("test-jaspi.xml");
         AuthConfigFactoryImpl.staticConfigFile = new File(url.getPath());
+        CallbackHandler callbackHandler = null;
+        AuthConfigFactoryImpl.staticCallbackHandler = callbackHandler;
         AuthConfigFactory.setFactory(null);
     }
     

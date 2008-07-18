@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.security.auth.AuthPermission;
+import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.message.AuthException;
 import javax.security.auth.message.config.AuthConfigFactory;
 import javax.security.auth.message.config.AuthConfigProvider;
@@ -43,13 +44,16 @@ import org.xml.sax.SAXException;
  */
 public class AuthConfigFactoryImpl extends AuthConfigFactory {
 
+    private static final File DEFAULT_CONFIG_FILE = new File("config/jaspi.xml");
+    public static File staticConfigFile = DEFAULT_CONFIG_FILE;
+    public static CallbackHandler staticCallbackHandler;
+
     private static ClassLoader contextClassLoader;
     private JaspiType jaspiType = new JaspiType();
 
     private final ClassLoaderLookup classLoaderLookup;
+    private final CallbackHandler callbackHandler;
     private final File configFile;
-    private static final File DEFAULT_CONFIG_FILE = new File("config/jaspi.xml");
-    public static File staticConfigFile = DEFAULT_CONFIG_FILE;
 
     static {
         contextClassLoader = java.security.AccessController
@@ -60,9 +64,10 @@ public class AuthConfigFactoryImpl extends AuthConfigFactory {
                         });
     }
 
-    public AuthConfigFactoryImpl(ClassLoaderLookup classLoaderLookup, File configFile) throws AuthException {
-        JaspiXmlUtil.registerClassLoaderLookup(classLoaderLookup);
+    public AuthConfigFactoryImpl(ClassLoaderLookup classLoaderLookup, CallbackHandler callbackHandler, File configFile) throws AuthException {
+        JaspiXmlUtil.initialize(classLoaderLookup, callbackHandler);
         this.classLoaderLookup = classLoaderLookup;
+        this.callbackHandler = callbackHandler;
         this.configFile = configFile;
         loadConfig();
     }
@@ -73,7 +78,7 @@ public class AuthConfigFactoryImpl extends AuthConfigFactory {
             public ClassLoader getClassLoader(String name) {
                 return contextClassLoader;
             }
-        }, staticConfigFile);
+        }, staticCallbackHandler, staticConfigFile);
     }
     
     public synchronized String[] detachListener(RegistrationListener listener, String layer, String appContext) throws SecurityException {
@@ -186,7 +191,7 @@ public class AuthConfigFactoryImpl extends AuthConfigFactory {
             }
             ctx.setClassName(className);
             ctx.setProperties(constructorParam);
-            ctx.createAuthConfigProvider(classLoaderLookup);
+            ctx.initialize(classLoaderLookup, callbackHandler);
         } else {
             if (provider == null) {
                 throw new IllegalStateException("No config provider to set");

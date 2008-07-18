@@ -33,6 +33,7 @@ public class AuthModuleTypeJAXB<T>
     public final static AuthModuleTypeJAXB<ServerAuthModule> SERVER_INSTANCE = new AuthModuleTypeJAXB<ServerAuthModule>();
     private final static LifecycleCallback lifecycleCallback = new LifecycleCallback(AuthModuleType.class);
     private final static FieldAccessor<AuthModuleType, String> authModuleTypeClassName = new FieldAccessor<AuthModuleType, String>(AuthModuleType.class, "className");
+    private final static FieldAccessor<AuthModuleType, String> authModuleTypeClassLoaderName = new FieldAccessor<AuthModuleType, String>(AuthModuleType.class, "classLoaderName");
     private final static FieldAccessor<AuthModuleType, MessagePolicyType> authModuleTypeRequestPolicy = new FieldAccessor<AuthModuleType, MessagePolicyType>(AuthModuleType.class, "requestPolicy");
     private final static FieldAccessor<AuthModuleType, MessagePolicyType> authModuleTypeResponsePolicy = new FieldAccessor<AuthModuleType, MessagePolicyType>(AuthModuleType.class, "responsePolicy");
     private final static FieldAccessor<AuthModuleType, Map<String, String>> authModuleTypeOptions = new FieldAccessor<AuthModuleType, Map<String, String>>(AuthModuleType.class, "options");
@@ -103,6 +104,10 @@ public class AuthModuleTypeJAXB<T>
                 // ELEMENT: className
                 String className = elementReader.getElementAsString();
                 authModuleTypeClassName.setObject(reader, context, authModuleType, className);
+            } else if (("classLoaderName" == elementReader.getLocalName())&&("http://geronimo.apache.org/xml/ns/geronimo-jaspi" == elementReader.getNamespaceURI())) {
+                // ELEMENT: classLoaderName
+                String classLoaderName = elementReader.getElementAsString();
+                authModuleTypeClassLoaderName.setObject(reader, context, authModuleType, classLoaderName);
             } else if (("requestPolicy" == elementReader.getLocalName())&&("http://geronimo.apache.org/xml/ns/geronimo-jaspi" == elementReader.getNamespaceURI())) {
                 // ELEMENT: requestPolicy
                 MessagePolicyType requestPolicy = readMessagePolicyType(elementReader, context);

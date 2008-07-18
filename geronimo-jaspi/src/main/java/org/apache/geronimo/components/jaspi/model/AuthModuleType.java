@@ -10,13 +10,22 @@ package org.apache.geronimo.components.jaspi.model;
 
 import java.io.Serializable;
 import java.util.Map;
+import java.security.PrivilegedExceptionAction;
+import java.security.PrivilegedActionException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
-import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import javax.security.auth.callback.CallbackHandler;
+import javax.security.auth.message.AuthException;
+import javax.security.auth.message.MessagePolicy;
+
+import org.apache.geronimo.components.jaspi.ClassLoaderLookup;
 
 
 /**
@@ -55,14 +64,11 @@ public class AuthModuleType<T>
     private final static long serialVersionUID = 12343L;
     @XmlElement(required = true)
     protected String className;
-    @XmlElement(required = true)
+    protected String classLoaderName;
     protected MessagePolicyType requestPolicy;
-    @XmlElement(required = true)
     protected MessagePolicyType responsePolicy;
     @XmlJavaTypeAdapter(StringMapAdapter.class)
     protected Map<String, String> options;
-    @XmlTransient
-    private T authModule;
 
     /**
      * Gets the value of the className property.
@@ -160,11 +166,46 @@ public class AuthModuleType<T>
         this.options = value;
     }
 
-    public void createAuthModule(ClassLoader classLoader) {
-        throw new RuntimeException("NYI");
+    public String getClassLoaderName() {
+        return classLoaderName;
     }
 
-    public T getAuthModule() {
+    public void setClassLoaderName(String classLoaderName) {
+        this.classLoaderName = classLoaderName;
+    }
+
+    public T newAuthModule(final ClassLoaderLookup classLoaderLookup, final CallbackHandler callbackHandler) throws AuthException {
+        final ClassLoader classLoader = classLoaderLookup.getClassLoader(classLoaderName);
+        T authModule;
+        try {
+            authModule = java.security.AccessController
+            .doPrivileged(new PrivilegedExceptionAction<T>() {
+                public T run() throws ClassNotFoundException, SecurityException, NoSuchMethodException, IllegalArgumentException, InstantiationException, IllegalAccessException, InvocationTargetException, AuthException {
+                    Class<? extends T> cl = (Class<? extends T>) Class.forName(className, true, classLoader);
+                    Constructor<? extends T> cnst = cl.getConstructor();
+                    T authModule = cnst.newInstance();
+                    Method m = cl.getMethod("initialize", MessagePolicy.class, MessagePolicy.class, CallbackHandler.class, Map.class);
+                    MessagePolicy reqPolicy = requestPolicy == null? null:requestPolicy.newMessagePolicy(classLoader);
+                    MessagePolicy respPolicy = responsePolicy == null? null: responsePolicy.newMessagePolicy(classLoader);
+                    m.invoke(authModule, reqPolicy, respPolicy, callbackHandler, options);
+                    return authModule;
+                }
+            });
+        } catch (PrivilegedActionException e) {
+            Exception inner = e.getException();
+            if (inner instanceof InstantiationException) {
+                throw (AuthException) new AuthException("AuthConfigFactory error:"
+                                + inner.getCause().getMessage()).initCause(inner.getCause());
+            } else {
+                throw (AuthException) new AuthException("AuthConfigFactory error: " + inner).initCause(inner);
+            }
+        } catch (Exception e) {
+            throw (AuthException) new AuthException("AuthConfigFactory error: " + e).initCause(e);
+        }
+
+
+
         return authModule;
     }
+
 }

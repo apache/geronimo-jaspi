@@ -34,6 +34,11 @@ import javax.xml.bind.JAXBException;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
+import javax.security.auth.message.config.AuthConfigProvider;
+import javax.security.auth.message.config.ClientAuthConfig;
+import javax.security.auth.message.config.ClientAuthContext;
+import javax.security.auth.message.config.ServerAuthConfig;
+import javax.security.auth.message.config.ServerAuthContext;
 
 import org.testng.annotations.Test;
 import org.xml.sax.SAXException;
@@ -53,11 +58,38 @@ public class JaxbTest {
         JaspiType jaspi1 = loadJaspi(file);
         if (jaspi1.getConfigProvider().size() != count) throw new Exception("expected " + count + " configprovider, not this: " + jaspi1.getConfigProvider());
         URL url = getClass().getClassLoader().getResource("test-jaspi.xml");
-        File newFile = new File(new File(url.getPath()).getParentFile(), "test-jaspi-2.xml");
+        File newFile = new File(new File(url.getPath()).getParentFile(), "test-jaspi-write.xml");
         Writer writer = new FileWriter(newFile);
         JaspiXmlUtil.writeJaspi(jaspi1, writer);
         JaspiType jaspi2 = JaspiXmlUtil.loadJaspi(new FileReader(newFile));
         if (jaspi2.getConfigProvider().size() != count) throw new Exception("expected " + count + " configprovider, not this: " + jaspi2.getConfigProvider());
+    }
+
+    @Test
+    public void testLoad2() throws Exception {
+        String file = "test-jaspi-2.xml";
+        JaspiType jaspi1 = loadJaspi(file);
+        if (jaspi1.getConfigProvider().size() != count) throw new Exception("expected " + count + " configprovider, not this: " + jaspi1.getConfigProvider());
+        URL url = getClass().getClassLoader().getResource("test-jaspi.xml");
+        File newFile = new File(new File(url.getPath()).getParentFile(), "test-jaspi-2-write.xml");
+        Writer writer = new FileWriter(newFile);
+        JaspiXmlUtil.writeJaspi(jaspi1, writer);
+        JaspiType jaspi2 = JaspiXmlUtil.loadJaspi(new FileReader(newFile));
+        if (jaspi2.getConfigProvider().size() != count) throw new Exception("expected " + count + " configprovider, not this: " + jaspi2.getConfigProvider());
+
+        AuthConfigProvider configProvider = jaspi1.getConfigProvider().get(ConfigProviderType.getRegistrationKey("Http", "test-app1")).getProvider();
+        ClientAuthConfig clientAuthConfig = configProvider.getClientAuthConfig("Http", "test-app1", null);
+        String authContextID = clientAuthConfig.getAuthContextID(null);
+        ClientAuthContext clientAuthContext = clientAuthConfig.getAuthContext(authContextID, null, null);
+        clientAuthContext.secureRequest(null, null);
+
+        ServerAuthConfig serverAuthConfig = configProvider.getServerAuthConfig("Http", "test-app1", null);
+         authContextID = serverAuthConfig.getAuthContextID(null);
+        ServerAuthContext serverAuthContext = serverAuthConfig.getAuthContext(authContextID, null, null);
+        serverAuthContext.secureResponse(null, null);
+
+
+
     }
 
     private JaspiType loadJaspi(String file) throws ParserConfigurationException, IOException, SAXException, JAXBException, XMLStreamException {

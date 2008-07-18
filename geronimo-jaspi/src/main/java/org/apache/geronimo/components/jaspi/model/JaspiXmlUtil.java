@@ -34,6 +34,7 @@ import javax.xml.bind.Marshaller;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.security.auth.callback.CallbackHandler;
 
 import org.xml.sax.SAXException;
 import org.apache.geronimo.components.jaspi.ClassLoaderLookup;
@@ -44,7 +45,7 @@ import org.apache.geronimo.components.jaspi.ClassLoaderLookup;
 public class JaspiXmlUtil {
     public static final XMLInputFactory XMLINPUT_FACTORY = XMLInputFactory.newInstance();
     public static final JAXBContext JASPI_CONTEXT;
-    private static ConfigProviderMapAdapter configProviderMapAdapter = new ConfigProviderMapAdapter();
+    private static KeyedObjectMapAdapter configProviderMapAdapter = new KeyedObjectMapAdapter(ConfigProviderType.class);
 
     static {
         try {
@@ -56,8 +57,10 @@ public class JaspiXmlUtil {
         }
     }
 
-    public static void registerClassLoaderLookup(ClassLoaderLookup classLoaderLookup) {
-        configProviderMapAdapter = new ConfigProviderMapAdapter();
+    public static void initialize(ClassLoaderLookup classLoaderLookup, CallbackHandler callbackHandler) {
+//        configProviderMapAdapter = new KeyedObjectMapAdapter<ConfigProviderType>(classLoaderLookup, callbackHandler, ConfigProviderType.class);
+        KeyedObjectMapAdapter.staticClassLoaderLookup = classLoaderLookup;
+        KeyedObjectMapAdapter.staticCallbackHandler = callbackHandler;
     }
 
     public static void writeJaspi(JaspiType metadata, Writer out) throws XMLStreamException, JAXBException {

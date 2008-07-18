@@ -14,7 +14,7 @@ import com.envoisolutions.sxc.jaxb.RuntimeContext;
 import com.envoisolutions.sxc.util.Attribute;
 import com.envoisolutions.sxc.util.XoXMLStreamReader;
 import com.envoisolutions.sxc.util.XoXMLStreamWriter;
-import org.apache.geronimo.components.jaspi.model.ConfigProviderMapAdapter;
+import org.apache.geronimo.components.jaspi.model.KeyedObjectMapAdapter;
 import org.apache.geronimo.components.jaspi.model.ConfigProviderType;
 import org.apache.geronimo.components.jaspi.model.JaspiType;
 import static sxc.org.apache.geronimo.components.jaspi.model.ConfigProviderTypeJAXB.readConfigProviderType;
@@ -30,7 +30,7 @@ public class JaspiTypeJAXB
     public final static JaspiTypeJAXB INSTANCE = new JaspiTypeJAXB();
     private final static LifecycleCallback lifecycleCallback = new LifecycleCallback(JaspiType.class);
     private final static FieldAccessor<JaspiType, Map<String, ConfigProviderType>> jaspiTypeConfigProvider = new FieldAccessor<JaspiType, Map<String, ConfigProviderType>>(JaspiType.class, "configProvider");
-    private final static ConfigProviderMapAdapter configProviderMapAdapterAdapter = new ConfigProviderMapAdapter();
+    private final static KeyedObjectMapAdapter<ConfigProviderType> configProviderMapAdapterAdapter = new KeyedObjectMapAdapter<ConfigProviderType>(ConfigProviderType.class);
 
     public JaspiTypeJAXB() {
         super(JaspiType.class, null, new QName("http://geronimo.apache.org/xml/ns/geronimo-jaspi".intern(), "jaspiType".intern()));
@@ -102,7 +102,7 @@ public class JaspiTypeJAXB
             configProvider = configProviderMapAdapterAdapter.unmarshal(configProviderArray);
             jaspiTypeConfigProvider.setObject(reader, context, jaspiType, configProvider);
         } catch (Exception e) {
-//            context.xmlAdapterError(null, ConfigProviderMapAdapter.class, Map.class, Map.class, e);
+//            context.xmlAdapterError(null, KeyedObjectMapAdapter.class, Map.class, Map.class, e);
             throw e;
         }
 
@@ -138,7 +138,7 @@ public class JaspiTypeJAXB
         try {
             configProvider = configProviderMapAdapterAdapter.marshal(configProviderRaw);
         } catch (Exception e) {
-            context.xmlAdapterError(jaspiType, "configProvider", ConfigProviderMapAdapter.class, Map.class, Map.class, e);
+            context.xmlAdapterError(jaspiType, "configProvider", KeyedObjectMapAdapter.class, Map.class, Map.class, e);
         }
         if (configProvider!= null) {
             for (ConfigProviderType configProviderItem: configProvider) {

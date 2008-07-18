@@ -9,10 +9,17 @@
 package org.apache.geronimo.components.jaspi.model;
 
 import java.io.Serializable;
+import java.security.PrivilegedExceptionAction;
+import java.security.PrivilegedActionException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Constructor;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
+import javax.security.auth.message.MessagePolicy;
+import javax.security.auth.message.AuthException;
 
 
 /**
@@ -70,4 +77,27 @@ public class ProtectionPolicyType
         this.className = value;
     }
 
+    public MessagePolicy.ProtectionPolicy newProtectionPolicy(final ClassLoader classLoader) throws AuthException {
+        try {
+            return java.security.AccessController
+            .doPrivileged(new PrivilegedExceptionAction<MessagePolicy.ProtectionPolicy>() {
+                public MessagePolicy.ProtectionPolicy run() throws ClassNotFoundException, SecurityException, NoSuchMethodException, IllegalArgumentException, InstantiationException, IllegalAccessException, InvocationTargetException {
+                    Class<? extends MessagePolicy.ProtectionPolicy> cl = (Class<? extends MessagePolicy.ProtectionPolicy>) Class.forName(className, true, classLoader);
+                    Constructor<? extends MessagePolicy.ProtectionPolicy> cnst = cl.getConstructor();
+                    MessagePolicy.ProtectionPolicy target = cnst.newInstance();
+                    return target;
+                }
+            });
+        } catch (PrivilegedActionException e) {
+            Exception inner = e.getException();
+            if (inner instanceof InstantiationException) {
+                throw (AuthException) new AuthException("AuthConfigFactory error:"
+                                + inner.getCause().getMessage()).initCause(inner.getCause());
+            } else {
+                throw (AuthException) new AuthException("AuthConfigFactory error: " + inner).initCause(inner);
+            }
+        } catch (Exception e) {
+            throw (AuthException) new AuthException("AuthConfigFactory error: " + e).initCause(e);
+        }
+    }
 }

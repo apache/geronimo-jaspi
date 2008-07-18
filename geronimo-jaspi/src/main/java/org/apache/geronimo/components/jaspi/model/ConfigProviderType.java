@@ -12,6 +12,7 @@ import java.io.Serializable;
 import java.util.Map;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.security.PrivilegedExceptionAction;
 import java.security.PrivilegedActionException;
 import java.lang.reflect.InvocationTargetException;
@@ -26,7 +27,10 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import javax.security.auth.message.config.AuthConfigFactory;
 import javax.security.auth.message.config.RegistrationListener;
 import javax.security.auth.message.config.AuthConfigProvider;
+import javax.security.auth.message.config.ClientAuthConfig;
+import javax.security.auth.message.config.ServerAuthConfig;
 import javax.security.auth.message.AuthException;
+import javax.security.auth.callback.CallbackHandler;
 
 import org.apache.geronimo.components.jaspi.ClassLoaderLookup;
 
@@ -77,7 +81,7 @@ import org.apache.geronimo.components.jaspi.ClassLoaderLookup;
     "classLoaderName"
 })
 public class ConfigProviderType
-    implements AuthConfigFactory.RegistrationContext, Serializable
+    implements AuthConfigFactory.RegistrationContext, Serializable, KeyedObject
 {
 
     private final static long serialVersionUID = 12343L;
@@ -89,9 +93,11 @@ public class ConfigProviderType
     @XmlElement(required = true)
     @XmlJavaTypeAdapter(StringMapAdapter.class)
     protected Map<String, String> properties;
-    protected List<ClientAuthConfigType> clientAuthConfig;
-    protected List<ServerAuthConfigType> serverAuthConfig;
-    protected Boolean persistent;
+    @XmlJavaTypeAdapter(KeyedObjectMapAdapter.class)
+    private Map<String, ClientAuthConfigType> clientAuthConfig;
+    @XmlJavaTypeAdapter(KeyedObjectMapAdapter.class)
+    private Map<String, ServerAuthConfigType> serverAuthConfig;
+    protected Boolean persistent = Boolean.FALSE;
     protected String classLoaderName;
 
     @XmlTransient
@@ -251,9 +257,9 @@ public class ConfigProviderType
      * 
      * 
      */
-    public List<ClientAuthConfigType> getClientAuthConfig() {
+    public Map<String, ClientAuthConfigType> getClientAuthConfig() {
         if (clientAuthConfig == null) {
-            clientAuthConfig = new ArrayList<ClientAuthConfigType>();
+            clientAuthConfig = new HashMap<String, ClientAuthConfigType>();
         }
         return this.clientAuthConfig;
     }
@@ -280,9 +286,9 @@ public class ConfigProviderType
      * 
      * 
      */
-    public List<ServerAuthConfigType> getServerAuthConfig() {
+    public Map<String, ServerAuthConfigType> getServerAuthConfig() {
         if (serverAuthConfig == null) {
-            serverAuthConfig = new ArrayList<ServerAuthConfigType>();
+            serverAuthConfig = new HashMap<String, ServerAuthConfigType>();
         }
         return this.serverAuthConfig;
     }
@@ -331,37 +337,112 @@ public class ConfigProviderType
         this.classLoaderName = classLoaderName;
     }
 
-    public void createAuthConfigProvider(ClassLoaderLookup classLoaderLookup) throws AuthException {
-        final ClassLoader classLoader = classLoaderLookup.getClassLoader(classLoaderName);
-        try {
-            provider = java.security.AccessController
-            .doPrivileged(new PrivilegedExceptionAction<AuthConfigProvider>() {
-                public AuthConfigProvider run() throws ClassNotFoundException, SecurityException, NoSuchMethodException, IllegalArgumentException, InstantiationException, IllegalAccessException, InvocationTargetException {
-                    Class<? extends AuthConfigProvider> cl = (Class<? extends AuthConfigProvider>) Class.forName(className, true, classLoader);
-                    Constructor<? extends AuthConfigProvider> cnst = cl.getConstructor(Map.class);
-                    return cnst.newInstance(properties);
+    public void initialize(ClassLoaderLookup classLoaderLookup, CallbackHandler callbackHandler) throws AuthException {
+        if (className == null) {
+            provider = new ConfigProviderImpl(this, classLoaderLookup);
+        } else {
+            final ClassLoader classLoader = classLoaderLookup.getClassLoader(classLoaderName);
+            try {
+                provider = java.security.AccessController
+                .doPrivileged(new PrivilegedExceptionAction<AuthConfigProvider>() {
+                    public AuthConfigProvider run() throws ClassNotFoundException, SecurityException, NoSuchMethodException, IllegalArgumentException, InstantiationException, IllegalAccessException, InvocationTargetException {
+                        Class<? extends AuthConfigProvider> cl = (Class<? extends AuthConfigProvider>) Class.forName(className, true, classLoader);
+                        Constructor<? extends AuthConfigProvider> cnst = cl.getConstructor(Map.class);
+                        return cnst.newInstance(properties);
+                    }
+                });
+            } catch (PrivilegedActionException e) {
+                Exception inner = e.getException();
+                if (inner instanceof InstantiationException) {
+                    throw (AuthException) new AuthException("AuthConfigFactory error:"
+                                    + inner.getCause().getMessage()).initCause(inner.getCause());
+                } else {
+                    throw (AuthException) new AuthException("AuthConfigFactory error: " + inner).initCause(inner);
                 }
-            });
-        } catch (PrivilegedActionException e) {
-            Exception inner = e.getException();
-            if (inner instanceof InstantiationException) {
-                throw (AuthException) new AuthException("AuthConfigFactory error:"
-                                + inner.getCause().getMessage()).initCause(inner.getCause());
-            } else {
-                throw (AuthException) new AuthException("AuthConfigFactory error: " + inner).initCause(inner);
+            } catch (Exception e) {
+                throw (AuthException) new AuthException("AuthConfigFactory error: " + e).initCause(e);
             }
-        } catch (Exception e) {
-            throw (AuthException) new AuthException("AuthConfigFactory error: " + e).initCause(e);
         }
-
     }
 
     public static String getRegistrationKey(String layer, String appContext) {
         return layer + "/" + appContext;
     }
 
-    public String getRegistrationKey() {
+    public String getKey() {
         return getRegistrationKey(getMessageLayer(), getAppContext());
+    }
+
+    public static class ConfigProviderImpl implements AuthConfigProvider {
+
+        private final ConfigProviderType configProviderType;
+        private final ClassLoaderLookup classLoaderLookup;
+
+        public ConfigProviderImpl(ConfigProviderType configProviderType, ClassLoaderLookup classLoaderLookup) {
+            this.configProviderType = configProviderType;
+            this.classLoaderLookup = classLoaderLookup;
+        }
+
+        /**
+         * spec required constructor
+         * @param properties
+         * @param factory
+         */
+        public ConfigProviderImpl(Map<String, String> properties, AuthConfigFactory factory) {
+            throw new RuntimeException("don't call this");
+        }
+
+        public ClientAuthConfig getClientAuthConfig(String layer, String appContext, CallbackHandler handler) throws AuthException, SecurityException {
+            if (layer == null) {
+                throw new NullPointerException("messageLayer");
+            }
+            if (appContext == null) {
+                throw new NullPointerException("appContext");
+            }
+            final Map<String, ClientAuthConfigType> configTypeMap = configProviderType.getClientAuthConfig();
+            ClientAuthConfigType ctx = configTypeMap.get(getRegistrationKey(layer, appContext));
+            if (ctx == null) {
+                ctx = configTypeMap.get(getRegistrationKey(null, appContext));
+            }
+            if (ctx == null) {
+                ctx = configTypeMap.get(getRegistrationKey(layer, null));
+            }
+            if (ctx == null) {
+                ctx = configTypeMap.get(getRegistrationKey(null, null));
+            }
+            if (ctx != null) {
+                
+                return ctx.newClientAuthConfig(layer, appContext, classLoaderLookup, handler);
+            }
+            throw new AuthException("No suitable ClientAuthConfig");
+        }
+
+        public ServerAuthConfig getServerAuthConfig(String layer, String appContext, CallbackHandler handler) throws AuthException, SecurityException {
+            if (layer == null) {
+                throw new NullPointerException("messageLayer");
+            }
+            if (appContext == null) {
+                throw new NullPointerException("appContext");
+            }
+            ServerAuthConfigType ctx = configProviderType.getServerAuthConfig().get(getRegistrationKey(layer, appContext));
+            if (ctx == null) {
+                ctx = configProviderType.getServerAuthConfig().get(getRegistrationKey(null, appContext));
+            }
+            if (ctx == null) {
+                ctx = configProviderType.getServerAuthConfig().get(getRegistrationKey(layer, null));
+            }
+            if (ctx == null) {
+                ctx = configProviderType.getServerAuthConfig().get(getRegistrationKey(null, null));
+            }
+            if (ctx != null) {
+
+                return ctx.newServerAuthConfig(layer, appContext, classLoaderLookup, handler);
+            }
+            throw new AuthException("No suitable ServerAuthConfig");
+        }
+
+        public void refresh() throws AuthException, SecurityException {
+        }
     }
 
 }
