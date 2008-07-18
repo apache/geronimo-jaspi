@@ -286,7 +286,7 @@
                     </xs:documentation>
                 </xs:annotation>
             </xs:element>
-            <xs:element name="authenticationContextID" type="xs:string">
+            <xs:element name="authenticationContextID" type="xs:string" minOccurs="0">
                 <xs:annotation>
                     <xs:documentation>
                         the constant value to be returned from getAuthContextID(MessageInfo messageInfo)
@@ -313,10 +313,17 @@
                     </xs:documentation>
                 </xs:annotation>
             </xs:element>
-            <xs:element name="requestPolicy" type="jaspi:messagePolicyType">
+            <xs:element name="classLoaderName" type="xs:string" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>
+                        name of classloader to load any needed classes (e.g. custom config providers, modules, policy stuff)
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="requestPolicy" type="jaspi:messagePolicyType" minOccurs="0">
 
             </xs:element>
-            <xs:element name="responsePolicy" type="jaspi:messagePolicyType">
+            <xs:element name="responsePolicy" type="jaspi:messagePolicyType" minOccurs="0">
 
             </xs:element>
             <xs:element name="options"

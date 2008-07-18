@@ -24,28 +24,35 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.lang.reflect.Array;
 
 import javax.xml.bind.annotation.adapters.XmlAdapter;
+import javax.security.auth.callback.CallbackHandler;
 
 import org.apache.geronimo.components.jaspi.ClassLoaderLookup;
 
 /**
  * @version $Rev$ $Date$
  */
-public class ConfigProviderMapAdapter extends XmlAdapter<ConfigProviderType[], Map<String, ConfigProviderType>> {
+public class KeyedObjectMapAdapter<T extends KeyedObject> extends XmlAdapter<T[], Map<String, T>> {
     public static ClassLoaderLookup staticClassLoaderLookup;
+    public static CallbackHandler staticCallbackHandler;
     private final ClassLoaderLookup classLoaderLookup;
+    private final CallbackHandler callbackHandler;
+    private final Class<T> type;
 
-    public ConfigProviderMapAdapter(ClassLoaderLookup classLoaderLookup) {
+    public KeyedObjectMapAdapter(ClassLoaderLookup classLoaderLookup, CallbackHandler callbackHandler, Class<T> type) {
         this.classLoaderLookup = classLoaderLookup;
+        this.callbackHandler = callbackHandler;
+        this.type = type;
     }
 
-    public ConfigProviderMapAdapter() {
+    public KeyedObjectMapAdapter(Class<T> type) {
         if (staticClassLoaderLookup != null) {
             this.classLoaderLookup = staticClassLoaderLookup;
         } else {
             ClassLoader testLoader = Thread.currentThread().getContextClassLoader();
-            final ClassLoader cl = testLoader == null ? ConfigProviderMapAdapter.class.getClassLoader() : testLoader;
+            final ClassLoader cl = testLoader == null ? KeyedObjectMapAdapter.class.getClassLoader() : testLoader;
             classLoaderLookup = new ClassLoaderLookup() {
 
                 public ClassLoader getClassLoader(String name) {
@@ -53,29 +60,35 @@ public class ConfigProviderMapAdapter extends XmlAdapter<ConfigProviderType[], M
                 }
             };
         }
+        this.type = type;
+        callbackHandler = staticCallbackHandler;
     }
 
-    public Map<String, ConfigProviderType> unmarshal(ConfigProviderType[] configProviderTypes) throws Exception {
-        Map<String, ConfigProviderType> map = new HashMap<String, ConfigProviderType>();
+    public Map<String, T> unmarshal(T[] configProviderTypes) throws Exception {
+        Map<String, T> map = new HashMap<String, T>();
         if (configProviderTypes != null) {
-            for (ConfigProviderType configProviderType : configProviderTypes) {
+            for (T configProviderType : configProviderTypes) {
                 if (configProviderType != null) {
-                    String key = configProviderType.getRegistrationKey();
+                    String key = configProviderType.getKey();
                     map.put(key, configProviderType);
-                    configProviderType.createAuthConfigProvider(classLoaderLookup);
+                    configProviderType.initialize(classLoaderLookup, callbackHandler);
                 }
             }
         }
         return map;
     }
 
-    public ConfigProviderType[] marshal(Map<String, ConfigProviderType> stringConfigProviderTypeMap) throws Exception {
-        List<ConfigProviderType> list = new ArrayList<ConfigProviderType>();
-        for (ConfigProviderType configProviderType : stringConfigProviderTypeMap.values()) {
+    public T[] marshal(Map<String, T> stringConfigProviderTypeMap) throws Exception {
+        if (stringConfigProviderTypeMap == null) {
+            return null;
+        }
+        List<T> list = new ArrayList<T>();
+        for (T configProviderType : stringConfigProviderTypeMap.values()) {
             if (configProviderType.isPersistent()) {
                 list.add(configProviderType);
             }
         }
-        return list.toArray(new ConfigProviderType[list.size()]);
+        T[] array = (T[]) Array.newInstance(type, list.size());
+        return list.toArray(array);
     }
 }

@@ -9,19 +9,23 @@
 package org.apache.geronimo.components.jaspi.model;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.XmlTransient;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import javax.security.auth.message.config.ServerAuthConfig;
 import javax.security.auth.message.config.ServerAuthContext;
 import javax.security.auth.message.AuthException;
 import javax.security.auth.message.MessageInfo;
 import javax.security.auth.Subject;
+import javax.security.auth.callback.CallbackHandler;
+
+import org.apache.geronimo.components.jaspi.ClassLoaderLookup;
 
 
 /**
@@ -56,7 +60,7 @@ import javax.security.auth.Subject;
     "serverAuthContext"
 })
 public class ServerAuthConfigType
-    implements ServerAuthConfig, Serializable
+    implements Serializable, KeyedObject
 {
 
     private final static long serialVersionUID = 12343L;
@@ -65,7 +69,8 @@ public class ServerAuthConfigType
     protected String authenticationContextID;
     @XmlElement(name = "protected")
     protected boolean _protected;
-    protected List<ServerAuthContextType> serverAuthContext;
+    @XmlJavaTypeAdapter(KeyedObjectMapAdapter.class)
+    protected Map<String, ServerAuthContextType> serverAuthContext;
 
     /**
      * Gets the value of the messageLayer property.
@@ -107,7 +112,7 @@ public class ServerAuthConfigType
         if (authenticationContextID != null) {
             return authenticationContextID;
         }
-        for (ServerAuthContextType serverAuthContextType: serverAuthContext) {
+        for (ServerAuthContextType serverAuthContextType: serverAuthContext.values()) {
             String authContextID = serverAuthContextType.getAuthenticationContextID(messageInfo);
             if (authContextID != null) {
                 return authContextID;
@@ -193,14 +198,81 @@ public class ServerAuthConfigType
      * 
      * 
      */
-    public List<ServerAuthContextType> getServerAuthContext() {
+    public Map<String, ServerAuthContextType> getServerAuthContext() {
         if (serverAuthContext == null) {
-            serverAuthContext = new ArrayList<ServerAuthContextType>();
+            serverAuthContext = new HashMap<String, ServerAuthContextType>();
         }
         return this.serverAuthContext;
     }
 
     public ServerAuthContext getAuthContext(String authContextID, Subject serviceSubject, Map properties) throws AuthException {
+        //see page 136  We are going to ignore the clientSubject and properties for now.
+        for (ServerAuthContextType serverAuthContext: getServerAuthContext().values()) {
+            if (serverAuthContext.getAuthenticationContextID().equals(authContextID)) {
+                return serverAuthContext.getServerAuthContext();
+            }
+        }
         return null;
+    }
+    public String getKey() {
+        return ConfigProviderType.getRegistrationKey(messageLayer, appContext);
+    }
+
+    public void initialize(ClassLoaderLookup classLoaderLookup, CallbackHandler callbackHandler) throws AuthException {
+    }
+
+    public boolean isPersistent() {
+        return true;
+    }
+
+    public ServerAuthConfig newServerAuthConfig(String messageLayer, String appContext, ClassLoaderLookup classLoaderLookup, CallbackHandler callbackHandler) throws AuthException {
+        Map<String, ServerAuthContext> authContextMap = new HashMap<String, ServerAuthContext>();
+        for (ServerAuthContextType serverAuthContextType: getServerAuthContext().values()) {
+            if (serverAuthContextType.match(messageLayer, appContext)) {
+                ServerAuthContext serverAuthContext = serverAuthContextType.newServerAuthContext(classLoaderLookup, callbackHandler);
+                String authContextID = serverAuthContextType.getAuthenticationContextID();
+                if (authContextID == null) {
+                    authContextID = getAuthenticationContextID();
+                }
+                if (!authContextMap.containsKey(authContextID)) {
+                    authContextMap.put(authContextID,  serverAuthContext);
+                }
+            }
+        }
+        return new ServerAuthConfigImpl(this, authContextMap);
+    }
+
+    public static class ServerAuthConfigImpl implements ServerAuthConfig {
+
+        private final ServerAuthConfigType serverAuthConfigType;
+        private final Map<String, ServerAuthContext> serverAuthContextMap;
+
+        public ServerAuthConfigImpl(ServerAuthConfigType serverAuthConfigType, Map<String, ServerAuthContext> serverAuthContextMap) {
+            this.serverAuthConfigType = serverAuthConfigType;
+            this.serverAuthContextMap = serverAuthContextMap;
+        }
+
+        public ServerAuthContext getAuthContext(String authContextID, Subject serverSubject, Map properties) throws AuthException {
+            return serverAuthContextMap.get(authContextID);
+        }
+
+        public String getAppContext() {
+            return serverAuthConfigType.getAppContext();
+        }
+
+        public String getAuthContextID(MessageInfo messageInfo) throws IllegalArgumentException {
+            return serverAuthConfigType.getAuthContextID(messageInfo);
+        }
+
+        public String getMessageLayer() {
+            return serverAuthConfigType.getMessageLayer();
+        }
+
+        public boolean isProtected() {
+            return serverAuthConfigType.isProtected();
+        }
+
+        public void refresh() throws AuthException, SecurityException {
+        }
     }
 }

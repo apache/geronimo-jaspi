@@ -9,8 +9,6 @@
 package org.apache.geronimo.components.jaspi.model;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
 
@@ -51,7 +49,7 @@ public class JaspiType
 
     private final static long serialVersionUID = 12343L;
 
-    @XmlJavaTypeAdapter(ConfigProviderMapAdapter.class)
+    @XmlJavaTypeAdapter(KeyedObjectMapAdapter.class)
     protected Map<String, ConfigProviderType> configProvider;
 
     /**

@@ -17,6 +17,7 @@ import org.apache.geronimo.components.jaspi.model.ClientAuthConfigType;
 import org.apache.geronimo.components.jaspi.model.ConfigProviderType;
 import org.apache.geronimo.components.jaspi.model.ServerAuthConfigType;
 import org.apache.geronimo.components.jaspi.model.StringMapAdapter;
+import org.apache.geronimo.components.jaspi.model.KeyedObjectMapAdapter;
 
 
 import static sxc.org.apache.geronimo.components.jaspi.model.ClientAuthConfigTypeJAXB.readClientAuthConfigType;
@@ -38,11 +39,13 @@ public class ConfigProviderTypeJAXB
     private final static FieldAccessor<ConfigProviderType, String> configProviderTypeDescription = new FieldAccessor<ConfigProviderType, String>(ConfigProviderType.class, "description");
     private final static FieldAccessor<ConfigProviderType, String> configProviderTypeClassName = new FieldAccessor<ConfigProviderType, String>(ConfigProviderType.class, "className");
     private final static FieldAccessor<ConfigProviderType, Map<String, String>> configProviderTypeProperties = new FieldAccessor<ConfigProviderType, Map<String, String>>(ConfigProviderType.class, "properties");
-    private final static FieldAccessor<ConfigProviderType, List<ClientAuthConfigType>> configProviderTypeClientAuthConfig = new FieldAccessor<ConfigProviderType, List<ClientAuthConfigType>>(ConfigProviderType.class, "clientAuthConfig");
-    private final static FieldAccessor<ConfigProviderType, List<ServerAuthConfigType>> configProviderTypeServerAuthConfig = new FieldAccessor<ConfigProviderType, List<ServerAuthConfigType>>(ConfigProviderType.class, "serverAuthConfig");
+    private final static FieldAccessor<ConfigProviderType, Map<String, ClientAuthConfigType>> configProviderTypeClientAuthConfig = new FieldAccessor<ConfigProviderType, Map<String, ClientAuthConfigType>>(ConfigProviderType.class, "clientAuthConfig");
+    private final static FieldAccessor<ConfigProviderType, Map<String, ServerAuthConfigType>> configProviderTypeServerAuthConfig = new FieldAccessor<ConfigProviderType, Map<String, ServerAuthConfigType>>(ConfigProviderType.class, "serverAuthConfig");
     private final static FieldAccessor<ConfigProviderType, Boolean> configProviderTypePersistent = new FieldAccessor<ConfigProviderType, Boolean>(ConfigProviderType.class, "persistent");
     private final static FieldAccessor<ConfigProviderType, String> configProviderTypeClassLoaderName = new FieldAccessor<ConfigProviderType, String>(ConfigProviderType.class, "classLoaderName");
     private final static StringMapAdapter stringMapAdapterAdapter = new StringMapAdapter();
+    private final static KeyedObjectMapAdapter<ClientAuthConfigType> clientAuthConfigMapAdapter = new KeyedObjectMapAdapter<ClientAuthConfigType>(ClientAuthConfigType.class);
+    private final static KeyedObjectMapAdapter<ServerAuthConfigType> serverAuthConfigMapAdapter = new KeyedObjectMapAdapter<ServerAuthConfigType>(ServerAuthConfigType.class);
 
     public ConfigProviderTypeJAXB() {
         super(ConfigProviderType.class, null, new QName("http://geronimo.apache.org/xml/ns/geronimo-jaspi".intern(), "configProviderType".intern()), ClientAuthConfigTypeJAXB.class, ServerAuthConfigTypeJAXB.class);
@@ -76,8 +79,8 @@ public class ConfigProviderTypeJAXB
         ConfigProviderType configProviderType = new ConfigProviderType();
         context.beforeUnmarshal(configProviderType, lifecycleCallback);
 
-        List<ClientAuthConfigType> clientAuthConfig = null;
-        List<ServerAuthConfigType> serverAuthConfig = null;
+        List<ClientAuthConfigType> clientAuthConfigRaw = new ArrayList<ClientAuthConfigType>();
+        List<ServerAuthConfigType> serverAuthConfigRaw = new ArrayList<ServerAuthConfigType>();
 
         // Check xsi:type
         QName xsiType = reader.getXsiType();
@@ -128,27 +131,11 @@ public class ConfigProviderTypeJAXB
             } else if (("clientAuthConfig" == elementReader.getLocalName())&&("http://geronimo.apache.org/xml/ns/geronimo-jaspi" == elementReader.getNamespaceURI())) {
                 // ELEMENT: clientAuthConfig
                 ClientAuthConfigType clientAuthConfigItem = readClientAuthConfigType(elementReader, context);
-                if (clientAuthConfig == null) {
-                    clientAuthConfig = configProviderTypeClientAuthConfig.getObject(reader, context, configProviderType);
-                    if (clientAuthConfig!= null) {
-                        clientAuthConfig.clear();
-                    } else {
-                        clientAuthConfig = new ArrayList<ClientAuthConfigType>();
-                    }
-                }
-                clientAuthConfig.add(clientAuthConfigItem);
+                clientAuthConfigRaw.add(clientAuthConfigItem);
             } else if (("serverAuthConfig" == elementReader.getLocalName())&&("http://geronimo.apache.org/xml/ns/geronimo-jaspi" == elementReader.getNamespaceURI())) {
                 // ELEMENT: serverAuthConfig
                 ServerAuthConfigType serverAuthConfigItem = readServerAuthConfigType(elementReader, context);
-                if (serverAuthConfig == null) {
-                    serverAuthConfig = configProviderTypeServerAuthConfig.getObject(reader, context, configProviderType);
-                    if (serverAuthConfig!= null) {
-                        serverAuthConfig.clear();
-                    } else {
-                        serverAuthConfig = new ArrayList<ServerAuthConfigType>();
-                    }
-                }
-                serverAuthConfig.add(serverAuthConfigItem);
+                serverAuthConfigRaw.add(serverAuthConfigItem);
             } else if (("persistent" == elementReader.getLocalName())&&("http://geronimo.apache.org/xml/ns/geronimo-jaspi" == elementReader.getNamespaceURI())) {
                 // ELEMENT: persistent
                 Boolean persistent = ("1".equals(elementReader.getElementAsString())||"true".equals(elementReader.getElementAsString()));
@@ -161,10 +148,12 @@ public class ConfigProviderTypeJAXB
                 context.unexpectedElement(elementReader, new QName("http://geronimo.apache.org/xml/ns/geronimo-jaspi", "messageLayer"), new QName("http://geronimo.apache.org/xml/ns/geronimo-jaspi", "appContext"), new QName("http://geronimo.apache.org/xml/ns/geronimo-jaspi", "description"), new QName("http://geronimo.apache.org/xml/ns/geronimo-jaspi", "className"), new QName("http://geronimo.apache.org/xml/ns/geronimo-jaspi", "properties"), new QName("http://geronimo.apache.org/xml/ns/geronimo-jaspi", "clientAuthConfig"), new QName("http://geronimo.apache.org/xml/ns/geronimo-jaspi", "serverAuthConfig"), new QName("http://geronimo.apache.org/xml/ns/geronimo-jaspi", "persistent"), new QName("http://geronimo.apache.org/xml/ns/geronimo-jaspi", "classLoaderName"));
             }
         }
-        if (clientAuthConfig!= null) {
+        if (clientAuthConfigRaw!= null) {
+            Map<String, ClientAuthConfigType> clientAuthConfig = clientAuthConfigMapAdapter.unmarshal(clientAuthConfigRaw.toArray(new ClientAuthConfigType[clientAuthConfigRaw.size()]));
             configProviderTypeClientAuthConfig.setObject(reader, context, configProviderType, clientAuthConfig);
         }
-        if (serverAuthConfig!= null) {
+        if (serverAuthConfigRaw!= null) {
+            Map<String, ServerAuthConfigType> serverAuthConfig = serverAuthConfigMapAdapter.unmarshal(serverAuthConfigRaw.toArray(new ServerAuthConfigType[serverAuthConfigRaw.size()]));
             configProviderTypeServerAuthConfig.setObject(reader, context, configProviderType, serverAuthConfig);
         }
 
@@ -243,7 +232,8 @@ public class ConfigProviderTypeJAXB
         }
 
         // ELEMENT: clientAuthConfig
-        List<ClientAuthConfigType> clientAuthConfig = configProviderTypeClientAuthConfig.getObject(configProviderType, context, configProviderType);
+        Map<String, ClientAuthConfigType> clientAuthConfigMap = configProviderTypeClientAuthConfig.getObject(configProviderType, context, configProviderType);
+        ClientAuthConfigType[] clientAuthConfig = clientAuthConfigMapAdapter.marshal(clientAuthConfigMap);
         if (clientAuthConfig!= null) {
             for (ClientAuthConfigType clientAuthConfigItem: clientAuthConfig) {
                 writer.writeStartElement(prefix, "clientAuthConfig", "http://geronimo.apache.org/xml/ns/geronimo-jaspi");
@@ -257,7 +247,8 @@ public class ConfigProviderTypeJAXB
         }
 
         // ELEMENT: serverAuthConfig
-        List<ServerAuthConfigType> serverAuthConfig = configProviderTypeServerAuthConfig.getObject(configProviderType, context, configProviderType);
+        Map<String,ServerAuthConfigType> serverAuthConfigMap = configProviderTypeServerAuthConfig.getObject(configProviderType, context, configProviderType);
+        ServerAuthConfigType[] serverAuthConfig = serverAuthConfigMapAdapter.marshal(serverAuthConfigMap);
         if (serverAuthConfig!= null) {
             for (ServerAuthConfigType serverAuthConfigItem: serverAuthConfig) {
                 writer.writeStartElement(prefix, "serverAuthConfig", "http://geronimo.apache.org/xml/ns/geronimo-jaspi");

@@ -11,10 +11,20 @@ package org.apache.geronimo.components.jaspi.model;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.security.PrivilegedExceptionAction;
+import java.security.PrivilegedActionException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
+import javax.security.auth.message.MessagePolicy;
+import javax.security.auth.message.AuthException;
+import javax.security.auth.callback.CallbackHandler;
 
 
 /**
@@ -104,4 +114,12 @@ public class TargetPolicyType
         return this.target;
     }
 
+    public MessagePolicy.TargetPolicy newTargetPolicy(ClassLoader cl) throws AuthException {
+        MessagePolicy.Target[] targets = new MessagePolicy.Target[getTarget().size()];
+        int i = 0;
+        for (TargetType targetType: getTarget()) {
+            targets[i++] = targetType.newTarget(cl);
+        }
+        return new MessagePolicy.TargetPolicy(targets, protectionPolicy.newProtectionPolicy(cl));
+    }
 }

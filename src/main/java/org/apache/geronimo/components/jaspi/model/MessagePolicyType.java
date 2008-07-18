@@ -15,6 +15,8 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlType;
+import javax.security.auth.message.MessagePolicy;
+import javax.security.auth.message.AuthException;
 
 
 /**
@@ -87,7 +89,7 @@ public class MessagePolicyType
      *     {@link Boolean }
      *     
      */
-    public Boolean isMandatory() {
+    public boolean isMandatory() {
         return mandatory;
     }
 
@@ -99,8 +101,20 @@ public class MessagePolicyType
      *     {@link Boolean }
      *     
      */
-    public void setMandatory(Boolean value) {
+    public void setMandatory(boolean value) {
         this.mandatory = value;
+    }
+
+    public MessagePolicy newMessagePolicy(ClassLoader cl) throws AuthException {
+        if (targetPolicy == null || targetPolicy.size() == 0) {
+            return null;
+        }
+        MessagePolicy.TargetPolicy[] targetPolicies = new MessagePolicy.TargetPolicy[targetPolicy.size()];
+        int i = 0;
+        for (TargetPolicyType targetPolicyType: targetPolicy) {
+            targetPolicies[i++] = targetPolicyType.newTargetPolicy(cl);
+        }
+        return new MessagePolicy(targetPolicies, mandatory);
     }
 
 }

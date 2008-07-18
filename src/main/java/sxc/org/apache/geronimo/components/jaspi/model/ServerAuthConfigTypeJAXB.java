@@ -3,6 +3,8 @@ package sxc.org.apache.geronimo.components.jaspi.model;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+
 import javax.xml.XMLConstants;
 import javax.xml.namespace.QName;
 import com.envoisolutions.sxc.jaxb.FieldAccessor;
@@ -14,6 +16,7 @@ import com.envoisolutions.sxc.util.XoXMLStreamReader;
 import com.envoisolutions.sxc.util.XoXMLStreamWriter;
 import org.apache.geronimo.components.jaspi.model.ServerAuthConfigType;
 import org.apache.geronimo.components.jaspi.model.ServerAuthContextType;
+import org.apache.geronimo.components.jaspi.model.KeyedObjectMapAdapter;
 
 
 import static sxc.org.apache.geronimo.components.jaspi.model.ServerAuthContextTypeJAXB.readServerAuthContextType;
@@ -32,7 +35,8 @@ public class ServerAuthConfigTypeJAXB
     private final static FieldAccessor<ServerAuthConfigType, String> serverAuthConfigTypeAppContext = new FieldAccessor<ServerAuthConfigType, String>(ServerAuthConfigType.class, "appContext");
     private final static FieldAccessor<ServerAuthConfigType, String> serverAuthConfigTypeAuthenticationContextID = new FieldAccessor<ServerAuthConfigType, String>(ServerAuthConfigType.class, "authenticationContextID");
     private final static FieldAccessor<ServerAuthConfigType, Boolean> serverAuthConfigType_protected = new FieldAccessor<ServerAuthConfigType, Boolean>(ServerAuthConfigType.class, "_protected");
-    private final static FieldAccessor<ServerAuthConfigType, List<ServerAuthContextType>> serverAuthConfigTypeServerAuthContext = new FieldAccessor<ServerAuthConfigType, List<ServerAuthContextType>>(ServerAuthConfigType.class, "serverAuthContext");
+    private final static FieldAccessor<ServerAuthConfigType, Map<String, ServerAuthContextType>> serverAuthConfigTypeServerAuthContext = new FieldAccessor<ServerAuthConfigType, Map<String, ServerAuthContextType>>(ServerAuthConfigType.class, "serverAuthContext");
+    private final static KeyedObjectMapAdapter<ServerAuthContextType> serverAuthContextMapAdapter = new KeyedObjectMapAdapter<ServerAuthContextType>(ServerAuthContextType.class);
 
     public ServerAuthConfigTypeJAXB() {
         super(ServerAuthConfigType.class, null, new QName("http://geronimo.apache.org/xml/ns/geronimo-jaspi".intern(), "serverAuthConfigType".intern()), ServerAuthContextTypeJAXB.class);
@@ -66,7 +70,7 @@ public class ServerAuthConfigTypeJAXB
         ServerAuthConfigType serverAuthConfigType = new ServerAuthConfigType();
         context.beforeUnmarshal(serverAuthConfigType, lifecycleCallback);
 
-        List<ServerAuthContextType> serverAuthContext = null;
+        List<ServerAuthContextType> serverAuthContextRaw = new ArrayList<ServerAuthContextType>();
 
         // Check xsi:type
         QName xsiType = reader.getXsiType();
@@ -104,20 +108,21 @@ public class ServerAuthConfigTypeJAXB
             } else if (("serverAuthContext" == elementReader.getLocalName())&&("http://geronimo.apache.org/xml/ns/geronimo-jaspi" == elementReader.getNamespaceURI())) {
                 // ELEMENT: serverAuthContext
                 ServerAuthContextType serverAuthContextItem = readServerAuthContextType(elementReader, context);
-                if (serverAuthContext == null) {
-                    serverAuthContext = serverAuthConfigTypeServerAuthContext.getObject(reader, context, serverAuthConfigType);
-                    if (serverAuthContext!= null) {
-                        serverAuthContext.clear();
-                    } else {
-                        serverAuthContext = new ArrayList<ServerAuthContextType>();
-                    }
-                }
-                serverAuthContext.add(serverAuthContextItem);
+//                if (serverAuthContextRaw == null) {
+//                    serverAuthContextRaw = serverAuthConfigTypeServerAuthContext.getObject(reader, context, serverAuthConfigType);
+//                    if (serverAuthContextRaw != null) {
+//                        serverAuthContextRaw.clear();
+//                    } else {
+//                        serverAuthContextRaw = new ArrayList<ServerAuthContextType>();
+//                    }
+//                }
+                serverAuthContextRaw.add(serverAuthContextItem);
             } else {
                 context.unexpectedElement(elementReader, new QName("http://geronimo.apache.org/xml/ns/geronimo-jaspi", "messageLayer"), new QName("http://geronimo.apache.org/xml/ns/geronimo-jaspi", "appContext"), new QName("http://geronimo.apache.org/xml/ns/geronimo-jaspi", "authenticationContextID"), new QName("http://geronimo.apache.org/xml/ns/geronimo-jaspi", "protected"), new QName("http://geronimo.apache.org/xml/ns/geronimo-jaspi", "serverAuthContext"));
             }
         }
-        if (serverAuthContext!= null) {
+        if (serverAuthContextRaw != null) {
+            Map<String, ServerAuthContextType> serverAuthContext = serverAuthContextMapAdapter.unmarshal(serverAuthContextRaw.toArray(new ServerAuthContextType[serverAuthContextRaw.size()]));
             serverAuthConfigTypeServerAuthContext.setObject(reader, context, serverAuthConfigType, serverAuthContext);
         }
 
@@ -180,7 +185,8 @@ public class ServerAuthConfigTypeJAXB
         writer.writeEndElement();
 
         // ELEMENT: serverAuthContext
-        List<ServerAuthContextType> serverAuthContext = serverAuthConfigTypeServerAuthContext.getObject(serverAuthConfigType, context, serverAuthConfigType);
+        Map<String, ServerAuthContextType> serverAuthContextMap = serverAuthConfigTypeServerAuthContext.getObject(serverAuthConfigType, context, serverAuthConfigType);
+        ServerAuthContextType[] serverAuthContext = serverAuthContextMapAdapter.marshal(serverAuthContextMap);
         if (serverAuthContext!= null) {
             for (ServerAuthContextType serverAuthContextItem: serverAuthContext) {
                 writer.writeStartElement(prefix, "serverAuthContext", "http://geronimo.apache.org/xml/ns/geronimo-jaspi");

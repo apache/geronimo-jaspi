@@ -3,6 +3,8 @@ package sxc.org.apache.geronimo.components.jaspi.model;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+
 import javax.xml.XMLConstants;
 import javax.xml.namespace.QName;
 import com.envoisolutions.sxc.jaxb.FieldAccessor;
@@ -14,6 +16,7 @@ import com.envoisolutions.sxc.util.XoXMLStreamReader;
 import com.envoisolutions.sxc.util.XoXMLStreamWriter;
 import org.apache.geronimo.components.jaspi.model.ClientAuthConfigType;
 import org.apache.geronimo.components.jaspi.model.ClientAuthContextType;
+import org.apache.geronimo.components.jaspi.model.KeyedObjectMapAdapter;
 
 
 import static sxc.org.apache.geronimo.components.jaspi.model.ClientAuthContextTypeJAXB.readClientAuthContextType;
@@ -32,7 +35,8 @@ public class ClientAuthConfigTypeJAXB
     private final static FieldAccessor<ClientAuthConfigType, String> clientAuthConfigTypeAppContext = new FieldAccessor<ClientAuthConfigType, String>(ClientAuthConfigType.class, "appContext");
     private final static FieldAccessor<ClientAuthConfigType, String> clientAuthConfigTypeAuthenticationContextID = new FieldAccessor<ClientAuthConfigType, String>(ClientAuthConfigType.class, "authenticationContextID");
     private final static FieldAccessor<ClientAuthConfigType, Boolean> clientAuthConfigType_protected = new FieldAccessor<ClientAuthConfigType, Boolean>(ClientAuthConfigType.class, "_protected");
-    private final static FieldAccessor<ClientAuthConfigType, List<ClientAuthContextType>> clientAuthConfigTypeClientAuthContext = new FieldAccessor<ClientAuthConfigType, List<ClientAuthContextType>>(ClientAuthConfigType.class, "clientAuthContext");
+    private final static FieldAccessor<ClientAuthConfigType, Map<String, ClientAuthContextType>> clientAuthConfigTypeClientAuthContext = new FieldAccessor<ClientAuthConfigType, Map<String, ClientAuthContextType>>(ClientAuthConfigType.class, "clientAuthContext");
+    private final static KeyedObjectMapAdapter<ClientAuthContextType> clientAuthContextMapAdapter = new KeyedObjectMapAdapter<ClientAuthContextType>(ClientAuthContextType.class);
 
     public ClientAuthConfigTypeJAXB() {
         super(ClientAuthConfigType.class, null, new QName("http://geronimo.apache.org/xml/ns/geronimo-jaspi".intern(), "clientAuthConfigType".intern()), ClientAuthContextTypeJAXB.class);
@@ -66,7 +70,7 @@ public class ClientAuthConfigTypeJAXB
         ClientAuthConfigType clientAuthConfigType = new ClientAuthConfigType();
         context.beforeUnmarshal(clientAuthConfigType, lifecycleCallback);
 
-        List<ClientAuthContextType> clientAuthContext = null;
+        List<ClientAuthContextType> clientAuthContextRaw = new ArrayList<ClientAuthContextType>();
 
         // Check xsi:type
         QName xsiType = reader.getXsiType();
@@ -104,20 +108,21 @@ public class ClientAuthConfigTypeJAXB
             } else if (("clientAuthContext" == elementReader.getLocalName())&&("http://geronimo.apache.org/xml/ns/geronimo-jaspi" == elementReader.getNamespaceURI())) {
                 // ELEMENT: clientAuthContext
                 ClientAuthContextType clientAuthContextItem = readClientAuthContextType(elementReader, context);
-                if (clientAuthContext == null) {
-                    clientAuthContext = clientAuthConfigTypeClientAuthContext.getObject(reader, context, clientAuthConfigType);
-                    if (clientAuthContext!= null) {
-                        clientAuthContext.clear();
-                    } else {
-                        clientAuthContext = new ArrayList<ClientAuthContextType>();
-                    }
-                }
-                clientAuthContext.add(clientAuthContextItem);
+//                if (clientAuthContextRaw == null) {
+//                    clientAuthContextRaw = clientAuthConfigTypeClientAuthContext.getObject(reader, context, clientAuthConfigType);
+//                    if (clientAuthContextRaw!= null) {
+//                        clientAuthContextRaw.clear();
+//                    } else {
+//                        clientAuthContextRaw = new ArrayList<ClientAuthContextType>();
+//                    }
+//                }
+                clientAuthContextRaw.add(clientAuthContextItem);
             } else {
                 context.unexpectedElement(elementReader, new QName("http://geronimo.apache.org/xml/ns/geronimo-jaspi", "messageLayer"), new QName("http://geronimo.apache.org/xml/ns/geronimo-jaspi", "appContext"), new QName("http://geronimo.apache.org/xml/ns/geronimo-jaspi", "authenticationContextID"), new QName("http://geronimo.apache.org/xml/ns/geronimo-jaspi", "protected"), new QName("http://geronimo.apache.org/xml/ns/geronimo-jaspi", "clientAuthContext"));
             }
         }
-        if (clientAuthContext!= null) {
+        if (clientAuthContextRaw != null) {
+            Map<String, ClientAuthContextType> clientAuthContext = clientAuthContextMapAdapter.unmarshal(clientAuthContextRaw.toArray(new ClientAuthContextType[clientAuthContextRaw.size()]));
             clientAuthConfigTypeClientAuthContext.setObject(reader, context, clientAuthConfigType, clientAuthContext);
         }
 
@@ -180,7 +185,8 @@ public class ClientAuthConfigTypeJAXB
         writer.writeEndElement();
 
         // ELEMENT: clientAuthContext
-        List<ClientAuthContextType> clientAuthContext = clientAuthConfigTypeClientAuthContext.getObject(clientAuthConfigType, context, clientAuthConfigType);
+        Map<String, ClientAuthContextType> clientAuthContextMap = clientAuthConfigTypeClientAuthContext.getObject(clientAuthConfigType, context, clientAuthConfigType);
+        ClientAuthContextType[] clientAuthContext = clientAuthContextMapAdapter.marshal(clientAuthContextMap);
         if (clientAuthContext!= null) {
             for (ClientAuthContextType clientAuthContextItem: clientAuthContext) {
                 writer.writeStartElement(prefix, "clientAuthContext", "http://geronimo.apache.org/xml/ns/geronimo-jaspi");

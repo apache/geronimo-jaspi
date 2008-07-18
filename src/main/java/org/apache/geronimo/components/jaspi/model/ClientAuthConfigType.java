@@ -9,19 +9,23 @@
 package org.apache.geronimo.components.jaspi.model;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.XmlTransient;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import javax.security.auth.message.config.ClientAuthConfig;
 import javax.security.auth.message.config.ClientAuthContext;
 import javax.security.auth.message.AuthException;
 import javax.security.auth.message.MessageInfo;
 import javax.security.auth.Subject;
+import javax.security.auth.callback.CallbackHandler;
+
+import org.apache.geronimo.components.jaspi.ClassLoaderLookup;
 
 
 /**
@@ -56,7 +60,7 @@ import javax.security.auth.Subject;
     "clientAuthContext"
 })
 public class ClientAuthConfigType
-    implements ClientAuthConfig, Serializable
+    implements Serializable, KeyedObject
 {
 
     private final static long serialVersionUID = 12343L;
@@ -65,7 +69,9 @@ public class ClientAuthConfigType
     protected String authenticationContextID;
     @XmlElement(name = "protected")
     protected boolean _protected;
-    protected List<ClientAuthContextType> clientAuthContext;
+    //TODO go back to a map
+    @XmlJavaTypeAdapter(KeyedObjectMapAdapter.class)
+    protected Map<String, ClientAuthContextType> clientAuthContext;
 
     /**
      * Gets the value of the messageLayer property.
@@ -101,19 +107,6 @@ public class ClientAuthConfigType
      */
     public String getAppContext() {
         return appContext;
-    }
-
-    public String getAuthContextID(MessageInfo messageInfo) throws IllegalArgumentException {
-        if (authenticationContextID != null) {
-            return authenticationContextID;
-        }
-        for (ClientAuthContextType clientAuthContextType: clientAuthContext) {
-            String authContextID = clientAuthContextType.getAuthenticationContextID(messageInfo);
-            if (authContextID != null) {
-                return authContextID;
-            }
-        }
-        return null;
     }
 
     /**
@@ -193,14 +186,87 @@ public class ClientAuthConfigType
      * 
      * 
      */
-    public List<ClientAuthContextType> getClientAuthContext() {
+    public Map<String, ClientAuthContextType> getClientAuthContext() {
         if (clientAuthContext == null) {
-            clientAuthContext = new ArrayList<ClientAuthContextType>();
+            clientAuthContext = new HashMap<String, ClientAuthContextType>();
         }
         return this.clientAuthContext;
     }
 
-    public ClientAuthContext getAuthContext(String authContextID, Subject clientSubject, Map properties) throws AuthException {
+
+    //TODO move to ClientAuthContextImpl
+    public String getAuthContextID(MessageInfo messageInfo) throws IllegalArgumentException {
+        if (authenticationContextID != null) {
+            return authenticationContextID;
+        }
+        for (ClientAuthContextType clientAuthContextType: clientAuthContext.values()) {
+            String authContextID = clientAuthContextType.getAuthenticationContextID(messageInfo);
+            if (authContextID != null) {
+                return authContextID;
+            }
+        }
         return null;
+    }
+
+    public String getKey() {
+        return ConfigProviderType.getRegistrationKey(messageLayer, appContext);
+    }
+
+    public void initialize(ClassLoaderLookup classLoaderLookup, CallbackHandler callbackHandler) throws AuthException {
+    }
+
+    public boolean isPersistent() {
+        return true;
+    }
+
+    public ClientAuthConfig newClientAuthConfig(String messageLayer, String appContext, ClassLoaderLookup classLoaderLookup, CallbackHandler callbackHandler) throws AuthException {
+        Map<String, ClientAuthContext> authContextMap = new HashMap<String, ClientAuthContext>();
+        for (ClientAuthContextType clientAuthContextType: getClientAuthContext().values()) {
+            if (clientAuthContextType.match(messageLayer, appContext)) {
+                ClientAuthContext clientAuthContext = clientAuthContextType.newClientAuthContext(classLoaderLookup, callbackHandler);
+                String authContextID = clientAuthContextType.getAuthenticationContextID();
+                if (authContextID == null) {
+                    authContextID = getAuthenticationContextID();
+                }
+                if (!authContextMap.containsKey(authContextID)) {
+                    authContextMap.put(authContextID,  clientAuthContext);
+                }
+            }
+        }
+        return new ClientAuthConfigImpl(this, authContextMap);
+    }
+
+    public static class ClientAuthConfigImpl implements ClientAuthConfig {
+
+        private final ClientAuthConfigType clientAuthConfigType;
+        private final Map<String, ClientAuthContext> clientAuthContextMap;
+
+        public ClientAuthConfigImpl(ClientAuthConfigType clientAuthConfigType, Map<String, ClientAuthContext> clientAuthContextMap) {
+            this.clientAuthConfigType = clientAuthConfigType;
+            this.clientAuthContextMap = clientAuthContextMap;
+        }
+
+        public ClientAuthContext getAuthContext(String authContextID, Subject clientSubject, Map properties) throws AuthException {
+            return clientAuthContextMap.get(authContextID);
+        }
+
+        public String getAppContext() {
+            return clientAuthConfigType.getAppContext();
+        }
+
+        public String getAuthContextID(MessageInfo messageInfo) throws IllegalArgumentException {
+            return clientAuthConfigType.getAuthContextID(messageInfo);
+        }
+
+        public String getMessageLayer() {
+            return clientAuthConfigType.getMessageLayer();
+        }
+
+        public boolean isProtected() {
+            return clientAuthConfigType.isProtected();
+        }
+
+        public void refresh() throws AuthException, SecurityException {
+        }
     }
 }
