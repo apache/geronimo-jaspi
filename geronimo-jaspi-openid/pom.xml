@@ -1,0 +1,28 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.apache.geronimo.components</groupId>
+        <artifactId>geronimo-jaspi-parent</artifactId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+
+  <artifactId>geronimo-jaspi-openid</artifactId>
+  <name>geronimo-jaspi-openid</name>
+  <dependencies>
+      <dependency>
+          <groupId>org.apache.geronimo.specs</groupId>
+          <artifactId>geronimo-jaspi_1.0_spec</artifactId>
+      </dependency>
+      <dependency>
+          <groupId>org.openid4java</groupId>
+          <artifactId>openid4java-consumer</artifactId>
+          <version>0.9.5-SNAPSHOT</version>
+      </dependency>
+      <dependency>
+          <groupId>org.apache.geronimo.specs</groupId>
+          <artifactId>geronimo-servlet_3.0_spec</artifactId>
+          <version>1.0-EA-SNAPSHOT</version>
+      </dependency>
+  </dependencies>
+</project>
