@@ -21,7 +21,7 @@
 package org.apache.geronimo.components.jaspi;
 
 /**
- * @version $Rev:$ $Date:$
+ * @version $Rev$ $Date$
  */
 public interface ClassLoaderLookup {
 

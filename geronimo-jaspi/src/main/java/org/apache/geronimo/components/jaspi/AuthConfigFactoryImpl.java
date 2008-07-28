@@ -40,7 +40,10 @@ import org.apache.geronimo.components.jaspi.model.JaspiXmlUtil;
 import org.xml.sax.SAXException;
 
 /**
- * Implementation of the AuthConfigFactory. 
+ * Implementation of the AuthConfigFactory.
+ *
+ *
+ * @version $Rev: $ $Date: $
  */
 public class AuthConfigFactoryImpl extends AuthConfigFactory {
 
