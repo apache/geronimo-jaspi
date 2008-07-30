@@ -47,8 +47,8 @@ import org.xml.sax.SAXException;
  */
 public class AuthConfigFactoryImpl extends AuthConfigFactory {
 
-    private static final File DEFAULT_CONFIG_FILE = new File("config/jaspi.xml");
-    public static File staticConfigFile = DEFAULT_CONFIG_FILE;
+//    private static final File DEFAULT_CONFIG_FILE = new File("config/jaspi.xml");
+    public static File staticConfigFile;// = DEFAULT_CONFIG_FILE;
     public static CallbackHandler staticCallbackHandler;
 
     private static ClassLoader contextClassLoader;
@@ -76,12 +76,7 @@ public class AuthConfigFactoryImpl extends AuthConfigFactory {
     }
 
     public AuthConfigFactoryImpl() throws AuthException {
-        this(new ClassLoaderLookup() {
-
-            public ClassLoader getClassLoader(String name) {
-                return contextClassLoader;
-            }
-        }, staticCallbackHandler, staticConfigFile);
+        this(new ConstantClassLoaderLookup(contextClassLoader), staticCallbackHandler, staticConfigFile);
     }
     
     public synchronized String[] detachListener(RegistrationListener listener, String layer, String appContext) throws SecurityException {
@@ -233,6 +228,7 @@ public class AuthConfigFactoryImpl extends AuthConfigFactory {
     }
     
     private void loadConfig() throws AuthException {
+        if (configFile != null) {
         try {
             FileReader in = new FileReader(configFile);
             try {
@@ -251,22 +247,25 @@ public class AuthConfigFactoryImpl extends AuthConfigFactory {
         } catch (XMLStreamException e) {
             throw (AuthException)new AuthException("Could not read config").initCause(e);
         }
+        }
     }
     
     private void saveConfig() throws AuthException {
-        try {
-            FileWriter out = new FileWriter(configFile);
+        if (configFile != null) {
             try {
-                JaspiXmlUtil.writeJaspi(jaspiType, out);
-            } finally {
-                out.close();
+                FileWriter out = new FileWriter(configFile);
+                try {
+                    JaspiXmlUtil.writeJaspi(jaspiType, out);
+                } finally {
+                    out.close();
+                }
+            } catch (IOException e) {
+                throw (AuthException)new AuthException("Could not write config").initCause(e);
+            } catch (XMLStreamException e) {
+                throw (AuthException)new AuthException("Could not write config").initCause(e);
+            } catch (JAXBException e) {
+                throw (AuthException)new AuthException("Could not write config").initCause(e);
             }
-        } catch (IOException e) {
-            throw (AuthException)new AuthException("Could not write config").initCause(e);
-        } catch (XMLStreamException e) {
-            throw (AuthException)new AuthException("Could not write config").initCause(e);
-        } catch (JAXBException e) {
-            throw (AuthException)new AuthException("Could not write config").initCause(e);
         }
     }
     

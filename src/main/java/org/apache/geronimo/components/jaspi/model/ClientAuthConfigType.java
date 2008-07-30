@@ -27,6 +27,7 @@ package org.apache.geronimo.components.jaspi.model;
 import java.io.Serializable;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.Collections;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -89,6 +90,18 @@ public class ClientAuthConfigType
     //TODO go back to a map
     @XmlJavaTypeAdapter(KeyedObjectMapAdapter.class)
     protected Map<String, ClientAuthContextType> clientAuthContext;
+
+
+    public ClientAuthConfigType() {
+    }
+
+    public ClientAuthConfigType(ClientAuthContextType clientAuthContextType, boolean _protected) {
+        this.messageLayer = clientAuthContextType.getMessageLayer();
+        this.appContext = clientAuthContextType.getAppContext();
+        this.authenticationContextID = clientAuthContextType.getAuthenticationContextID();
+        this.clientAuthContext = Collections.singletonMap(clientAuthContextType.getKey(), clientAuthContextType);
+        this._protected = _protected;
+    }
 
     /**
      * Gets the value of the messageLayer property.

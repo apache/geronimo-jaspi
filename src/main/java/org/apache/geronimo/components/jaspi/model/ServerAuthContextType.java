@@ -27,6 +27,7 @@ package org.apache.geronimo.components.jaspi.model;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Collections;
 
 import javax.security.auth.Subject;
 import javax.security.auth.callback.CallbackHandler;
@@ -85,6 +86,17 @@ public class ServerAuthContextType
 
     @XmlTransient
     private ServerAuthContext serverAuthContext;
+
+
+    public ServerAuthContextType() {
+    }
+
+    public ServerAuthContextType(String messageLayer, String appContext, String authenticationContextID, AuthModuleType<ServerAuthModule> serverAuthModule) {
+        this.messageLayer = messageLayer;
+        this.appContext = appContext;
+        this.authenticationContextID = authenticationContextID;
+        this.serverAuthModule = Collections.singletonList(serverAuthModule);
+    }
 
     /**
      * Gets the value of the messageLayer property.

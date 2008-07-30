@@ -20,8 +20,11 @@ import java.io.File;
 import java.net.URL;
 
 import javax.security.auth.message.AuthException;
+import javax.security.auth.message.module.ClientAuthModule;
+import javax.security.auth.message.module.ServerAuthModule;
 import javax.security.auth.message.config.AuthConfigFactory;
 import javax.security.auth.message.config.RegistrationListener;
+import javax.security.auth.message.config.AuthConfigProvider;
 import javax.security.auth.message.config.AuthConfigFactory.RegistrationContext;
 import javax.security.auth.callback.CallbackHandler;
 
@@ -30,6 +33,10 @@ import junit.framework.TestCase;
 import org.apache.geronimo.components.jaspi.providers.BadConstructorProvider;
 import org.apache.geronimo.components.jaspi.providers.BadImplementProvider;
 import org.apache.geronimo.components.jaspi.providers.DummyProvider;
+import org.apache.geronimo.components.jaspi.providers.DummyClientAuthModule;
+import org.apache.geronimo.components.jaspi.providers.DummyServerAuthModule;
+import org.apache.geronimo.components.jaspi.model.AuthModuleType;
+import org.apache.geronimo.components.jaspi.model.JaspiUtil;
 
 public class AuthConfigFactoryImplTest extends TestCase {
 
@@ -149,6 +156,33 @@ public class AuthConfigFactoryImplTest extends TestCase {
         factory.removeRegistration(regId);
         assertTrue(listener.notified);
     }
+
+    public void testWrapClientAuthModule() throws Exception {
+        AuthConfigFactory factory = AuthConfigFactory.getFactory();
+        AuthModuleType<ClientAuthModule> authModuleType = new AuthModuleType<ClientAuthModule>();
+        authModuleType.setClassName(DummyClientAuthModule.class.getName());
+        ClassLoaderLookup classLoaderLookup = new ConstantClassLoaderLookup(getClass().getClassLoader());
+        AuthConfigProvider authConfigProvider = JaspiUtil.wrapClientAuthModule("layer", "appContext1", "id", authModuleType, true, classLoaderLookup, null);
+        String regId = factory.registerConfigProvider(authConfigProvider, "layer", "appContext1", "description");
+        DummyListener listener = new DummyListener();
+        assertNotNull(factory.getConfigProvider("layer", "appContext1", listener));
+        factory.removeRegistration(regId);
+        assertTrue(listener.notified);
+    }
+    
+    public void testWrapServerAuthModule() throws Exception {
+        AuthConfigFactory factory = AuthConfigFactory.getFactory();
+        AuthModuleType<ServerAuthModule> authModuleType = new AuthModuleType<ServerAuthModule>();
+        authModuleType.setClassName(DummyServerAuthModule.class.getName());
+        ClassLoaderLookup classLoaderLookup = new ConstantClassLoaderLookup(getClass().getClassLoader());
+        AuthConfigProvider authConfigProvider = JaspiUtil.wrapServerAuthModule("layer", "appContext1", "id", authModuleType, true, classLoaderLookup, null);
+        String regId = factory.registerConfigProvider(authConfigProvider, "layer", "appContext1", "description");
+        DummyListener listener = new DummyListener();
+        assertNotNull(factory.getConfigProvider("layer", "appContext1", listener));
+        factory.removeRegistration(regId);
+        assertTrue(listener.notified);
+    }
+
     
     public static class DummyListener implements RegistrationListener {
         public boolean notified = true;

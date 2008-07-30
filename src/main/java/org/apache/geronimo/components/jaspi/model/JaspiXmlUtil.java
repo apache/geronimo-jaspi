@@ -45,12 +45,12 @@ import org.apache.geronimo.components.jaspi.ClassLoaderLookup;
 public class JaspiXmlUtil {
     public static final XMLInputFactory XMLINPUT_FACTORY = XMLInputFactory.newInstance();
     public static final JAXBContext JASPI_CONTEXT;
-    private static KeyedObjectMapAdapter configProviderMapAdapter = new KeyedObjectMapAdapter(ConfigProviderType.class);
+//    private static KeyedObjectMapAdapter configProviderMapAdapter = new KeyedObjectMapAdapter(ConfigProviderType.class);
 
     static {
         try {
 //            JASPI_CONTEXT = JAXBContext.newInstance(JaspiType.class);
-            JASPI_CONTEXT = com.envoisolutions.sxc.jaxb.JAXBContextImpl.newInstance(new Class[] {JaspiType.class}, Collections.singletonMap("com.envoisolutions.sxc.generate", "false"));
+            JASPI_CONTEXT = com.envoisolutions.sxc.jaxb.JAXBContextImpl.newInstance(new Class[] {JaspiType.class, ConfigProviderType.class, ClientAuthConfigType.class, ClientAuthContextType.class, ServerAuthConfigType.class, ServerAuthContextType.class, AuthModuleType.class}, Collections.singletonMap("com.envoisolutions.sxc.generate", "false"));
 
         } catch (JAXBException e) {
             throw new RuntimeException("Could not create jaxb contexts for plugin types", e);
@@ -63,26 +63,127 @@ public class JaspiXmlUtil {
         KeyedObjectMapAdapter.staticCallbackHandler = callbackHandler;
     }
 
-    public static void writeJaspi(JaspiType metadata, Writer out) throws XMLStreamException, JAXBException {
+    public static <T> void write(JAXBElement<T> element, Writer out) throws JAXBException {
         Marshaller marshaller = JASPI_CONTEXT.createMarshaller();
-        marshaller.setAdapter(configProviderMapAdapter);
         marshaller.setProperty("jaxb.formatted.output", true);
-        JAXBElement<JaspiType> element = new ObjectFactory().createJaspi(metadata);
         marshaller.marshal(element, out);
     }
 
+    public static <T>T load(Reader in, Class<T> clazz) throws ParserConfigurationException, IOException, SAXException, JAXBException, XMLStreamException {
+        XMLStreamReader xmlStream = XMLINPUT_FACTORY.createXMLStreamReader(in);
+        return load(xmlStream, clazz);
+    }
+
+    public static <T>T load(XMLStreamReader in, Class<T> clazz) throws ParserConfigurationException, IOException, SAXException, JAXBException, XMLStreamException {
+        Unmarshaller unmarshaller = JASPI_CONTEXT.createUnmarshaller();
+        JAXBElement<T> element = unmarshaller.unmarshal(in, clazz);
+        return element.getValue();
+    }
+
+    public static void writeJaspi(JaspiType metadata, Writer out) throws XMLStreamException, JAXBException {
+        write(new ObjectFactory().createJaspi(metadata), out);
+    }
 
     public static JaspiType loadJaspi(Reader in) throws ParserConfigurationException, IOException, SAXException, JAXBException, XMLStreamException {
-        XMLStreamReader xmlStream = XMLINPUT_FACTORY.createXMLStreamReader(in);
-        return loadJaspi(xmlStream);
+        return load(in, JaspiType.class);
     }
 
     public static JaspiType loadJaspi(XMLStreamReader in) throws ParserConfigurationException, IOException, SAXException, JAXBException, XMLStreamException {
-        Unmarshaller unmarshaller = JASPI_CONTEXT.createUnmarshaller();
-        unmarshaller.setAdapter(configProviderMapAdapter);
-        JAXBElement<JaspiType> element = unmarshaller.unmarshal(in, JaspiType.class);
-        JaspiType rbac = element.getValue();
-        return rbac;
+        return load(in, JaspiType.class);
     }
+
+    public static void writeConfigProvider(ConfigProviderType metadata, Writer out) throws XMLStreamException, JAXBException {
+        write(new ObjectFactory().createConfigProvider(metadata), out);
+    }
+
+    public static ConfigProviderType loadConfigProvider(Reader in) throws ParserConfigurationException, IOException, SAXException, JAXBException, XMLStreamException {
+        return load(in, ConfigProviderType.class);
+    }
+
+    public static ConfigProviderType loadConfigProvider(XMLStreamReader in) throws ParserConfigurationException, IOException, SAXException, JAXBException, XMLStreamException {
+        return load(in, ConfigProviderType.class);
+    }
+
+
+    public static void writeClientAuthConfig(ClientAuthConfigType metadata, Writer out) throws XMLStreamException, JAXBException {
+        write(new ObjectFactory().createClientAuthConfig(metadata), out);
+    }
+
+    public static ClientAuthConfigType loadClientAuthConfig(Reader in) throws ParserConfigurationException, IOException, SAXException, JAXBException, XMLStreamException {
+        return load(in, ClientAuthConfigType.class);
+    }
+
+    public static ClientAuthConfigType loadClientAuthConfig(XMLStreamReader in) throws ParserConfigurationException, IOException, SAXException, JAXBException, XMLStreamException {
+        return load(in, ClientAuthConfigType.class);
+    }
+
+
+    public static void writeClientAuthContext(ClientAuthContextType metadata, Writer out) throws XMLStreamException, JAXBException {
+        write(new ObjectFactory().createClientAuthContext(metadata), out);
+    }
+
+    public static ClientAuthContextType loadClientAuthContext(Reader in) throws ParserConfigurationException, IOException, SAXException, JAXBException, XMLStreamException {
+        return load(in, ClientAuthContextType.class);
+    }
+
+    public static ClientAuthContextType loadClientAuthContext(XMLStreamReader in) throws ParserConfigurationException, IOException, SAXException, JAXBException, XMLStreamException {
+        return load(in, ClientAuthContextType.class);
+    }
+
+    
+    public static void writeClientAuthModule(AuthModuleType metadata, Writer out) throws XMLStreamException, JAXBException {
+        write(new ObjectFactory().createClientAuthModule(metadata), out);
+    }
+
+    public static AuthModuleType loadClientAuthModule(Reader in) throws ParserConfigurationException, IOException, SAXException, JAXBException, XMLStreamException {
+        return load(in, AuthModuleType.class);
+    }
+
+    public static AuthModuleType loadClientAuthModule(XMLStreamReader in) throws ParserConfigurationException, IOException, SAXException, JAXBException, XMLStreamException {
+        return load(in, AuthModuleType.class);
+    }
+
+
+
+    public static void writeServerAuthConfig(ServerAuthConfigType metadata, Writer out) throws XMLStreamException, JAXBException {
+        write(new ObjectFactory().createServerAuthConfig(metadata), out);
+    }
+
+    public static ServerAuthConfigType loadServerAuthConfig(Reader in) throws ParserConfigurationException, IOException, SAXException, JAXBException, XMLStreamException {
+        return load(in, ServerAuthConfigType.class);
+    }
+
+    public static ServerAuthConfigType loadServerAuthConfig(XMLStreamReader in) throws ParserConfigurationException, IOException, SAXException, JAXBException, XMLStreamException {
+        return load(in, ServerAuthConfigType.class);
+    }
+
+
+    public static void writeServerAuthContext(ServerAuthContextType metadata, Writer out) throws XMLStreamException, JAXBException {
+        write(new ObjectFactory().createServerAuthContext(metadata), out);
+    }
+
+    public static ServerAuthContextType loadServerAuthContext(Reader in) throws ParserConfigurationException, IOException, SAXException, JAXBException, XMLStreamException {
+        return load(in, ServerAuthContextType.class);
+    }
+
+    public static ServerAuthContextType loadServerAuthContext(XMLStreamReader in) throws ParserConfigurationException, IOException, SAXException, JAXBException, XMLStreamException {
+        return load(in, ServerAuthContextType.class);
+    }
+
+
+    public static void writeServerAuthModule(AuthModuleType metadata, Writer out) throws XMLStreamException, JAXBException {
+        write(new ObjectFactory().createServerAuthModule(metadata), out);
+    }
+
+    public static AuthModuleType loadServerAuthModule(Reader in) throws ParserConfigurationException, IOException, SAXException, JAXBException, XMLStreamException {
+        return load(in, AuthModuleType.class);
+    }
+
+    public static AuthModuleType loadServerAuthModule(XMLStreamReader in) throws ParserConfigurationException, IOException, SAXException, JAXBException, XMLStreamException {
+        return load(in, AuthModuleType.class);
+    }
+
+
+
 
 }
