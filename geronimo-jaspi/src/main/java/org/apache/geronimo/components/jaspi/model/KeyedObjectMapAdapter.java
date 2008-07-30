@@ -30,6 +30,7 @@ import javax.xml.bind.annotation.adapters.XmlAdapter;
 import javax.security.auth.callback.CallbackHandler;
 
 import org.apache.geronimo.components.jaspi.ClassLoaderLookup;
+import org.apache.geronimo.components.jaspi.ConstantClassLoaderLookup;
 
 /**
  * @version $Rev$ $Date$
@@ -53,12 +54,7 @@ public class KeyedObjectMapAdapter<T extends KeyedObject> extends XmlAdapter<T[]
         } else {
             ClassLoader testLoader = Thread.currentThread().getContextClassLoader();
             final ClassLoader cl = testLoader == null ? KeyedObjectMapAdapter.class.getClassLoader() : testLoader;
-            classLoaderLookup = new ClassLoaderLookup() {
-
-                public ClassLoader getClassLoader(String name) {
-                    return cl;
-                }
-            };
+            classLoaderLookup = new ConstantClassLoaderLookup(cl);
         }
         this.type = type;
         callbackHandler = staticCallbackHandler;

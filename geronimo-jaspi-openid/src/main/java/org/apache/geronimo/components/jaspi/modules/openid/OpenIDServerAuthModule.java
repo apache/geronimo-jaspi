@@ -23,6 +23,7 @@ package org.apache.geronimo.components.jaspi.modules.openid;
 import java.util.Map;
 import java.util.List;
 import java.io.IOException;
+import java.net.URL;
 
 import javax.security.auth.message.module.ServerAuthModule;
 import javax.security.auth.message.MessagePolicy;
@@ -52,7 +53,7 @@ import org.openid4java.message.AuthRequest;
 import org.openid4java.message.ParameterList;
 
 /**
- * @version $Rev:$ $Date:$
+ * @version $Rev$ $Date$
  */
 public class OpenIDServerAuthModule implements ServerAuthModule {
 
@@ -140,6 +141,9 @@ public class OpenIDServerAuthModule implements ServerAuthModule {
             final IdentifierPrincipal principal = new IdentifierPrincipal(identifier.getIdentifier());
             clientSubject.getPrincipals().add(principal);
             clientSubject.getPrincipals().add(new AuthenticatedPrincipal());
+            DiscoveryInformation discovered = (DiscoveryInformation) session.getAttribute(DISCOVERY_SESSION_KEY);
+            URL opEndpoint = discovered.getOPEndpoint();
+            clientSubject.getPrincipals().add(new OpenIDProviderPrincipal(opEndpoint.toString()));
             CallerPrincipalCallback cpCallback = new CallerPrincipalCallback(clientSubject, principal);
             GroupPrincipalCallback gpCallback = new GroupPrincipalCallback(clientSubject, new String[] {"authenticated"});
             try {

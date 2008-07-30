@@ -355,7 +355,7 @@ public class ConfigProviderType
 
     public void initialize(ClassLoaderLookup classLoaderLookup, CallbackHandler callbackHandler) throws AuthException {
         if (className == null) {
-            provider = new ConfigProviderImpl(this, classLoaderLookup);
+            provider = new ConfigProviderImpl(getClientAuthConfig(), getServerAuthConfig(), classLoaderLookup);
         } else {
             final ClassLoader classLoader = classLoaderLookup.getClassLoader(classLoaderName);
             try {
@@ -391,12 +391,15 @@ public class ConfigProviderType
 
     public static class ConfigProviderImpl implements AuthConfigProvider {
 
-        private final ConfigProviderType configProviderType;
+//        private final ConfigProviderType configProviderType;
         private final ClassLoaderLookup classLoaderLookup;
+        private final Map<String, ClientAuthConfigType> clientConfigTypeMap;
+        private final Map<String, ServerAuthConfigType> serverAuthConfigMap;
 
-        public ConfigProviderImpl(ConfigProviderType configProviderType, ClassLoaderLookup classLoaderLookup) {
-            this.configProviderType = configProviderType;
+        public ConfigProviderImpl(Map<String, ClientAuthConfigType> clientConfigTypeMap, Map<String, ServerAuthConfigType> serverAuthConfigMap, ClassLoaderLookup classLoaderLookup) {
             this.classLoaderLookup = classLoaderLookup;
+            this.clientConfigTypeMap = clientConfigTypeMap;
+            this.serverAuthConfigMap = serverAuthConfigMap;
         }
 
         /**
@@ -415,16 +418,15 @@ public class ConfigProviderType
             if (appContext == null) {
                 throw new NullPointerException("appContext");
             }
-            final Map<String, ClientAuthConfigType> configTypeMap = configProviderType.getClientAuthConfig();
-            ClientAuthConfigType ctx = configTypeMap.get(getRegistrationKey(layer, appContext));
+            ClientAuthConfigType ctx = clientConfigTypeMap.get(getRegistrationKey(layer, appContext));
             if (ctx == null) {
-                ctx = configTypeMap.get(getRegistrationKey(null, appContext));
+                ctx = clientConfigTypeMap.get(getRegistrationKey(null, appContext));
             }
             if (ctx == null) {
-                ctx = configTypeMap.get(getRegistrationKey(layer, null));
+                ctx = clientConfigTypeMap.get(getRegistrationKey(layer, null));
             }
             if (ctx == null) {
-                ctx = configTypeMap.get(getRegistrationKey(null, null));
+                ctx = clientConfigTypeMap.get(getRegistrationKey(null, null));
             }
             if (ctx != null) {
                 
@@ -440,15 +442,15 @@ public class ConfigProviderType
             if (appContext == null) {
                 throw new NullPointerException("appContext");
             }
-            ServerAuthConfigType ctx = configProviderType.getServerAuthConfig().get(getRegistrationKey(layer, appContext));
+            ServerAuthConfigType ctx = serverAuthConfigMap.get(getRegistrationKey(layer, appContext));
             if (ctx == null) {
-                ctx = configProviderType.getServerAuthConfig().get(getRegistrationKey(null, appContext));
+                ctx = serverAuthConfigMap.get(getRegistrationKey(null, appContext));
             }
             if (ctx == null) {
-                ctx = configProviderType.getServerAuthConfig().get(getRegistrationKey(layer, null));
+                ctx = serverAuthConfigMap.get(getRegistrationKey(layer, null));
             }
             if (ctx == null) {
-                ctx = configProviderType.getServerAuthConfig().get(getRegistrationKey(null, null));
+                ctx = serverAuthConfigMap.get(getRegistrationKey(null, null));
             }
             if (ctx != null) {
 

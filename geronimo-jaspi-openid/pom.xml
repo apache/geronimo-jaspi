@@ -44,5 +44,18 @@
           <artifactId>geronimo-servlet_3.0_spec</artifactId>
           <version>1.0-EA-SNAPSHOT</version>
       </dependency>
+
+      <dependency>
+          <groupId>org.apache.geronimo.components</groupId>
+          <artifactId>geronimo-jaspi</artifactId>
+          <version>${version}</version>
+          <scope>test</scope>
+      </dependency>
+      <dependency>
+          <groupId>org.testng</groupId>
+          <artifactId>testng</artifactId>
+          <classifier>jdk15</classifier>
+          <scope>test</scope>
+      </dependency>
   </dependencies>
 </project>

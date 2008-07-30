@@ -49,6 +49,56 @@
         </xs:annotation>
     </xs:element>
 
+    <xs:element name="configProvider" type="jaspi:configProviderType">
+        <xs:annotation>
+            <xs:documentation>
+                Configuration of a single configProvider element
+            </xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="clientAuthConfig" type="jaspi:clientAuthConfigType">
+        <xs:annotation>
+            <xs:documentation>
+                Configuration of a single clientAuthConfig element
+            </xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="clientAuthContext" type="jaspi:clientAuthContextType">
+        <xs:annotation>
+            <xs:documentation>
+                Configuration of a single clientAuthContext element
+            </xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="clientAuthModule" type="jaspi:authModuleType">
+        <xs:annotation>
+            <xs:documentation>
+                Configuration of a single clientAuthModule element
+            </xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="serverAuthConfig" type="jaspi:serverAuthConfigType">
+        <xs:annotation>
+            <xs:documentation>
+                Configuration of a single serverAuthConfig element
+            </xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="serverAuthContext" type="jaspi:serverAuthContextType">
+        <xs:annotation>
+            <xs:documentation>
+                Configuration of a single serverAuthContext element
+            </xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="serverAuthModule" type="jaspi:authModuleType">
+        <xs:annotation>
+            <xs:documentation>
+                Configuration of a single serverAuthModule element
+            </xs:documentation>
+        </xs:annotation>
+    </xs:element>
+
     <xs:complexType name="jaspiType">
         <xs:sequence>
             <xs:element name="configProvider" type="jaspi:configProviderType" minOccurs="0" maxOccurs="unbounded">
