@@ -33,7 +33,7 @@ import org.apache.geronimo.components.jaspi.model.AuthModuleType;
 import org.testng.annotations.Test;
 
 /**
- * @version $Rev:$ $Date:$
+ * @version $Rev$ $Date$
  */
 public class OpenIDServerAuthModuleTest {
 
@@ -44,7 +44,7 @@ public class OpenIDServerAuthModuleTest {
         AuthConfigFactory factory1 = AuthConfigFactory.getFactory();
         AuthModuleType<ServerAuthModule> authModuleType = new AuthModuleType<ServerAuthModule>();
         authModuleType.setClassName(OpenIDServerAuthModule.class.getName());
-        AuthConfigProvider authConfigProvider = JaspiUtil.wrapServerAuthModule("Http", "testApp", "id", authModuleType, true, new ConstantClassLoaderLookup(getClass().getClassLoader()), callbackHandler);
+        AuthConfigProvider authConfigProvider = JaspiUtil.wrapServerAuthModule("Http", "testApp", "id", authModuleType, true, new ConstantClassLoaderLookup(getClass().getClassLoader()));
         factory1.registerConfigProvider(authConfigProvider, "Http", "testApp", "description");
         AuthConfigProvider authConfigProvider2 = factory1.getConfigProvider("Http", "testApp", null);
         ServerAuthConfig serverAuthConfig = authConfigProvider2.getServerAuthConfig("Http", "testApp", callbackHandler);

@@ -256,7 +256,7 @@ public class ServerAuthContextType
                 if (result == AuthStatus.SEND_CONTINUE || result == AuthStatus.SEND_FAILURE) {
                     return result;
                 }
-                throw new AuthException("Invalid AuthStatus " + result + " from server auth module: " + serverAuthModule);
+                throw new AuthException("Invalid AuthStatus " + result + " from server auth module secureResponse: " + serverAuthModule);
             }
             return AuthStatus.SEND_SUCCESS;
         }
@@ -272,7 +272,7 @@ public class ServerAuthContextType
                 if (result == AuthStatus.SEND_SUCCESS || result == AuthStatus.SEND_CONTINUE || result == AuthStatus.FAILURE) {
                     return result;
                 }
-                throw new AuthException("Invalid AuthStatus " + result + " from server auth module: " + serverAuthModule);
+                throw new AuthException("Invalid AuthStatus " + result + " from server auth module validateRequest: " + serverAuthModule);
             }
             return AuthStatus.SUCCESS;
         }

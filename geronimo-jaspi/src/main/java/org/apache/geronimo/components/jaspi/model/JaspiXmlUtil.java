@@ -35,6 +35,8 @@ import javax.xml.bind.JAXBElement;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.security.auth.callback.CallbackHandler;
+import javax.security.auth.message.module.ServerAuthModule;
+import javax.security.auth.message.module.ClientAuthModule;
 
 import org.xml.sax.SAXException;
 import org.apache.geronimo.components.jaspi.ClassLoaderLookup;
@@ -71,13 +73,31 @@ public class JaspiXmlUtil {
 
     public static <T>T load(Reader in, Class<T> clazz) throws ParserConfigurationException, IOException, SAXException, JAXBException, XMLStreamException {
         XMLStreamReader xmlStream = XMLINPUT_FACTORY.createXMLStreamReader(in);
-        return load(xmlStream, clazz);
+        try {
+            return load(xmlStream, clazz);
+        } finally {
+            xmlStream.close();
+        }
+    }
+
+    public static Object untypedLoad(Reader in) throws ParserConfigurationException, IOException, SAXException, JAXBException, XMLStreamException {
+        XMLStreamReader xmlStream = XMLINPUT_FACTORY.createXMLStreamReader(in);
+        try {
+            return untypedLoad(xmlStream);
+        } finally {
+            xmlStream.close();
+        }
     }
 
     public static <T>T load(XMLStreamReader in, Class<T> clazz) throws ParserConfigurationException, IOException, SAXException, JAXBException, XMLStreamException {
         Unmarshaller unmarshaller = JASPI_CONTEXT.createUnmarshaller();
         JAXBElement<T> element = unmarshaller.unmarshal(in, clazz);
         return element.getValue();
+    }
+
+    public static Object untypedLoad(XMLStreamReader in) throws ParserConfigurationException, IOException, SAXException, JAXBException, XMLStreamException {
+        Unmarshaller unmarshaller = JASPI_CONTEXT.createUnmarshaller();
+        return unmarshaller.unmarshal(in);
     }
 
     public static void writeJaspi(JaspiType metadata, Writer out) throws XMLStreamException, JAXBException {
@@ -135,11 +155,11 @@ public class JaspiXmlUtil {
         write(new ObjectFactory().createClientAuthModule(metadata), out);
     }
 
-    public static AuthModuleType loadClientAuthModule(Reader in) throws ParserConfigurationException, IOException, SAXException, JAXBException, XMLStreamException {
+    public static AuthModuleType<ClientAuthModule> loadClientAuthModule(Reader in) throws ParserConfigurationException, IOException, SAXException, JAXBException, XMLStreamException {
         return load(in, AuthModuleType.class);
     }
 
-    public static AuthModuleType loadClientAuthModule(XMLStreamReader in) throws ParserConfigurationException, IOException, SAXException, JAXBException, XMLStreamException {
+    public static AuthModuleType<ClientAuthModule> loadClientAuthModule(XMLStreamReader in) throws ParserConfigurationException, IOException, SAXException, JAXBException, XMLStreamException {
         return load(in, AuthModuleType.class);
     }
 
@@ -175,11 +195,11 @@ public class JaspiXmlUtil {
         write(new ObjectFactory().createServerAuthModule(metadata), out);
     }
 
-    public static AuthModuleType loadServerAuthModule(Reader in) throws ParserConfigurationException, IOException, SAXException, JAXBException, XMLStreamException {
+    public static AuthModuleType<ServerAuthModule> loadServerAuthModule(Reader in) throws ParserConfigurationException, IOException, SAXException, JAXBException, XMLStreamException {
         return load(in, AuthModuleType.class);
     }
 
-    public static AuthModuleType loadServerAuthModule(XMLStreamReader in) throws ParserConfigurationException, IOException, SAXException, JAXBException, XMLStreamException {
+    public static AuthModuleType<ServerAuthModule> loadServerAuthModule(XMLStreamReader in) throws ParserConfigurationException, IOException, SAXException, JAXBException, XMLStreamException {
         return load(in, AuthModuleType.class);
     }
 
