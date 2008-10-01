@@ -343,6 +343,7 @@
     </build>
 
     <repositories>
+        <!--  repo for jaxb dependencies -->
         <repository>
             <id>java.net</id>
             <url>http://download.java.net/maven/1/</url>
@@ -352,6 +353,18 @@
             </snapshots>
             <releases>
                 <enabled>true</enabled>
+            </releases>
+        </repository>
+        <!--  repo for openid dependencies -->
+        <repository>
+            <id>alchim.sourceforce</id>
+            <url>http://alchim.sourceforge.net/download/snapshots/</url>
+            <layout>default</layout>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+            <releases>
+                <enabled>false</enabled>
             </releases>
         </repository>
     </repositories>
