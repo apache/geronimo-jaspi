@@ -64,6 +64,7 @@ public class OpenIDServerAuthModule implements ServerAuthModule {
     private static final String DISCOVERY_SESSION_KEY = "openid-disc";
     private static final String RETURN_ADDRESS = "/_openid_security_check";
     private static final String ORIGINAL_URI_KEY = "org.apache.geronimo.components.jaspi.openid.URI";
+    private static final String RETURN_ADDRESS_KEY = "org.apache.geronimo.components.jaspi.openid.return.address";
 
     private CallbackHandler callbackHandler;
     private ConsumerManager consumerManager;
@@ -74,7 +75,7 @@ public class OpenIDServerAuthModule implements ServerAuthModule {
     }
 
     public void initialize(MessagePolicy requestPolicy, MessagePolicy responsePolicy, CallbackHandler handler, Map options) throws AuthException {
-        this.callbackHandler = callbackHandler;
+        this.callbackHandler = handler;
         try {
             consumerManager = new ConsumerManager();
         } catch (ConsumerException e) {
@@ -93,7 +94,8 @@ public class OpenIDServerAuthModule implements ServerAuthModule {
     public AuthStatus validateRequest(MessageInfo messageInfo, Subject clientSubject, Subject serviceSubject) throws AuthException {
         HttpServletRequest request = (HttpServletRequest) messageInfo.getRequestMessage();
         HttpServletResponse response = (HttpServletResponse) messageInfo.getResponseMessage();
-        HttpSession session = request.getSession(isMandatory(messageInfo));
+        boolean isMandatory = isMandatory(messageInfo);
+        HttpSession session = request.getSession(isMandatory);
         //auth not mandatory and not logged in.
         if (session == null) {
             return AuthStatus.SUCCESS;
@@ -104,18 +106,23 @@ public class OpenIDServerAuthModule implements ServerAuthModule {
         if (uri.endsWith(RETURN_ADDRESS)) {
             ParameterList parameterList = new ParameterList(request.getParameterMap());
             DiscoveryInformation discovered = (DiscoveryInformation) session.getAttribute(DISCOVERY_SESSION_KEY);
-            //TODO what if its missing?
-            String originalURI = (String) session.getAttribute(ORIGINAL_URI_KEY);
+            String returnAddress = (String) session.getAttribute(RETURN_ADDRESS_KEY);
+            session.removeAttribute(RETURN_ADDRESS_KEY);
             try {
-                //TODO is originalURI correct for verify call???
-                VerificationResult verification = consumerManager.verify(originalURI, parameterList, discovered);
+                VerificationResult verification = consumerManager.verify(returnAddress, parameterList, discovered);
                 Identifier identifier = verification.getVerifiedId();
-                session.setAttribute(ID_KEY, identifier);
-                //redirect back to original page
-                session.removeAttribute(ORIGINAL_URI_KEY);
-                response.setContentLength(0);
-                response.sendRedirect(response.encodeRedirectURL(originalURI));
-                return AuthStatus.SEND_CONTINUE;
+
+                if (identifier != null) {
+                    session.setAttribute(ID_KEY, identifier);
+                    //redirect back to original page
+                    response.setContentLength(0);
+                    String originalURI = (String) session.getAttribute(ORIGINAL_URI_KEY);
+                    session.removeAttribute(ORIGINAL_URI_KEY);
+                    response.sendRedirect(response.encodeRedirectURL(originalURI));
+                    return AuthStatus.SEND_CONTINUE;
+                }
+                response.sendError(HttpServletResponse.SC_FORBIDDEN, "Response verification failed: " + verification.getStatusMsg());
+
 //            } catch (MessageException e) {
 //
 //            } catch (DiscoveryException e) {
@@ -156,9 +163,17 @@ public class OpenIDServerAuthModule implements ServerAuthModule {
             return AuthStatus.SUCCESS;
         }
 
+        //if request is not mandatory, we don't authenticate.
+        if (!isMandatory) {
+            return AuthStatus.SUCCESS;
+        }
         //assume not...
 
         String openidIdentifier = request.getParameter(OPENID_IDENTIFIER);
+        //redirect to login page here...
+        if (openidIdentifier == null) {
+            
+        }
         try {
             List<DiscoveryInformation> discoveries = consumerManager.discover(openidIdentifier);
             //associate with one OP
@@ -166,8 +181,10 @@ public class OpenIDServerAuthModule implements ServerAuthModule {
             //save association info in session
             session.setAttribute(DISCOVERY_SESSION_KEY, discovered);
 
-            AuthRequest authRequest = consumerManager.authenticate(discovered, RETURN_ADDRESS);
-
+            String returnAddress = request.getRequestURL().append(RETURN_ADDRESS).toString();
+            AuthRequest authRequest = consumerManager.authenticate(discovered, returnAddress);
+            session.setAttribute(RETURN_ADDRESS_KEY, authRequest.getReturnTo());
+            
             //save original uri in response, to be retrieved after redirect returns
             session.setAttribute(ORIGINAL_URI_KEY, getFullRequestURI(request).toString());
 
@@ -212,7 +229,7 @@ public class OpenIDServerAuthModule implements ServerAuthModule {
     }
 
     public AuthStatus secureResponse(MessageInfo messageInfo, Subject serviceSubject) throws AuthException {
-        return AuthStatus.SUCCESS;
+        return AuthStatus.SEND_SUCCESS;
     }
 
 }

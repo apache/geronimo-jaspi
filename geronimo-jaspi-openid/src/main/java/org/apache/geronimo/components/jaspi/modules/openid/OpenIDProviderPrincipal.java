@@ -21,11 +21,12 @@
 package org.apache.geronimo.components.jaspi.modules.openid;
 
 import java.security.Principal;
+import java.io.Serializable;
 
 /**
  * @version $Rev$ $Date$
  */
-public class OpenIDProviderPrincipal implements Principal {
+public class OpenIDProviderPrincipal implements Principal, Serializable {
 
     private final String name;
     public OpenIDProviderPrincipal(String identifier) {
@@ -34,5 +35,20 @@ public class OpenIDProviderPrincipal implements Principal {
 
     public String getName() {
         return name;
+    }
+
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        OpenIDProviderPrincipal that = (OpenIDProviderPrincipal) o;
+
+        if (name != null ? !name.equals(that.name) : that.name != null) return false;
+
+        return true;
+    }
+
+    public int hashCode() {
+        return (name != null ? name.hashCode() : 0);
     }
 }

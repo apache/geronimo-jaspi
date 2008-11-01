@@ -21,12 +21,33 @@
 package org.apache.geronimo.components.jaspi.modules.openid;
 
 import java.security.Principal;
+import java.io.Serializable;
 
 /**
- * @version $Rev:$ $Date:$
+ * @version $Rev$ $Date$
  */
-public class AuthenticatedPrincipal implements Principal {
-    public String getName() {
-        return "authenticated";
+public class AuthenticatedPrincipal implements Principal, Serializable {
+    private static final String AUTHENTICATED = "authenticated";
+
+    public AuthenticatedPrincipal() {
     }
+
+    public AuthenticatedPrincipal(String ignoredName) {
+    }
+
+    public String getName() {
+        return AUTHENTICATED;
+    }
+
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        return true;
+    }
+
+    public int hashCode() {
+        return (AUTHENTICATED.hashCode());
+    }
+
 }
