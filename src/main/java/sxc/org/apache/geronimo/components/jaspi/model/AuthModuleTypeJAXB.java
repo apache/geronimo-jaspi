@@ -150,7 +150,7 @@ public class AuthModuleTypeJAXB<T>
 
                 authModuleTypeOptions.setObject(reader, context, authModuleType, options);
             } else {
-                context.unexpectedElement(elementReader, new QName("http://geronimo.apache.org/xml/ns/geronimo-jaspi", "className"), new QName("http://geronimo.apache.org/xml/ns/geronimo-jaspi", "requestPolicy"), new QName("http://geronimo.apache.org/xml/ns/geronimo-jaspi", "responsePolicy"), new QName("http://geronimo.apache.org/xml/ns/geronimo-jaspi", "options"));
+                context.unexpectedElement(elementReader, new QName(elementReader.getNamespaceURI(), elementReader.getLocalName()), new QName("http://geronimo.apache.org/xml/ns/geronimo-jaspi", "requestPolicy"), new QName("http://geronimo.apache.org/xml/ns/geronimo-jaspi", "responsePolicy"), new QName("http://geronimo.apache.org/xml/ns/geronimo-jaspi", "options"));
             }
         }
 
