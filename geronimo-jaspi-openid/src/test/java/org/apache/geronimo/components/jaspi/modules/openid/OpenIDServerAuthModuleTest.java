@@ -20,6 +20,9 @@
 
 package org.apache.geronimo.components.jaspi.modules.openid;
 
+import java.util.Map;
+import java.util.HashMap;
+
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.message.config.AuthConfigFactory;
 import javax.security.auth.message.config.AuthConfigProvider;
@@ -44,6 +47,10 @@ public class OpenIDServerAuthModuleTest {
         AuthConfigFactory factory1 = AuthConfigFactory.getFactory();
         AuthModuleType<ServerAuthModule> authModuleType = new AuthModuleType<ServerAuthModule>();
         authModuleType.setClassName(OpenIDServerAuthModule.class.getName());
+        Map<String, String> options = new HashMap<String, String>();
+        options.put(OpenIDServerAuthModule.LOGIN_PAGE_KEY, "/login.jsp");
+        options.put(OpenIDServerAuthModule.ERROR_PAGE_KEY, "/error.jsp");
+        authModuleType.setOptions(options);
         AuthConfigProvider authConfigProvider = JaspiUtil.wrapServerAuthModule("Http", "testApp", "id", authModuleType, true, new ConstantClassLoaderLookup(getClass().getClassLoader()));
         factory1.registerConfigProvider(authConfigProvider, "Http", "testApp", "description");
         AuthConfigProvider authConfigProvider2 = factory1.getConfigProvider("Http", "testApp", null);
