@@ -117,6 +117,8 @@ public class ConfigProviderType
     protected String classLoaderName;
 
     @XmlTransient
+    private AuthConfigFactory authConfigFactory;
+    @XmlTransient
     private final List<RegistrationListener> listeners = new ArrayList<RegistrationListener>();
     @XmlTransient
     private AuthConfigProvider provider;
@@ -125,10 +127,11 @@ public class ConfigProviderType
     public ConfigProviderType() {
     }
 
-    public ConfigProviderType(String messageLayer, String appContext, boolean persistent) {
+    public ConfigProviderType(String messageLayer, String appContext, boolean persistent, AuthConfigFactory authConfigFactory) {
         this.messageLayer = messageLayer;
         this.appContext = appContext;
         this.persistent = persistent;
+        this.authConfigFactory = authConfigFactory;
     }
 
     /**
@@ -353,7 +356,7 @@ public class ConfigProviderType
         this.classLoaderName = classLoaderName;
     }
 
-    public void initialize(ClassLoaderLookup classLoaderLookup, CallbackHandler callbackHandler) throws AuthException {
+    public void initialize(ClassLoaderLookup classLoaderLookup, CallbackHandler callbackHandler) {
         if (className == null) {
             provider = new ConfigProviderImpl(getClientAuthConfig(), getServerAuthConfig(), classLoaderLookup);
         } else {
@@ -363,20 +366,20 @@ public class ConfigProviderType
                 .doPrivileged(new PrivilegedExceptionAction<AuthConfigProvider>() {
                     public AuthConfigProvider run() throws ClassNotFoundException, SecurityException, NoSuchMethodException, IllegalArgumentException, InstantiationException, IllegalAccessException, InvocationTargetException {
                         Class<? extends AuthConfigProvider> cl = (Class<? extends AuthConfigProvider>) Class.forName(className, true, classLoader);
-                        Constructor<? extends AuthConfigProvider> cnst = cl.getConstructor(Map.class);
-                        return cnst.newInstance(properties);
+                        Constructor<? extends AuthConfigProvider> cnst = cl.getConstructor(Map.class, AuthConfigFactory.class);
+                        return cnst.newInstance(properties, authConfigFactory);
                     }
                 });
             } catch (PrivilegedActionException e) {
                 Exception inner = e.getException();
                 if (inner instanceof InstantiationException) {
-                    throw (AuthException) new AuthException("AuthConfigFactory error:"
-                                    + inner.getCause().getMessage()).initCause(inner.getCause());
+                    throw new SecurityException("AuthConfigFactory error:"
+                                    + inner.getCause().getMessage(), inner.getCause());
                 } else {
-                    throw (AuthException) new AuthException("AuthConfigFactory error: " + inner).initCause(inner);
+                    throw new SecurityException("AuthConfigFactory error: " + inner, inner);
                 }
             } catch (Exception e) {
-                throw (AuthException) new AuthException("AuthConfigFactory error: " + e).initCause(e);
+                throw new SecurityException("AuthConfigFactory error: " + e, e);
             }
         }
     }
@@ -459,7 +462,7 @@ public class ConfigProviderType
             throw new AuthException("No suitable ServerAuthConfig");
         }
 
-        public void refresh() throws AuthException, SecurityException {
+        public void refresh() throws SecurityException {
         }
     }
 

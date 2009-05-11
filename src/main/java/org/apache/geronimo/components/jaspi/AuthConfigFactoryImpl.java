@@ -42,13 +42,12 @@ import org.xml.sax.SAXException;
 /**
  * Implementation of the AuthConfigFactory.
  *
- *
  * @version $Rev: $ $Date: $
  */
 public class AuthConfigFactoryImpl extends AuthConfigFactory {
 
-//    private static final File DEFAULT_CONFIG_FILE = new File("config/jaspi.xml");
-    public static File staticConfigFile;// = DEFAULT_CONFIG_FILE;
+    public static final String JASPI_CONFIGURATION_FILE = "org.apache.geronimo.jaspi.configurationFile";
+    private static final File DEFAULT_CONFIG_FILE = new File("var/config/security/jaspi/jaspi.xml");
     public static CallbackHandler staticCallbackHandler;
 
     private static ClassLoader contextClassLoader;
@@ -60,14 +59,14 @@ public class AuthConfigFactoryImpl extends AuthConfigFactory {
 
     static {
         contextClassLoader = java.security.AccessController
-                        .doPrivileged(new java.security.PrivilegedAction<ClassLoader>() {
-                            public ClassLoader run() {
-                                return Thread.currentThread().getContextClassLoader();
-                            }
-                        });
+                .doPrivileged(new java.security.PrivilegedAction<ClassLoader>() {
+                    public ClassLoader run() {
+                        return Thread.currentThread().getContextClassLoader();
+                    }
+                });
     }
 
-    public AuthConfigFactoryImpl(ClassLoaderLookup classLoaderLookup, CallbackHandler callbackHandler, File configFile) throws AuthException {
+    public AuthConfigFactoryImpl(ClassLoaderLookup classLoaderLookup, CallbackHandler callbackHandler, File configFile) {
         JaspiXmlUtil.initialize(classLoaderLookup, callbackHandler);
         this.classLoaderLookup = classLoaderLookup;
         this.callbackHandler = callbackHandler;
@@ -75,10 +74,34 @@ public class AuthConfigFactoryImpl extends AuthConfigFactory {
         loadConfig();
     }
 
-    public AuthConfigFactoryImpl() throws AuthException {
-        this(new ConstantClassLoaderLookup(contextClassLoader), staticCallbackHandler, staticConfigFile);
+    public AuthConfigFactoryImpl() {
+        this(new ConstantClassLoaderLookup(contextClassLoader), staticCallbackHandler, getConfigFile());
     }
-    
+
+    private static File getConfigFile() {
+        String fileLocation = java.security.AccessController
+                .doPrivileged(new java.security.PrivilegedAction<String>() {
+                    public String run() {
+                        return System.getProperty(JASPI_CONFIGURATION_FILE);
+                    }
+                });
+        File file;
+        if (fileLocation == null) {
+            file = DEFAULT_CONFIG_FILE;
+        } else {
+            file = new File(fileLocation);
+        }
+//        if (!file.exists()) {
+//            file.getParentFile().mkdirs();
+//            try {
+//                file.createNewFile();
+//            } catch (IOException e) {
+//                throw new SecurityException("Could not initialize jaspi configuration file");
+//            }
+//        }
+        return file;
+    }
+
     public synchronized String[] detachListener(RegistrationListener listener, String layer, String appContext) throws SecurityException {
         SecurityManager sm = System.getSecurityManager();
         if (sm != null) {
@@ -143,7 +166,7 @@ public class AuthConfigFactoryImpl extends AuthConfigFactory {
         return ids.toArray(new String[ids.size()]);
     }
 
-    public synchronized void refresh() throws AuthException, SecurityException {
+    public synchronized void refresh() throws SecurityException {
         SecurityManager sm = System.getSecurityManager();
         if (sm != null) {
             sm.checkPermission(new AuthPermission("refreshAuth"));
@@ -151,7 +174,7 @@ public class AuthConfigFactoryImpl extends AuthConfigFactory {
         loadConfig();
     }
 
-    public String registerConfigProvider(AuthConfigProvider authConfigProvider, String layer, String appContext, String description) throws AuthException, SecurityException {
+    public String registerConfigProvider(AuthConfigProvider authConfigProvider, String layer, String appContext, String description) throws SecurityException {
         SecurityManager sm = System.getSecurityManager();
         if (sm != null) {
             sm.checkPermission(new AuthPermission("registerAuthConfigProvider"));
@@ -159,7 +182,7 @@ public class AuthConfigFactoryImpl extends AuthConfigFactory {
         return registerConfigProvider(authConfigProvider, layer, appContext, description, false, null, null);
     }
 
-    public synchronized String registerConfigProvider(final String className, final Map constructorParam, String layer, String appContext, String description) throws AuthException, SecurityException {
+    public synchronized String registerConfigProvider(final String className, final Map constructorParam, String layer, String appContext, String description) throws SecurityException {
         SecurityManager sm = System.getSecurityManager();
         if (sm != null) {
             sm.checkPermission(new AuthPermission("registerAuthConfigProvider"));
@@ -169,12 +192,12 @@ public class AuthConfigFactoryImpl extends AuthConfigFactory {
         return key;
     }
 
-    private String registerConfigProvider(AuthConfigProvider provider, String layer, String appContext, String description, boolean persistent, Map<String, String> constructorParam, String className) throws AuthException {
+    private String registerConfigProvider(AuthConfigProvider provider, String layer, String appContext, String description, boolean persistent, Map<String, String> constructorParam, String className) {
         String key = ConfigProviderType.getRegistrationKey(layer, appContext);
         // Get or create context
         ConfigProviderType ctx = getRegistrations().get(key);
         if (ctx == null) {
-            ctx = new ConfigProviderType(layer, appContext, persistent);
+            ctx = new ConfigProviderType(layer, appContext, persistent, persistent? null: this);
             getRegistrations().put(key, ctx);
         } else {
             if (persistent != ctx.isPersistent()) {
@@ -212,11 +235,7 @@ public class AuthConfigFactoryImpl extends AuthConfigFactory {
             sm.checkPermission(new AuthPermission("removeAuthRegistration"));
         }
         ConfigProviderType ctx = getRegistrations().remove(registrationID);
-        try {
-            saveConfig();
-        } catch (AuthException e) {
-            throw new SecurityException(e);
-        }
+        saveConfig();
         if (ctx != null) {
             List<RegistrationListener> listeners = ctx.getListeners();
             for (RegistrationListener listener : listeners) {
@@ -226,31 +245,31 @@ public class AuthConfigFactoryImpl extends AuthConfigFactory {
         }
         return false;
     }
-    
-    private void loadConfig() throws AuthException {
-        if (configFile != null) {
-        try {
-            FileReader in = new FileReader(configFile);
+
+    private void loadConfig() {
+        if (configFile != null && configFile.length() > 0) {
             try {
-                jaspiType = JaspiXmlUtil.loadJaspi(in);
-            } finally {
-                in.close();
+                FileReader in = new FileReader(configFile);
+                try {
+                    jaspiType = JaspiXmlUtil.loadJaspi(in);
+                } finally {
+                    in.close();
+                }
+            } catch (ParserConfigurationException e) {
+                throw new SecurityException("Could not read config", e);
+            } catch (IOException e) {
+                throw new SecurityException("Could not read config", e);
+            } catch (SAXException e) {
+                throw new SecurityException("Could not read config", e);
+            } catch (JAXBException e) {
+                throw new SecurityException("Could not read config", e);
+            } catch (XMLStreamException e) {
+                throw new SecurityException("Could not read config", e);
             }
-        } catch (ParserConfigurationException e) {
-            throw (AuthException)new AuthException("Could not read config").initCause(e);
-        } catch (IOException e) {
-            throw (AuthException)new AuthException("Could not read config").initCause(e);
-        } catch (SAXException e) {
-            throw (AuthException)new AuthException("Could not read config").initCause(e);
-        } catch (JAXBException e) {
-            throw (AuthException)new AuthException("Could not read config").initCause(e);
-        } catch (XMLStreamException e) {
-            throw (AuthException)new AuthException("Could not read config").initCause(e);
-        }
         }
     }
-    
-    private void saveConfig() throws AuthException {
+
+    private void saveConfig() {
         if (configFile != null) {
             try {
                 FileWriter out = new FileWriter(configFile);
@@ -260,14 +279,14 @@ public class AuthConfigFactoryImpl extends AuthConfigFactory {
                     out.close();
                 }
             } catch (IOException e) {
-                throw (AuthException)new AuthException("Could not write config").initCause(e);
+                throw new SecurityException("Could not write config", e);
             } catch (XMLStreamException e) {
-                throw (AuthException)new AuthException("Could not write config").initCause(e);
+                throw new SecurityException("Could not write config", e);
             } catch (JAXBException e) {
-                throw (AuthException)new AuthException("Could not write config").initCause(e);
+                throw new SecurityException("Could not write config", e);
             }
         }
     }
-    
+
 
 }

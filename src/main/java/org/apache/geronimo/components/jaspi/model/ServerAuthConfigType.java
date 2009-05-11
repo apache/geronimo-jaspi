@@ -301,7 +301,7 @@ public class ServerAuthConfigType
             return serverAuthConfigType.isProtected();
         }
 
-        public void refresh() throws AuthException, SecurityException {
+        public void refresh() throws SecurityException {
         }
     }
 }

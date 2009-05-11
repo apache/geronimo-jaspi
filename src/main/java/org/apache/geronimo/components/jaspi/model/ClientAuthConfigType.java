@@ -296,7 +296,7 @@ public class ClientAuthConfigType
             return clientAuthConfigType.isProtected();
         }
 
-        public void refresh() throws AuthException, SecurityException {
+        public void refresh() throws SecurityException {
         }
     }
 }
