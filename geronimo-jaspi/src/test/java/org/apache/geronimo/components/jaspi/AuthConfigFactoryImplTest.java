@@ -41,12 +41,12 @@ public class AuthConfigFactoryImplTest extends TestCase {
 
     protected void setUp() throws Exception {
         URL url = getClass().getClassLoader().getResource("test-jaspi.xml");
-        AuthConfigFactoryImpl.staticConfigFile = new File(url.getPath());
+        System.setProperty(AuthConfigFactoryImpl.JASPI_CONFIGURATION_FILE, url.getPath());
         CallbackHandler callbackHandler = null;
         AuthConfigFactoryImpl.staticCallbackHandler = callbackHandler;
         AuthConfigFactory.setFactory(null);
     }
-    
+
     public void testFactory() throws Exception {
         AuthConfigFactory factory1 = AuthConfigFactory.getFactory();
         assertNotNull(factory1);
@@ -54,27 +54,27 @@ public class AuthConfigFactoryImplTest extends TestCase {
         assertNotNull(factory2);
         assertSame(factory1, factory2);
     }
-    
+
     public void testBadConstructorProvider() throws Exception {
+        AuthConfigFactory factory = AuthConfigFactory.getFactory();
         try {
-            AuthConfigFactory factory = AuthConfigFactory.getFactory();
             factory.registerConfigProvider(BadConstructorProvider.class.getName(), null, "layer1", "appContext1", "description");
             fail("An exception should have been thrown");
-        } catch (AuthException e) {
-            //e.printStackTrace();
+        } catch (SecurityException e) {
+
         }
     }
-    
+
     public void testBadImplementProvider() throws Exception {
+        AuthConfigFactory factory = AuthConfigFactory.getFactory();
         try {
-            AuthConfigFactory factory = AuthConfigFactory.getFactory();
             factory.registerConfigProvider(BadImplementProvider.class.getName(), null, "layer2", "appContext2", "description");
             fail("An exception should have been thrown");
-        } catch (AuthException e) {
+        } catch (SecurityException e) {
             //e.printStackTrace();
         }
     }
-    
+
     public void testRegisterUnregister() throws Exception {
         AuthConfigFactory factory = AuthConfigFactory.getFactory();
         String regId = factory.registerConfigProvider(DummyProvider.class.getName(), null, "layer3", "appContext3", "description");
@@ -86,11 +86,11 @@ public class AuthConfigFactoryImplTest extends TestCase {
         assertEquals("description", regContext.getDescription());
 
         assertTrue(factory.removeRegistration(regId));
-        
+
         regContext = factory.getRegistrationContext(regId);
         assertNull(regContext);
     }
-    
+
     public void testProviderWithLayerAndContext() throws Exception {
         AuthConfigFactory factory = AuthConfigFactory.getFactory();
         String registrationID = factory.registerConfigProvider(DummyProvider.class.getName(), null, "layer4", "appContext4", "description");
@@ -101,7 +101,7 @@ public class AuthConfigFactoryImplTest extends TestCase {
         factory.removeRegistration(registrationID);
         assertNull(factory.getRegistrationContext(registrationID));
     }
-    
+
     public void testProviderWithLayer() throws Exception {
         AuthConfigFactory factory = AuthConfigFactory.getFactory();
         String registrationID = factory.registerConfigProvider(DummyProvider.class.getName(), null, "layer5", null, "description");
@@ -112,7 +112,7 @@ public class AuthConfigFactoryImplTest extends TestCase {
         factory.removeRegistration(registrationID);
         assertNull(factory.getRegistrationContext(registrationID));
     }
-    
+
     public void testProviderContextLayer() throws Exception {
         AuthConfigFactory factory = AuthConfigFactory.getFactory();
         String registrationID = factory.registerConfigProvider(DummyProvider.class.getName(), null, null, "appContext6", "description");
@@ -123,7 +123,7 @@ public class AuthConfigFactoryImplTest extends TestCase {
         factory.removeRegistration(registrationID);
         assertNull(factory.getRegistrationContext(registrationID));
     }
-    
+
     public void testProviderDefault() throws Exception {
         AuthConfigFactory factory = AuthConfigFactory.getFactory();
         String registrationID = factory.registerConfigProvider(DummyProvider.class.getName(), null, null, null, "description");
@@ -135,7 +135,7 @@ public class AuthConfigFactoryImplTest extends TestCase {
         factory.removeRegistration(registrationID);
         assertNull(factory.getRegistrationContext(registrationID));
     }
-    
+
     public void testListenerOnRegister() throws Exception {
         AuthConfigFactory factory = AuthConfigFactory.getFactory();
         String registrationID = factory.registerConfigProvider(DummyProvider.class.getName(), null, null, null, "description");
@@ -146,7 +146,7 @@ public class AuthConfigFactoryImplTest extends TestCase {
         factory.removeRegistration(registrationID);
         assertNull(factory.getRegistrationContext(registrationID));
     }
-    
+
     public void testListenerOnUnregister() throws Exception {
         AuthConfigFactory factory = AuthConfigFactory.getFactory();
         String regId = factory.registerConfigProvider(DummyProvider.class.getName(), null, null, null, "description");
@@ -168,7 +168,7 @@ public class AuthConfigFactoryImplTest extends TestCase {
         factory.removeRegistration(regId);
         assertTrue(listener.notified);
     }
-    
+
     public void testWrapServerAuthModule() throws Exception {
         AuthConfigFactory factory = AuthConfigFactory.getFactory();
         AuthModuleType<ServerAuthModule> authModuleType = new AuthModuleType<ServerAuthModule>();
@@ -182,12 +182,13 @@ public class AuthConfigFactoryImplTest extends TestCase {
         assertTrue(listener.notified);
     }
 
-    
+
     public static class DummyListener implements RegistrationListener {
         public boolean notified = true;
+
         public void notify(String layer, String appContext) {
             notified = true;
         }
     }
-    
+
 }

@@ -23,10 +23,11 @@ import javax.security.auth.message.AuthException;
 import javax.security.auth.message.config.AuthConfigProvider;
 import javax.security.auth.message.config.ClientAuthConfig;
 import javax.security.auth.message.config.ServerAuthConfig;
+import javax.security.auth.message.config.AuthConfigFactory;
 
 public class DummyProvider implements AuthConfigProvider {
 
-    public DummyProvider(Map props) {
+    public DummyProvider(Map props, AuthConfigFactory authConfigFactory) {
         
     }
     
@@ -40,7 +41,7 @@ public class DummyProvider implements AuthConfigProvider {
         return null;
     }
 
-    public void refresh() throws AuthException, SecurityException {
+    public void refresh() throws SecurityException {
         // TODO Auto-generated method stub
         
     }
