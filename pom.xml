@@ -51,11 +51,6 @@
         -->
         <version>1.0-SNAPSHOT</version>
 
-        <!-- OSGi properties -->
-        <geronimo.jaspi.osgi.export>${geronimo.jaspi.osgi.export.pkg}*;version=${version}</geronimo.jaspi.osgi.export>
-        <geronimo.jaspi.osgi.export.pkg/>
-        <geronimo.jaspi.osgi.import.pkg/>
-        <geronimo.jaspi.osgi.private.pkg/>
     </properties>
 
     <modules>
@@ -210,38 +205,38 @@
                         </execution>
                     </executions>
                 </plugin>
-              <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>ianal-maven-plugin</artifactId>
-                <version>1.0-alpha-1</version>
-              </plugin>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>ianal-maven-plugin</artifactId>
+                    <version>1.0-alpha-1</version>
+                </plugin>
             </plugins>
         </pluginManagement>
 
         <plugins>
 
             <!--<plugin>-->
-                <!--<groupId>com.envoisolutions.sxc</groupId>-->
-                <!--<artifactId>sxc-jaxb-maven-plugin</artifactId>-->
-                <!--<version>0.8-SNAPSHOT</version>-->
-                <!--<executions>-->
-                    <!--<execution>-->
-                        <!--<configuration>-->
-                            <!--<classes>-->
-                                <!--<class>org.apache.geronimo.components.jaspi.model</class>-->
-                            <!--</classes>-->
-                        <!--</configuration>-->
-                        <!--<goals>-->
-                            <!--<goal>generate</goal>-->
-                        <!--</goals>-->
-                    <!--</execution>-->
-                <!--</executions>-->
+            <!--<groupId>com.envoisolutions.sxc</groupId>-->
+            <!--<artifactId>sxc-jaxb-maven-plugin</artifactId>-->
+            <!--<version>0.8-SNAPSHOT</version>-->
+            <!--<executions>-->
+            <!--<execution>-->
+            <!--<configuration>-->
+            <!--<classes>-->
+            <!--<class>org.apache.geronimo.components.jaspi.model</class>-->
+            <!--</classes>-->
+            <!--</configuration>-->
+            <!--<goals>-->
+            <!--<goal>generate</goal>-->
+            <!--</goals>-->
+            <!--</execution>-->
+            <!--</executions>-->
             <!--</plugin>-->
 
-          <plugin>
-            <groupId>org.codehaus.mojo</groupId>
-            <artifactId>ianal-maven-plugin</artifactId>
-          </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>ianal-maven-plugin</artifactId>
+            </plugin>
 
             <plugin>
                 <groupId>org.apache.geronimo.genesis.plugins</groupId>
@@ -271,47 +266,17 @@
                     <target>1.5</target>
                 </configuration>
             </plugin>
-            <!--
-                        <plugin>
-                            <groupId>org.apache.felix</groupId>
-                            <artifactId>maven-bundle-plugin</artifactId>
-                            <version>1.2.0</version>
-                            <extensions>true</extensions>
-                            <executions>
-                                <execution>
-                                    <goals>
-                                        <goal>bundle</goal>
-                                    </goals>
-                                </execution>
-                            </executions>
-                            <configuration>
-                                <instructions>
-                                    <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
-                                    <Export-Package>${geronimo.jaspi.osgi.export}</Export-Package>
-                                    <Import-Package>${geronimo.jaspi.osgi.import.pkg}*</Import-Package>
-                                    <Private-Package>${geronimo.jaspi.osgi.private.pkg}</Private-Package>
-                                </instructions>
-                                <unpackBundle>true</unpackBundle>
-                            </configuration>
-                        </plugin>
-            -->
-            <!--<plugin>-->
-                <!--<groupId>org.jvnet.jaxb2.maven2</groupId>-->
-                <!--<artifactId>maven-jaxb2-plugin</artifactId>-->
-                <!--<version>0.5</version>-->
-                <!--<executions>-->
-                    <!--<execution>-->
-                        <!--<goals>-->
-                            <!--<goal>generate</goal>-->
-                        <!--</goals>-->
-                    <!--</execution>-->
-                <!--</executions>-->
-                <!--<configuration>-->
-                    <!--<schemaDirectory>src/main/xsd</schemaDirectory>-->
-                    <!--<packageName>org.apache.geronimo.components.jaspi.model</packageName>-->
-                    <!--<extension>true</extension>-->
-                <!--</configuration>-->
-            <!--</plugin>-->
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <version>2.0.0</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <instructions>
+                        <Bundle-DocURL>http://geronimo.apache.org</Bundle-DocURL>
+                    </instructions>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 
