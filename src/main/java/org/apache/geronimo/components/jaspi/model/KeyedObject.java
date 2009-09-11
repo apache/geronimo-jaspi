@@ -20,13 +20,13 @@
 
 package org.apache.geronimo.components.jaspi.model;
 
-import javax.security.auth.message.AuthException;
-import javax.security.auth.callback.CallbackHandler;
-
 import org.apache.geronimo.components.jaspi.ClassLoaderLookup;
 
+import javax.security.auth.callback.CallbackHandler;
+import javax.security.auth.message.AuthException;
+
 /**
- * @version $Rev:$ $Date:$
+ * @version $Rev$ $Date$
  */
 public interface KeyedObject {
     String getKey();

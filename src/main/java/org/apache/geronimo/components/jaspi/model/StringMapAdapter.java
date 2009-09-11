@@ -20,15 +20,16 @@
 
 package org.apache.geronimo.components.jaspi.model;
 
-import java.util.Properties;
-import java.util.Map;
-import java.util.HashMap;
+import javax.xml.bind.annotation.adapters.XmlAdapter;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-
-import javax.xml.bind.annotation.adapters.XmlAdapter;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
 
 /**
+ * jaxb helper class for maps
+ *
  * @version $Rev$ $Date$
  */
 public class StringMapAdapter extends XmlAdapter<String, Map<String, String>> {

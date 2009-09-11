@@ -24,25 +24,23 @@
 
 package org.apache.geronimo.components.jaspi.model;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Collections;
+import org.apache.geronimo.components.jaspi.ClassLoaderLookup;
 
 import javax.security.auth.Subject;
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.message.AuthException;
 import javax.security.auth.message.AuthStatus;
 import javax.security.auth.message.MessageInfo;
-import javax.security.auth.message.module.ServerAuthModule;
-import javax.security.auth.message.module.ClientAuthModule;
 import javax.security.auth.message.config.ServerAuthContext;
+import javax.security.auth.message.module.ServerAuthModule;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.XmlTransient;
-
-import org.apache.geronimo.components.jaspi.ClassLoaderLookup;
+import javax.xml.bind.annotation.XmlType;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 
 /**
@@ -181,6 +179,7 @@ public class ServerAuthContextType
      * <p/>
      * Objects of the following type(s) are allowed in the list
      * {@link AuthModuleType }
+     * @return list of Server auth modules in this context
      */
     public List<AuthModuleType<ServerAuthModule>> getServerAuthModule() {
         if (serverAuthModule == null) {

@@ -16,6 +16,19 @@
  */
 package org.apache.geronimo.components.jaspi;
 
+import org.apache.geronimo.components.jaspi.model.ConfigProviderType;
+import org.apache.geronimo.components.jaspi.model.JaspiType;
+import org.apache.geronimo.components.jaspi.model.JaspiXmlUtil;
+import org.xml.sax.SAXException;
+
+import javax.security.auth.AuthPermission;
+import javax.security.auth.callback.CallbackHandler;
+import javax.security.auth.message.config.AuthConfigFactory;
+import javax.security.auth.message.config.AuthConfigProvider;
+import javax.security.auth.message.config.RegistrationListener;
+import javax.xml.bind.JAXBException;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.stream.XMLStreamException;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -24,21 +37,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import javax.security.auth.AuthPermission;
-import javax.security.auth.callback.CallbackHandler;
-import javax.security.auth.message.AuthException;
-import javax.security.auth.message.config.AuthConfigFactory;
-import javax.security.auth.message.config.AuthConfigProvider;
-import javax.security.auth.message.config.RegistrationListener;
-import javax.xml.bind.JAXBException;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.stream.XMLStreamException;
-
-import org.apache.geronimo.components.jaspi.model.ConfigProviderType;
-import org.apache.geronimo.components.jaspi.model.JaspiType;
-import org.apache.geronimo.components.jaspi.model.JaspiXmlUtil;
-import org.xml.sax.SAXException;
-
 /**
  * Implementation of the AuthConfigFactory.
  *
@@ -46,8 +44,8 @@ import org.xml.sax.SAXException;
  */
 public class AuthConfigFactoryImpl extends AuthConfigFactory {
 
-    public static final String JASPI_CONFIGURATION_FILE = "org.apache.geronimo.jaspi.configurationFile";
-    private static final File DEFAULT_CONFIG_FILE = new File("var/config/security/jaspi/jaspi.xml");
+    public static final String JASPI_CONFIGURATION_FILE = "org.apache.geronimo.jaspic.configurationFile";
+    private static final File DEFAULT_CONFIG_FILE = new File("var/config/security/jaspic/jaspic.xml");
     public static CallbackHandler staticCallbackHandler;
 
     private static ClassLoader contextClassLoader;
@@ -91,14 +89,6 @@ public class AuthConfigFactoryImpl extends AuthConfigFactory {
         } else {
             file = new File(fileLocation);
         }
-//        if (!file.exists()) {
-//            file.getParentFile().mkdirs();
-//            try {
-//                file.createNewFile();
-//            } catch (IOException e) {
-//                throw new SecurityException("Could not initialize jaspi configuration file");
-//            }
-//        }
         return file;
     }
 

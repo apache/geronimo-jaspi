@@ -21,6 +21,8 @@
 package org.apache.geronimo.components.jaspi;
 
 /**
+ * Get a classloader suitable for a named context.
+ *
  * @version $Rev$ $Date$
  */
 public interface ClassLoaderLookup {
