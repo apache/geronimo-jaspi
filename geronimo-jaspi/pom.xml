@@ -30,16 +30,16 @@
 
     <groupId>org.apache.geronimo.components</groupId>
     <artifactId>geronimo-jaspi</artifactId>
-    <version>1.0</version>
+    <version>1.1-SNAPSHOT</version>
     <packaging>bundle</packaging>
     <name>Geronimo JASPI implementation</name>
 
     <description>Geronimo JASPI implementation using jaxb/sxc for simple xml persistence.</description>
 
     <scm>
-        <connection>scm:svn:http://svn.apache.org/repos/asf/geronimo/components/jaspi/tags/geronimo-jaspi-1.0</connection>
-        <developerConnection>scm:svn:https://svn.apache.org/repos/asf/geronimo/components/jaspi/tags/geronimo-jaspi-1.0</developerConnection>
-        <url>http://svn.apache.org/viewvc/geronimo/components/jaspi/tags/geronimo-jaspi-1.0</url>
+        <connection>scm:svn:http://svn.apache.org/repos/asf/geronimo/components/jaspi/trunk/geronimo-jaspi</connection>
+        <developerConnection>scm:svn:https://svn.apache.org/repos/asf/geronimo/components/jaspi/trunk/geronimo-jaspi</developerConnection>
+        <url>http://svn.apache.org/viewvc/geronimo/components/jaspi/trunk/geronimo-jaspi</url>
     </scm>
 
     <url>http://geronimo.apache.org/maven/${siteId}/${version}</url>
