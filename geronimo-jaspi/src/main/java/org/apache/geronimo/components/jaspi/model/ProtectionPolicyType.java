@@ -24,18 +24,17 @@
 
 package org.apache.geronimo.components.jaspi.model;
 
-import java.io.Serializable;
-import java.security.PrivilegedExceptionAction;
-import java.security.PrivilegedActionException;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Constructor;
-
+import javax.security.auth.message.AuthException;
+import javax.security.auth.message.MessagePolicy;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
-import javax.security.auth.message.MessagePolicy;
-import javax.security.auth.message.AuthException;
+import java.io.Serializable;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
 
 
 /**
@@ -99,7 +98,7 @@ public class ProtectionPolicyType
             return java.security.AccessController
             .doPrivileged(new PrivilegedExceptionAction<MessagePolicy.ProtectionPolicy>() {
                 public MessagePolicy.ProtectionPolicy run() throws ClassNotFoundException, SecurityException, NoSuchMethodException, IllegalArgumentException, InstantiationException, IllegalAccessException, InvocationTargetException {
-                    Class<? extends MessagePolicy.ProtectionPolicy> cl = (Class<? extends MessagePolicy.ProtectionPolicy>) Class.forName(className, true, classLoader);
+                    Class<? extends MessagePolicy.ProtectionPolicy> cl = Class.forName(className, true, classLoader).asSubclass(MessagePolicy.ProtectionPolicy.class);
                     Constructor<? extends MessagePolicy.ProtectionPolicy> cnst = cl.getConstructor();
                     MessagePolicy.ProtectionPolicy target = cnst.newInstance();
                     return target;

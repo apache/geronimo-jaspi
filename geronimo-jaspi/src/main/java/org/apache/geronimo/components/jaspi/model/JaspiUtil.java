@@ -20,15 +20,14 @@
 
 package org.apache.geronimo.components.jaspi.model;
 
-import java.util.Collections;
-import java.util.Map;
+import org.apache.geronimo.components.jaspi.ClassLoaderLookup;
 
 import javax.security.auth.message.AuthException;
 import javax.security.auth.message.config.AuthConfigProvider;
 import javax.security.auth.message.module.ClientAuthModule;
 import javax.security.auth.message.module.ServerAuthModule;
-
-import org.apache.geronimo.components.jaspi.ClassLoaderLookup;
+import java.util.Collections;
+import java.util.Map;
 
 /**
  * Convenience methods to wrap various jaspi objects into AuthConfigProvider instances, ready to be registered.

@@ -24,15 +24,15 @@
 
 package org.apache.geronimo.components.jaspi.model;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
+import javax.security.auth.message.AuthException;
+import javax.security.auth.message.MessagePolicy;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlType;
-import javax.security.auth.message.MessagePolicy;
-import javax.security.auth.message.AuthException;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -89,7 +89,8 @@ public class MessagePolicyType
      * Objects of the following type(s) are allowed in the list
      * {@link TargetPolicyType }
      * 
-     * 
+     *
+     * @return list of target policies
      */
     public List<TargetPolicyType> getTargetPolicy() {
         if (targetPolicy == null) {

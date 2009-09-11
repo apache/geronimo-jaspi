@@ -21,7 +21,9 @@
 package org.apache.geronimo.components.jaspi;
 
 /**
- * @version $Rev:$ $Date:$
+ * Simple default ClassLoader lookup that always returns the same classloader
+ *
+ * @version $Rev$ $Date$
  */
 public class ConstantClassLoaderLookup implements ClassLoaderLookup {
 

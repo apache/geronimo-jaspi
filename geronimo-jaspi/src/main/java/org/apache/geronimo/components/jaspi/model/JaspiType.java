@@ -24,16 +24,13 @@
 
 package org.apache.geronimo.components.jaspi.model;
 
-import java.io.Serializable;
-import java.util.Map;
-import java.util.HashMap;
-
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
-
-import org.apache.geronimo.components.jaspi.model.ConfigProviderType;
+import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 
 
 /**
@@ -89,7 +86,8 @@ public class JaspiType
      * Objects of the following type(s) are allowed in the list
      * {@link ConfigProviderType }
      * 
-     * 
+     *
+     * @return map of id to Config Provider
      */
     public Map<String, ConfigProviderType> getConfigProvider() {
         if (configProvider == null) {

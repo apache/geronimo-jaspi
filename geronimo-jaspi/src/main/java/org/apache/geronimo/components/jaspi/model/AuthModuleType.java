@@ -24,24 +24,23 @@
 
 package org.apache.geronimo.components.jaspi.model;
 
-import java.io.Serializable;
-import java.util.Map;
-import java.security.PrivilegedExceptionAction;
-import java.security.PrivilegedActionException;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
+import org.apache.geronimo.components.jaspi.ClassLoaderLookup;
 
+import javax.security.auth.callback.CallbackHandler;
+import javax.security.auth.message.AuthException;
+import javax.security.auth.message.MessagePolicy;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
-import javax.security.auth.callback.CallbackHandler;
-import javax.security.auth.message.AuthException;
-import javax.security.auth.message.MessagePolicy;
-
-import org.apache.geronimo.components.jaspi.ClassLoaderLookup;
+import java.io.Serializable;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
+import java.util.Map;
 
 
 /**

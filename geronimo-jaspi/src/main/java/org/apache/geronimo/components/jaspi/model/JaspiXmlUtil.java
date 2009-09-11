@@ -20,26 +20,21 @@
 
 package org.apache.geronimo.components.jaspi.model;
 
-import java.io.Writer;
-import java.io.Reader;
-import java.io.IOException;
-import java.util.Collections;
+import org.apache.geronimo.components.jaspi.ClassLoaderLookup;
+import org.xml.sax.SAXException;
 
+import javax.security.auth.callback.CallbackHandler;
+import javax.security.auth.message.module.ClientAuthModule;
+import javax.security.auth.message.module.ServerAuthModule;
+import javax.xml.bind.*;
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
-import javax.xml.bind.JAXBElement;
-import javax.xml.bind.Unmarshaller;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.security.auth.callback.CallbackHandler;
-import javax.security.auth.message.module.ServerAuthModule;
-import javax.security.auth.message.module.ClientAuthModule;
-
-import org.xml.sax.SAXException;
-import org.apache.geronimo.components.jaspi.ClassLoaderLookup;
+import java.io.IOException;
+import java.io.Reader;
+import java.io.Writer;
+import java.util.Collections;
 
 /**
  * @version $Rev$ $Date$

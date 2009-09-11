@@ -24,31 +24,22 @@
 
 package org.apache.geronimo.components.jaspi.model;
 
+import org.apache.geronimo.components.jaspi.ClassLoaderLookup;
+
+import javax.security.auth.callback.CallbackHandler;
+import javax.security.auth.message.AuthException;
+import javax.security.auth.message.config.*;
+import javax.xml.bind.annotation.*;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.io.Serializable;
-import java.util.Map;
-import java.util.List;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.security.PrivilegedExceptionAction;
-import java.security.PrivilegedActionException;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Constructor;
-
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlType;
-import javax.xml.bind.annotation.XmlTransient;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
-import javax.security.auth.message.config.AuthConfigFactory;
-import javax.security.auth.message.config.RegistrationListener;
-import javax.security.auth.message.config.AuthConfigProvider;
-import javax.security.auth.message.config.ClientAuthConfig;
-import javax.security.auth.message.config.ServerAuthConfig;
-import javax.security.auth.message.AuthException;
-import javax.security.auth.callback.CallbackHandler;
-
-import org.apache.geronimo.components.jaspi.ClassLoaderLookup;
+import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -274,7 +265,7 @@ public class ConfigProviderType
      * Objects of the following type(s) are allowed in the list
      * {@link ClientAuthConfigType }
      * 
-     * 
+     * @return map of id to client auth config
      */
     public Map<String, ClientAuthConfigType> getClientAuthConfig() {
         if (clientAuthConfig == null) {
@@ -303,7 +294,7 @@ public class ConfigProviderType
      * Objects of the following type(s) are allowed in the list
      * {@link ServerAuthConfigType }
      * 
-     * 
+     * @return map of id to server auth config
      */
     public Map<String, ServerAuthConfigType> getServerAuthConfig() {
         if (serverAuthConfig == null) {
@@ -365,7 +356,7 @@ public class ConfigProviderType
                 provider = java.security.AccessController
                 .doPrivileged(new PrivilegedExceptionAction<AuthConfigProvider>() {
                     public AuthConfigProvider run() throws ClassNotFoundException, SecurityException, NoSuchMethodException, IllegalArgumentException, InstantiationException, IllegalAccessException, InvocationTargetException {
-                        Class<? extends AuthConfigProvider> cl = (Class<? extends AuthConfigProvider>) Class.forName(className, true, classLoader);
+                        Class<? extends AuthConfigProvider> cl = Class.forName(className, true, classLoader).asSubclass(AuthConfigProvider.class);
                         Constructor<? extends AuthConfigProvider> cnst = cl.getConstructor(Map.class, AuthConfigFactory.class);
                         return cnst.newInstance(properties, authConfigFactory);
                     }
@@ -407,8 +398,8 @@ public class ConfigProviderType
 
         /**
          * spec required constructor
-         * @param properties
-         * @param factory
+         * @param properties useless properties map
+         * @param factory useless factory
          */
         public ConfigProviderImpl(Map<String, String> properties, AuthConfigFactory factory) {
             throw new RuntimeException("don't call this");

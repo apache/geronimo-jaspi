@@ -20,17 +20,16 @@
 
 package org.apache.geronimo.components.jaspi.model;
 
+import org.apache.geronimo.components.jaspi.ClassLoaderLookup;
+import org.apache.geronimo.components.jaspi.ConstantClassLoaderLookup;
+
+import javax.security.auth.callback.CallbackHandler;
+import javax.xml.bind.annotation.adapters.XmlAdapter;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.lang.reflect.Array;
-
-import javax.xml.bind.annotation.adapters.XmlAdapter;
-import javax.security.auth.callback.CallbackHandler;
-
-import org.apache.geronimo.components.jaspi.ClassLoaderLookup;
-import org.apache.geronimo.components.jaspi.ConstantClassLoaderLookup;
 
 /**
  * @version $Rev$ $Date$

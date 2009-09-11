@@ -24,25 +24,23 @@
 
 package org.apache.geronimo.components.jaspi.model;
 
-import java.io.Serializable;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.Collections;
+import org.apache.geronimo.components.jaspi.ClassLoaderLookup;
 
+import javax.security.auth.Subject;
+import javax.security.auth.callback.CallbackHandler;
+import javax.security.auth.message.AuthException;
+import javax.security.auth.message.MessageInfo;
+import javax.security.auth.message.config.ServerAuthConfig;
+import javax.security.auth.message.config.ServerAuthContext;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
-import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
-import javax.security.auth.message.config.ServerAuthConfig;
-import javax.security.auth.message.config.ServerAuthContext;
-import javax.security.auth.message.AuthException;
-import javax.security.auth.message.MessageInfo;
-import javax.security.auth.Subject;
-import javax.security.auth.callback.CallbackHandler;
-
-import org.apache.geronimo.components.jaspi.ClassLoaderLookup;
+import java.io.Serializable;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 
 /**
@@ -188,7 +186,8 @@ public class ServerAuthConfigType
 
     /**
      * Gets the value of the protected property.
-     * 
+     *
+     * @return whether the server auth config is protected
      */
     public boolean isProtected() {
         return _protected;
@@ -199,7 +198,8 @@ public class ServerAuthConfigType
 
     /**
      * Sets the value of the protected property.
-     * 
+     *
+     * @param value whether the server auth context should be protected
      */
     public void setProtected(boolean value) {
         this._protected = value;
@@ -225,7 +225,8 @@ public class ServerAuthConfigType
      * Objects of the following type(s) are allowed in the list
      * {@link ServerAuthContextType }
      * 
-     * 
+     *
+     * @return map of id to Server auth config
      */
     public Map<String, ServerAuthContextType> getServerAuthContext() {
         if (serverAuthContext == null) {
