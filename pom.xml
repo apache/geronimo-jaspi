@@ -56,6 +56,13 @@
     </distributionManagement>
 
     <dependencies>
+        
+        <dependency>
+            <groupId>org.apache.geronimo.specs</groupId>
+            <artifactId>geronimo-osgi-locator</artifactId>
+            <version>1.0</version>
+        </dependency>
+        
         <dependency>
             <groupId>org.apache.geronimo.specs</groupId>
             <artifactId>geronimo-jaspic_1.0_spec</artifactId>
@@ -166,6 +173,7 @@
                 <configuration>
                     <instructions>
                         <Export-Package>org.apache.geronimo.components.jaspi*;version=1.0</Export-Package>
+                        <Export-SPI-Provider>org.apache.geronimo.components.jaspi.AuthConfigFactoryImpl</Export-SPI-Provider>
                     </instructions>
                 </configuration>
             </plugin>
