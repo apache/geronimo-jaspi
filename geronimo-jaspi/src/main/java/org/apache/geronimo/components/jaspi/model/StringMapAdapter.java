@@ -20,12 +20,13 @@
 
 package org.apache.geronimo.components.jaspi.model;
 
-import javax.xml.bind.annotation.adapters.XmlAdapter;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+
+import javax.xml.bind.annotation.adapters.XmlAdapter;
 
 /**
  * jaxb helper class for maps

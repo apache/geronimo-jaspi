@@ -20,21 +20,24 @@
 
 package org.apache.geronimo.components.jaspi.model;
 
-import org.apache.geronimo.components.jaspi.ClassLoaderLookup;
-import org.xml.sax.SAXException;
-
-import javax.security.auth.callback.CallbackHandler;
-import javax.security.auth.message.module.ClientAuthModule;
-import javax.security.auth.message.module.ServerAuthModule;
-import javax.xml.bind.*;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamReader;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
 import java.util.Collections;
+
+import javax.security.auth.callback.CallbackHandler;
+import javax.security.auth.message.module.ClientAuthModule;
+import javax.security.auth.message.module.ServerAuthModule;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBElement;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
+import javax.xml.bind.Unmarshaller;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
+import org.xml.sax.SAXException;
 
 /**
  * @version $Rev$ $Date$
@@ -54,9 +57,7 @@ public class JaspiXmlUtil {
         }
     }
 
-    public static void initialize(ClassLoaderLookup classLoaderLookup, CallbackHandler callbackHandler) {
-//        configProviderMapAdapter = new KeyedObjectMapAdapter<ConfigProviderType>(classLoaderLookup, callbackHandler, ConfigProviderType.class);
-        KeyedObjectMapAdapter.staticClassLoaderLookup = classLoaderLookup;
+    public static void initialize(CallbackHandler callbackHandler) {
         KeyedObjectMapAdapter.staticCallbackHandler = callbackHandler;
     }
 

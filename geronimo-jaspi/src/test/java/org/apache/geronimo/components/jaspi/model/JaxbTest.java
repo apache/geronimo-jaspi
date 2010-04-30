@@ -45,8 +45,6 @@ import javax.security.auth.callback.CallbackHandler;
 
 import org.testng.annotations.Test;
 import org.xml.sax.SAXException;
-import org.apache.geronimo.components.jaspi.ClassLoaderLookup;
-import org.apache.geronimo.components.jaspi.ConstantClassLoaderLookup;
 
 /**
  * @version $Rev$ $Date$
@@ -57,7 +55,6 @@ public class JaxbTest {
 
     private final int count = 2;
 
-    private final ClassLoaderLookup classLoaderLookup = new ConstantClassLoaderLookup(getClass().getClassLoader());
     private CallbackHandler callbackHandler;
 
     @Test
@@ -110,7 +107,7 @@ public class JaxbTest {
         String file = "config-provider";
         Reader reader = getReader(file);
         ConfigProviderType jaspi1 = JaspiXmlUtil.loadConfigProvider(reader);
-        jaspi1.initialize(classLoaderLookup, callbackHandler);
+        jaspi1.initialize(callbackHandler);
         File newFile = getWriteFile(file);
         Writer writer = new FileWriter(newFile);
         JaspiXmlUtil.writeConfigProvider(jaspi1, writer);
@@ -125,13 +122,13 @@ public class JaxbTest {
         String file = "client-auth-config";
         Reader reader = getReader(file);
         ClientAuthConfigType jaspi1 = JaspiXmlUtil.loadClientAuthConfig(reader);
-        jaspi1.initialize(classLoaderLookup, callbackHandler);
+        jaspi1.initialize(callbackHandler);
         File newFile = getWriteFile(file);
         Writer writer = new FileWriter(newFile);
         JaspiXmlUtil.writeClientAuthConfig(jaspi1, writer);
         ClientAuthConfigType jaspi2 = JaspiXmlUtil.loadClientAuthConfig(new FileReader(newFile));
 
-        ClientAuthConfig clientAuthConfig = jaspi1.newClientAuthConfig("Http", "app", classLoaderLookup, callbackHandler);
+        ClientAuthConfig clientAuthConfig = jaspi1.newClientAuthConfig("Http", "app", callbackHandler);
         checkClientAuthConfig(clientAuthConfig);
     }
 
@@ -145,7 +142,7 @@ public class JaxbTest {
         JaspiXmlUtil.writeClientAuthContext(jaspi1, writer);
         ClientAuthContextType jaspi2 = JaspiXmlUtil.loadClientAuthContext(new FileReader(newFile));
 
-        ClientAuthContext clientAuthConfig = jaspi1.newClientAuthContext(classLoaderLookup, callbackHandler);
+        ClientAuthContext clientAuthConfig = jaspi1.newClientAuthContext(callbackHandler);
         clientAuthConfig.secureRequest(null, null);
     }
 
@@ -159,7 +156,7 @@ public class JaxbTest {
         JaspiXmlUtil.writeClientAuthModule(jaspi1, writer);
         AuthModuleType jaspi2 = JaspiXmlUtil.loadClientAuthModule(new FileReader(newFile));
 
-        ClientAuthModule clientAuthConfig = jaspi1.newAuthModule(classLoaderLookup, callbackHandler);
+        ClientAuthModule clientAuthConfig = jaspi1.newAuthModule(callbackHandler);
         clientAuthConfig.secureRequest(null, null);
     }
 

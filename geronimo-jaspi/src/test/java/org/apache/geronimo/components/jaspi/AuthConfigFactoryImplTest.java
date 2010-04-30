@@ -16,11 +16,9 @@
  */
 package org.apache.geronimo.components.jaspi;
 
-import java.io.File;
 import java.net.URL;
 
 import javax.security.auth.callback.CallbackHandler;
-import javax.security.auth.message.AuthException;
 import javax.security.auth.message.config.AuthConfigFactory;
 import javax.security.auth.message.config.AuthConfigFactory.RegistrationContext;
 import javax.security.auth.message.config.AuthConfigProvider;
@@ -160,8 +158,7 @@ public class AuthConfigFactoryImplTest extends TestCase {
         AuthConfigFactory factory = AuthConfigFactory.getFactory();
         AuthModuleType<ClientAuthModule> authModuleType = new AuthModuleType<ClientAuthModule>();
         authModuleType.setClassName(DummyClientAuthModule.class.getName());
-        ClassLoaderLookup classLoaderLookup = new ConstantClassLoaderLookup(getClass().getClassLoader());
-        AuthConfigProvider authConfigProvider = JaspiUtil.wrapClientAuthModule("layer", "appContext1", "id", authModuleType, true, classLoaderLookup);
+        AuthConfigProvider authConfigProvider = JaspiUtil.wrapClientAuthModule("layer", "appContext1", "id", authModuleType, true);
         String regId = factory.registerConfigProvider(authConfigProvider, "layer", "appContext1", "description");
         DummyListener listener = new DummyListener();
         assertNotNull(factory.getConfigProvider("layer", "appContext1", listener));
@@ -173,8 +170,7 @@ public class AuthConfigFactoryImplTest extends TestCase {
         AuthConfigFactory factory = AuthConfigFactory.getFactory();
         AuthModuleType<ServerAuthModule> authModuleType = new AuthModuleType<ServerAuthModule>();
         authModuleType.setClassName(DummyServerAuthModule.class.getName());
-        ClassLoaderLookup classLoaderLookup = new ConstantClassLoaderLookup(getClass().getClassLoader());
-        AuthConfigProvider authConfigProvider = JaspiUtil.wrapServerAuthModule("layer", "appContext1", "id", authModuleType, true, classLoaderLookup);
+        AuthConfigProvider authConfigProvider = JaspiUtil.wrapServerAuthModule("layer", "appContext1", "id", authModuleType, true);
         String regId = factory.registerConfigProvider(authConfigProvider, "layer", "appContext1", "description");
         DummyListener listener = new DummyListener();
         assertNotNull(factory.getConfigProvider("layer", "appContext1", listener));

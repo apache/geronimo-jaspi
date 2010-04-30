@@ -24,17 +24,19 @@
 
 package org.apache.geronimo.components.jaspi.model;
 
+import java.io.Serializable;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
+
 import javax.security.auth.message.AuthException;
 import javax.security.auth.message.MessagePolicy;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
-import java.io.Serializable;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.security.PrivilegedActionException;
-import java.security.PrivilegedExceptionAction;
+import org.apache.geronimo.osgi.locator.ProviderLocator;
 
 
 /**
@@ -93,12 +95,12 @@ public class ProtectionPolicyType
         this.className = value;
     }
 
-    public MessagePolicy.ProtectionPolicy newProtectionPolicy(final ClassLoader classLoader) throws AuthException {
+    public MessagePolicy.ProtectionPolicy newProtectionPolicy() throws AuthException {
         try {
             return java.security.AccessController
             .doPrivileged(new PrivilegedExceptionAction<MessagePolicy.ProtectionPolicy>() {
                 public MessagePolicy.ProtectionPolicy run() throws ClassNotFoundException, SecurityException, NoSuchMethodException, IllegalArgumentException, InstantiationException, IllegalAccessException, InvocationTargetException {
-                    Class<? extends MessagePolicy.ProtectionPolicy> cl = Class.forName(className, true, classLoader).asSubclass(MessagePolicy.ProtectionPolicy.class);
+                    Class<? extends MessagePolicy.ProtectionPolicy> cl = ProviderLocator.loadClass(className, getClass(), Thread.currentThread().getContextClassLoader()).asSubclass(MessagePolicy.ProtectionPolicy.class);
                     Constructor<? extends MessagePolicy.ProtectionPolicy> cnst = cl.getConstructor();
                     MessagePolicy.ProtectionPolicy target = cnst.newInstance();
                     return target;

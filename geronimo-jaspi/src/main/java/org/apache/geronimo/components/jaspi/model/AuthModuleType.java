@@ -24,7 +24,13 @@
 
 package org.apache.geronimo.components.jaspi.model;
 
-import org.apache.geronimo.components.jaspi.ClassLoaderLookup;
+import java.io.Serializable;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
+import java.util.Map;
 
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.message.AuthException;
@@ -34,13 +40,7 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
-import java.io.Serializable;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.security.PrivilegedActionException;
-import java.security.PrivilegedExceptionAction;
-import java.util.Map;
+import org.apache.geronimo.osgi.locator.ProviderLocator;
 
 
 /**
@@ -190,19 +190,18 @@ public class AuthModuleType<T>
         this.classLoaderName = classLoaderName;
     }
 
-    public T newAuthModule(final ClassLoaderLookup classLoaderLookup, final CallbackHandler callbackHandler) throws AuthException {
-        final ClassLoader classLoader = classLoaderLookup.getClassLoader(classLoaderName);
+    public T newAuthModule(final CallbackHandler callbackHandler) throws AuthException {
         T authModule;
         try {
             authModule = java.security.AccessController
             .doPrivileged(new PrivilegedExceptionAction<T>() {
                 public T run() throws ClassNotFoundException, SecurityException, NoSuchMethodException, IllegalArgumentException, InstantiationException, IllegalAccessException, InvocationTargetException, AuthException {
-                    Class<? extends T> cl = (Class<? extends T>) Class.forName(className, true, classLoader);
+                    Class<? extends T> cl = (Class<? extends T>) ProviderLocator.loadClass(className, getClass(), Thread.currentThread().getContextClassLoader());
                     Constructor<? extends T> cnst = cl.getConstructor();
                     T authModule = cnst.newInstance();
                     Method m = cl.getMethod("initialize", MessagePolicy.class, MessagePolicy.class, CallbackHandler.class, Map.class);
-                    MessagePolicy reqPolicy = requestPolicy == null? null:requestPolicy.newMessagePolicy(classLoader);
-                    MessagePolicy respPolicy = responsePolicy == null? null: responsePolicy.newMessagePolicy(classLoader);
+                    MessagePolicy reqPolicy = requestPolicy == null? null:requestPolicy.newMessagePolicy();
+                    MessagePolicy respPolicy = responsePolicy == null? null: responsePolicy.newMessagePolicy();
                     m.invoke(authModule, reqPolicy, respPolicy, callbackHandler, options);
                     return authModule;
                 }

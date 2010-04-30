@@ -24,13 +24,6 @@
 
 package org.apache.geronimo.components.jaspi.model;
 
-import org.apache.geronimo.components.jaspi.ClassLoaderLookup;
-
-import javax.security.auth.callback.CallbackHandler;
-import javax.security.auth.message.AuthException;
-import javax.security.auth.message.config.*;
-import javax.xml.bind.annotation.*;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.io.Serializable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -40,6 +33,21 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import javax.security.auth.callback.CallbackHandler;
+import javax.security.auth.message.AuthException;
+import javax.security.auth.message.config.AuthConfigFactory;
+import javax.security.auth.message.config.AuthConfigProvider;
+import javax.security.auth.message.config.ClientAuthConfig;
+import javax.security.auth.message.config.RegistrationListener;
+import javax.security.auth.message.config.ServerAuthConfig;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlTransient;
+import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import org.apache.geronimo.osgi.locator.ProviderLocator;
 
 
 /**
@@ -347,16 +355,15 @@ public class ConfigProviderType
         this.classLoaderName = classLoaderName;
     }
 
-    public void initialize(ClassLoaderLookup classLoaderLookup, CallbackHandler callbackHandler) {
+    public void initialize(CallbackHandler callbackHandler) {
         if (className == null) {
-            provider = new ConfigProviderImpl(getClientAuthConfig(), getServerAuthConfig(), classLoaderLookup);
+            provider = new ConfigProviderImpl(getClientAuthConfig(), getServerAuthConfig());
         } else {
-            final ClassLoader classLoader = classLoaderLookup.getClassLoader(classLoaderName);
             try {
                 provider = java.security.AccessController
                 .doPrivileged(new PrivilegedExceptionAction<AuthConfigProvider>() {
                     public AuthConfigProvider run() throws ClassNotFoundException, SecurityException, NoSuchMethodException, IllegalArgumentException, InstantiationException, IllegalAccessException, InvocationTargetException {
-                        Class<? extends AuthConfigProvider> cl = Class.forName(className, true, classLoader).asSubclass(AuthConfigProvider.class);
+                        Class<? extends AuthConfigProvider> cl = ProviderLocator.loadClass(className, getClass(), Thread.currentThread().getContextClassLoader()).asSubclass(AuthConfigProvider.class);
                         Constructor<? extends AuthConfigProvider> cnst = cl.getConstructor(Map.class, AuthConfigFactory.class);
                         return cnst.newInstance(properties, authConfigFactory);
                     }
@@ -385,13 +392,10 @@ public class ConfigProviderType
 
     public static class ConfigProviderImpl implements AuthConfigProvider {
 
-//        private final ConfigProviderType configProviderType;
-        private final ClassLoaderLookup classLoaderLookup;
         private final Map<String, ClientAuthConfigType> clientConfigTypeMap;
         private final Map<String, ServerAuthConfigType> serverAuthConfigMap;
 
-        public ConfigProviderImpl(Map<String, ClientAuthConfigType> clientConfigTypeMap, Map<String, ServerAuthConfigType> serverAuthConfigMap, ClassLoaderLookup classLoaderLookup) {
-            this.classLoaderLookup = classLoaderLookup;
+        public ConfigProviderImpl(Map<String, ClientAuthConfigType> clientConfigTypeMap, Map<String, ServerAuthConfigType> serverAuthConfigMap) {
             this.clientConfigTypeMap = clientConfigTypeMap;
             this.serverAuthConfigMap = serverAuthConfigMap;
         }
@@ -424,7 +428,7 @@ public class ConfigProviderType
             }
             if (ctx != null) {
                 
-                return ctx.newClientAuthConfig(layer, appContext, classLoaderLookup, handler);
+                return ctx.newClientAuthConfig(layer, appContext, handler);
             }
             throw new AuthException("No suitable ClientAuthConfig");
         }
@@ -448,7 +452,7 @@ public class ConfigProviderType
             }
             if (ctx != null) {
 
-                return ctx.newServerAuthConfig(layer, appContext, classLoaderLookup, handler);
+                return ctx.newServerAuthConfig(layer, appContext, handler);
             }
             throw new AuthException("No suitable ServerAuthConfig");
         }

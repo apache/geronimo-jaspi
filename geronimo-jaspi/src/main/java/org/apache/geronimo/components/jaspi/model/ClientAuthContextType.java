@@ -24,7 +24,10 @@
 
 package org.apache.geronimo.components.jaspi.model;
 
-import org.apache.geronimo.components.jaspi.ClassLoaderLookup;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import javax.security.auth.Subject;
 import javax.security.auth.callback.CallbackHandler;
@@ -37,10 +40,6 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 
 /**
@@ -191,17 +190,17 @@ public class ClientAuthContextType
         return ConfigProviderType.getRegistrationKey(messageLayer, appContext);
     }
 
-    public void initialize(ClassLoaderLookup classLoaderLookup, CallbackHandler callbackHandler) throws AuthException {
+    public void initialize(CallbackHandler callbackHandler) throws AuthException {
     }
 
     public boolean isPersistent() {
         return true;
     }
 
-    public ClientAuthContext newClientAuthContext(ClassLoaderLookup classLoaderLookup, CallbackHandler callbackHandler) throws AuthException {
+    public ClientAuthContext newClientAuthContext(CallbackHandler callbackHandler) throws AuthException {
         List<ClientAuthModule> clientAuthModules = new ArrayList<ClientAuthModule>();
         for (AuthModuleType<ClientAuthModule> clientAuthModuleType: clientAuthModule) {
-            ClientAuthModule instance = clientAuthModuleType.newAuthModule(classLoaderLookup, callbackHandler);
+            ClientAuthModule instance = clientAuthModuleType.newAuthModule(callbackHandler);
             clientAuthModules.add(instance);
         }
         return new ClientAuthContextImpl(clientAuthModules);

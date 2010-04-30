@@ -24,13 +24,14 @@
 
 package org.apache.geronimo.components.jaspi.model;
 
+import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
-import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Map;
 
 
 /**

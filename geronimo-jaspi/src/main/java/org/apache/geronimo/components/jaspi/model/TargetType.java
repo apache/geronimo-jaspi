@@ -24,17 +24,19 @@
 
 package org.apache.geronimo.components.jaspi.model;
 
+import java.io.Serializable;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
+
 import javax.security.auth.message.AuthException;
 import javax.security.auth.message.MessagePolicy;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
-import java.io.Serializable;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.security.PrivilegedActionException;
-import java.security.PrivilegedExceptionAction;
+import org.apache.geronimo.osgi.locator.ProviderLocator;
 
 
 /**
@@ -93,12 +95,12 @@ public class TargetType
         this.className = value;
     }
 
-    public MessagePolicy.Target newTarget(final ClassLoader classLoader) throws AuthException {
+    public MessagePolicy.Target newTarget() throws AuthException {
         try {
             return java.security.AccessController
             .doPrivileged(new PrivilegedExceptionAction<MessagePolicy.Target>() {
                 public MessagePolicy.Target run() throws ClassNotFoundException, SecurityException, NoSuchMethodException, IllegalArgumentException, InstantiationException, IllegalAccessException, InvocationTargetException {
-                    Class<? extends MessagePolicy.Target> cl = Class.forName(className, true, classLoader).asSubclass(MessagePolicy.Target.class);
+                    Class<? extends MessagePolicy.Target> cl = ProviderLocator.loadClass(className, getClass(), Thread.currentThread().getContextClassLoader()).asSubclass(MessagePolicy.Target.class);
                     Constructor<? extends MessagePolicy.Target> cnst = cl.getConstructor();
                     MessagePolicy.Target target = cnst.newInstance();
                     return target;
