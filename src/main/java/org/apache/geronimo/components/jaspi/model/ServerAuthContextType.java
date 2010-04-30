@@ -24,7 +24,10 @@
 
 package org.apache.geronimo.components.jaspi.model;
 
-import org.apache.geronimo.components.jaspi.ClassLoaderLookup;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import javax.security.auth.Subject;
 import javax.security.auth.callback.CallbackHandler;
@@ -37,10 +40,6 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 
 /**
@@ -192,10 +191,10 @@ public class ServerAuthContextType
         return ConfigProviderType.getRegistrationKey(messageLayer, appContext);
     }
 
-    public void initialize(ClassLoaderLookup classLoaderLookup, CallbackHandler callbackHandler) throws AuthException {
+    public void initialize(CallbackHandler callbackHandler) throws AuthException {
         List<ServerAuthModule> serverAuthModules = new ArrayList<ServerAuthModule>();
         for (AuthModuleType<ServerAuthModule> serverAuthModuleType: serverAuthModule) {
-            ServerAuthModule instance = serverAuthModuleType.newAuthModule(classLoaderLookup, callbackHandler);
+            ServerAuthModule instance = serverAuthModuleType.newAuthModule(callbackHandler);
             serverAuthModules.add(instance);
         }
         serverAuthContext = new ServerAuthContextImpl(serverAuthModules);
@@ -209,10 +208,10 @@ public class ServerAuthContextType
         return serverAuthContext;
     }
 
-    public ServerAuthContext newServerAuthContext(ClassLoaderLookup classLoaderLookup, CallbackHandler callbackHandler) throws AuthException {
+    public ServerAuthContext newServerAuthContext(CallbackHandler callbackHandler) throws AuthException {
         List<ServerAuthModule> serverAuthModules = new ArrayList<ServerAuthModule>();
         for (AuthModuleType<ServerAuthModule> serverAuthModuleType: serverAuthModule) {
-            ServerAuthModule instance = serverAuthModuleType.newAuthModule(classLoaderLookup, callbackHandler);
+            ServerAuthModule instance = serverAuthModuleType.newAuthModule(callbackHandler);
             serverAuthModules.add(instance);
         }
         return new ServerAuthContextImpl(serverAuthModules);

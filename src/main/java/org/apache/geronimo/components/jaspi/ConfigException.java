@@ -21,20 +21,23 @@
 package org.apache.geronimo.components.jaspi;
 
 /**
- * Simple default ClassLoader lookup that always returns the same classloader
- *
  * @version $Rev$ $Date$
  */
-public class ConstantClassLoaderLookup implements ClassLoaderLookup {
+public class ConfigException extends Exception {
 
-    private final ClassLoader classLoader;
-
-    public ConstantClassLoaderLookup(ClassLoader classLoader) {
-        this.classLoader = classLoader;
+    public ConfigException() {
+        super();
     }
 
-    public ClassLoader getClassLoader(String name) {
-        return classLoader;
+    public ConfigException(String s) {
+        super(s);
     }
-    
+
+    public ConfigException(String s, Throwable throwable) {
+        super(s, throwable);
+    }
+
+    public ConfigException(Throwable throwable) {
+        super(throwable);
+    }
 }

@@ -20,8 +20,6 @@
 
 package org.apache.geronimo.components.jaspi.model;
 
-import org.apache.geronimo.components.jaspi.ClassLoaderLookup;
-
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.message.AuthException;
 
@@ -30,6 +28,6 @@ import javax.security.auth.message.AuthException;
  */
 public interface KeyedObject {
     String getKey();
-    void initialize(ClassLoaderLookup classLoaderLookup, CallbackHandler callbackHandler) throws AuthException;
+    void initialize(CallbackHandler callbackHandler) throws AuthException;
     boolean isPersistent();
 }

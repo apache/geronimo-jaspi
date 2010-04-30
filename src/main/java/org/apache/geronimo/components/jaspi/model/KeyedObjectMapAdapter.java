@@ -20,43 +20,30 @@
 
 package org.apache.geronimo.components.jaspi.model;
 
-import org.apache.geronimo.components.jaspi.ClassLoaderLookup;
-import org.apache.geronimo.components.jaspi.ConstantClassLoaderLookup;
-
-import javax.security.auth.callback.CallbackHandler;
-import javax.xml.bind.annotation.adapters.XmlAdapter;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.security.auth.callback.CallbackHandler;
+import javax.xml.bind.annotation.adapters.XmlAdapter;
+
 /**
  * @version $Rev$ $Date$
  */
 public class KeyedObjectMapAdapter<T extends KeyedObject> extends XmlAdapter<T[], Map<String, T>> {
-    public static ClassLoaderLookup staticClassLoaderLookup;
     public static CallbackHandler staticCallbackHandler;
-    private final ClassLoaderLookup classLoaderLookup;
     private final CallbackHandler callbackHandler;
     private final Class<T> type;
 
-    public KeyedObjectMapAdapter(ClassLoaderLookup classLoaderLookup, CallbackHandler callbackHandler, Class<T> type) {
-        this.classLoaderLookup = classLoaderLookup;
+    public KeyedObjectMapAdapter(CallbackHandler callbackHandler, Class<T> type) {
         this.callbackHandler = callbackHandler;
         this.type = type;
     }
 
     public KeyedObjectMapAdapter(Class<T> type) {
-        if (staticClassLoaderLookup != null) {
-            this.classLoaderLookup = staticClassLoaderLookup;
-        } else {
-            ClassLoader testLoader = Thread.currentThread().getContextClassLoader();
-            final ClassLoader cl = testLoader == null ? KeyedObjectMapAdapter.class.getClassLoader() : testLoader;
-            classLoaderLookup = new ConstantClassLoaderLookup(cl);
-        }
-        this.type = type;
-        callbackHandler = staticCallbackHandler;
+        this(staticCallbackHandler, type);
     }
 
     public Map<String, T> unmarshal(T[] configProviderTypes) throws Exception {
@@ -66,7 +53,7 @@ public class KeyedObjectMapAdapter<T extends KeyedObject> extends XmlAdapter<T[]
                 if (configProviderType != null) {
                     String key = configProviderType.getKey();
                     map.put(key, configProviderType);
-                    configProviderType.initialize(classLoaderLookup, callbackHandler);
+                    configProviderType.initialize(callbackHandler);
                 }
             }
         }

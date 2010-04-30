@@ -20,14 +20,13 @@
 
 package org.apache.geronimo.components.jaspi.model;
 
-import org.apache.geronimo.components.jaspi.ClassLoaderLookup;
+import java.util.Collections;
+import java.util.Map;
 
 import javax.security.auth.message.AuthException;
 import javax.security.auth.message.config.AuthConfigProvider;
 import javax.security.auth.message.module.ClientAuthModule;
 import javax.security.auth.message.module.ServerAuthModule;
-import java.util.Collections;
-import java.util.Map;
 
 /**
  * Convenience methods to wrap various jaspi objects into AuthConfigProvider instances, ready to be registered.
@@ -38,39 +37,39 @@ public class JaspiUtil {
     private JaspiUtil() {
     }
 
-    public static AuthConfigProvider wraptAuthConfigProvider(ConfigProviderType configProviderType, ClassLoaderLookup classLoaderLookup) {
-        return new ConfigProviderType.ConfigProviderImpl(configProviderType.getClientAuthConfig(), configProviderType.getServerAuthConfig(), classLoaderLookup);
+    public static AuthConfigProvider wrapAuthConfigProvider(ConfigProviderType configProviderType) {
+        return new ConfigProviderType.ConfigProviderImpl(configProviderType.getClientAuthConfig(), configProviderType.getServerAuthConfig());
     }
 
-    public static AuthConfigProvider wrapClientAuthConfig(ClientAuthConfigType clientAuthConfigType, ClassLoaderLookup classLoaderLookup) throws AuthException {
+    public static AuthConfigProvider wrapClientAuthConfig(ClientAuthConfigType clientAuthConfigType) throws AuthException {
         Map<String, ClientAuthConfigType> clientAuthConfig = Collections.singletonMap(clientAuthConfigType.getKey(), clientAuthConfigType);
-        return new ConfigProviderType.ConfigProviderImpl(clientAuthConfig, Collections.<String, ServerAuthConfigType>emptyMap(), classLoaderLookup);
+        return new ConfigProviderType.ConfigProviderImpl(clientAuthConfig, Collections.<String, ServerAuthConfigType>emptyMap());
     }
 
-    public static AuthConfigProvider wrapClientAuthContext(ClientAuthContextType clientAuthContextType, boolean _protected, ClassLoaderLookup classLoaderLookup) throws AuthException {
+    public static AuthConfigProvider wrapClientAuthContext(ClientAuthContextType clientAuthContextType, boolean _protected) throws AuthException {
         ClientAuthConfigType clientAuthConfigType = new ClientAuthConfigType(clientAuthContextType, _protected);
-        return wrapClientAuthConfig(clientAuthConfigType, classLoaderLookup);
+        return wrapClientAuthConfig(clientAuthConfigType);
     }
 
-    public static AuthConfigProvider wrapClientAuthModule(String messageLayer, String appContext, String authenticationContextID, AuthModuleType<ClientAuthModule> clientAuthModuleType, boolean _protected, ClassLoaderLookup classLoaderLookup) throws AuthException {
+    public static AuthConfigProvider wrapClientAuthModule(String messageLayer, String appContext, String authenticationContextID, AuthModuleType<ClientAuthModule> clientAuthModuleType, boolean _protected) throws AuthException {
         ClientAuthContextType clientAuthContextType = new ClientAuthContextType(messageLayer, appContext, authenticationContextID, clientAuthModuleType);
-        return wrapClientAuthContext(clientAuthContextType, _protected, classLoaderLookup);
+        return wrapClientAuthContext(clientAuthContextType, _protected);
     }
 
 
-    public static AuthConfigProvider wrapServerAuthConfig(ServerAuthConfigType serverAuthConfigType, ClassLoaderLookup classLoaderLookup) throws AuthException {
+    public static AuthConfigProvider wrapServerAuthConfig(ServerAuthConfigType serverAuthConfigType) throws AuthException {
         Map<String, ServerAuthConfigType> serverAuthConfig = Collections.singletonMap(serverAuthConfigType.getKey(), serverAuthConfigType);
-        return new ConfigProviderType.ConfigProviderImpl(Collections.<String, ClientAuthConfigType>emptyMap(), serverAuthConfig, classLoaderLookup);
+        return new ConfigProviderType.ConfigProviderImpl(Collections.<String, ClientAuthConfigType>emptyMap(), serverAuthConfig);
     }
 
-    public static AuthConfigProvider wrapServerAuthContext(ServerAuthContextType serverAuthContextType, boolean _protected, ClassLoaderLookup classLoaderLookup) throws AuthException {
+    public static AuthConfigProvider wrapServerAuthContext(ServerAuthContextType serverAuthContextType, boolean _protected) throws AuthException {
         ServerAuthConfigType serverAuthConfigType = new ServerAuthConfigType(serverAuthContextType, _protected);
-        return wrapServerAuthConfig(serverAuthConfigType, classLoaderLookup);
+        return wrapServerAuthConfig(serverAuthConfigType);
     }
 
-    public static AuthConfigProvider wrapServerAuthModule(String messageLayer, String appContext, String authenticationContextID, AuthModuleType<ServerAuthModule> serverAuthModuleType, boolean _protected, ClassLoaderLookup classLoaderLookup) throws AuthException {
+    public static AuthConfigProvider wrapServerAuthModule(String messageLayer, String appContext, String authenticationContextID, AuthModuleType<ServerAuthModule> serverAuthModuleType, boolean _protected) throws AuthException {
         ServerAuthContextType serverAuthContextType = new ServerAuthContextType(messageLayer, appContext, authenticationContextID, serverAuthModuleType);
-        return wrapServerAuthContext(serverAuthContextType, _protected, classLoaderLookup);
+        return wrapServerAuthContext(serverAuthContextType, _protected);
     }
 
 }

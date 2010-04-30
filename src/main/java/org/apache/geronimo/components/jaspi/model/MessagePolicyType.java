@@ -24,15 +24,16 @@
 
 package org.apache.geronimo.components.jaspi.model;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.security.auth.message.AuthException;
 import javax.security.auth.message.MessagePolicy;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlType;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
 
 
 /**
@@ -123,14 +124,14 @@ public class MessagePolicyType
         this.mandatory = value;
     }
 
-    public MessagePolicy newMessagePolicy(ClassLoader cl) throws AuthException {
+    public MessagePolicy newMessagePolicy() throws AuthException {
         if (targetPolicy == null || targetPolicy.size() == 0) {
             return null;
         }
         MessagePolicy.TargetPolicy[] targetPolicies = new MessagePolicy.TargetPolicy[targetPolicy.size()];
         int i = 0;
         for (TargetPolicyType targetPolicyType: targetPolicy) {
-            targetPolicies[i++] = targetPolicyType.newTargetPolicy(cl);
+            targetPolicies[i++] = targetPolicyType.newTargetPolicy();
         }
         return new MessagePolicy(targetPolicies, mandatory);
     }

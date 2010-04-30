@@ -24,7 +24,10 @@
 
 package org.apache.geronimo.components.jaspi.model;
 
-import org.apache.geronimo.components.jaspi.ClassLoaderLookup;
+import java.io.Serializable;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.security.auth.Subject;
 import javax.security.auth.callback.CallbackHandler;
@@ -37,10 +40,6 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
-import java.io.Serializable;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 
 
 /**
@@ -243,18 +242,18 @@ public class ClientAuthConfigType
         return ConfigProviderType.getRegistrationKey(messageLayer, appContext);
     }
 
-    public void initialize(ClassLoaderLookup classLoaderLookup, CallbackHandler callbackHandler) throws AuthException {
+    public void initialize(CallbackHandler callbackHandler) throws AuthException {
     }
 
     public boolean isPersistent() {
         return true;
     }
 
-    public ClientAuthConfig newClientAuthConfig(String messageLayer, String appContext, ClassLoaderLookup classLoaderLookup, CallbackHandler callbackHandler) throws AuthException {
+    public ClientAuthConfig newClientAuthConfig(String messageLayer, String appContext, CallbackHandler callbackHandler) throws AuthException {
         Map<String, ClientAuthContext> authContextMap = new HashMap<String, ClientAuthContext>();
         for (ClientAuthContextType clientAuthContextType: getClientAuthContext().values()) {
             if (clientAuthContextType.match(messageLayer, appContext)) {
-                ClientAuthContext clientAuthContext = clientAuthContextType.newClientAuthContext(classLoaderLookup, callbackHandler);
+                ClientAuthContext clientAuthContext = clientAuthContextType.newClientAuthContext(callbackHandler);
                 String authContextID = clientAuthContextType.getAuthenticationContextID();
                 if (authContextID == null) {
                     authContextID = getAuthenticationContextID();

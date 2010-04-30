@@ -51,7 +51,6 @@ public class AuthConfigFactoryImpl extends AuthConfigFactory {
     private static ClassLoader contextClassLoader;
     private JaspiType jaspiType = new JaspiType();
 
-    private final ClassLoaderLookup classLoaderLookup;
     private final CallbackHandler callbackHandler;
     private final File configFile;
 
@@ -64,16 +63,15 @@ public class AuthConfigFactoryImpl extends AuthConfigFactory {
                 });
     }
 
-    public AuthConfigFactoryImpl(ClassLoaderLookup classLoaderLookup, CallbackHandler callbackHandler, File configFile) {
-        JaspiXmlUtil.initialize(classLoaderLookup, callbackHandler);
-        this.classLoaderLookup = classLoaderLookup;
+    public AuthConfigFactoryImpl(CallbackHandler callbackHandler, File configFile) {
+        JaspiXmlUtil.initialize(callbackHandler);
         this.callbackHandler = callbackHandler;
         this.configFile = configFile;
         loadConfig();
     }
 
     public AuthConfigFactoryImpl() {
-        this(new ConstantClassLoaderLookup(contextClassLoader), staticCallbackHandler, getConfigFile());
+        this(staticCallbackHandler, getConfigFile());
     }
 
     private static File getConfigFile() {
@@ -202,7 +200,7 @@ public class AuthConfigFactoryImpl extends AuthConfigFactory {
             }
             ctx.setClassName(className);
             ctx.setProperties(constructorParam);
-            ctx.initialize(classLoaderLookup, callbackHandler);
+            ctx.initialize(callbackHandler);
         } else {
             if (provider == null) {
                 throw new IllegalStateException("No config provider to set");
