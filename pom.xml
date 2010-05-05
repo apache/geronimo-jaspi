@@ -124,6 +124,22 @@
 
     </dependencies>
     <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                  <groupId>org.apache.maven.plugins</groupId>
+                  <artifactId>maven-jar-plugin</artifactId>
+                  <configuration>
+                    <archive>
+                      <manifest>
+                        <addDefaultSpecificationEntries>false</addDefaultSpecificationEntries>
+                      </manifest>
+                    </archive>
+                  </configuration>
+                </plugin>
+
+            </plugins>
+        </pluginManagement>
 
         <plugins>
 
@@ -146,13 +162,21 @@
                     <instructions>
                         <Export-Package>org.apache.geronimo.components.jaspi*;version=1.0</Export-Package>
                         <Export-SPI-Provider>org.apache.geronimo.components.jaspi.AuthConfigFactoryImpl</Export-SPI-Provider>
+                        <Import-Package>
+                            org.apache.geronimo.components.jaspi*;version="[1.0,1.1)",
+                            *
+                        </Import-Package>
+                        <!-- once a maven-bundle-plugin that can interpret the impl/uses version policy is released we can remove the explicit version ranges on import-package -->
                         <_versionpolicy-impl>[$(version;==;$(@)),$(version;=+;$(@)))</_versionpolicy-impl>
                         <_versionpolicy-uses>[$(version;==;$(@)),$(version;+;$(@)))</_versionpolicy-uses>
                         <_versionpolicy>[$(version;==;$(@)),$(version;+;$(@)))</_versionpolicy>
+                        <Specification-Version>1.0</Specification-Version>
+                        <Specification-Title>JASPIC</Specification-Title>
+                        <Specification-Vendor>Sun Microsystems</Specification-Vendor>
                     </instructions>
                 </configuration>
             </plugin>
-         </plugins>
+        </plugins>
     </build>
 
     <profiles>
