@@ -143,7 +143,7 @@ public class OpenIDServerAuthModule implements ServerAuthModule {
         HttpServletResponse response = (HttpServletResponse) messageInfo.getResponseMessage();
         boolean isMandatory = isMandatory(messageInfo);
         HttpSession session = request.getSession(isMandatory);
-        String uri = request.getPathInfo();
+        String uri = request.getRequestURI();
         if (session == null || isLoginOrErrorPage(uri)) {
             //auth not mandatory and not logged in.
             return AuthStatus.SUCCESS;

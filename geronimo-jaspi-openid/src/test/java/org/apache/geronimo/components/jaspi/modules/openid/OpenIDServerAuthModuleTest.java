@@ -30,7 +30,6 @@ import javax.security.auth.message.config.ServerAuthConfig;
 import javax.security.auth.message.config.ServerAuthContext;
 import javax.security.auth.message.module.ServerAuthModule;
 
-import org.apache.geronimo.components.jaspi.ConstantClassLoaderLookup;
 import org.apache.geronimo.components.jaspi.model.JaspiUtil;
 import org.apache.geronimo.components.jaspi.model.AuthModuleType;
 import org.testng.annotations.Test;
@@ -51,7 +50,7 @@ public class OpenIDServerAuthModuleTest {
         options.put(OpenIDServerAuthModule.LOGIN_PAGE_KEY, "/login.jsp");
         options.put(OpenIDServerAuthModule.ERROR_PAGE_KEY, "/error.jsp");
         authModuleType.setOptions(options);
-        AuthConfigProvider authConfigProvider = JaspiUtil.wrapServerAuthModule("Http", "testApp", "id", authModuleType, true, new ConstantClassLoaderLookup(getClass().getClassLoader()));
+        AuthConfigProvider authConfigProvider = JaspiUtil.wrapServerAuthModule("Http", "testApp", "id", authModuleType, true);
         factory1.registerConfigProvider(authConfigProvider, "Http", "testApp", "description");
         AuthConfigProvider authConfigProvider2 = factory1.getConfigProvider("Http", "testApp", null);
         ServerAuthConfig serverAuthConfig = authConfigProvider2.getServerAuthConfig("Http", "testApp", callbackHandler);
