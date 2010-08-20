@@ -32,7 +32,7 @@
     <artifactId>geronimo-jaspi-openid</artifactId>
     <packaging>bundle</packaging>
     <version>1.0-SNAPSHOT</version>
-    <name>geronimo-jaspi-openid</name>
+    <name>Apache Geronimo JASPI openid implementation</name>
 
     <description>Geronimo openid JASPI module implementation based on openid4java.</description>
 

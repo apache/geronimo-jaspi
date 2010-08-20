@@ -33,7 +33,7 @@
     <artifactId>geronimo-jaspi</artifactId>
     <version>1.2-SNAPSHOT</version>
     <packaging>bundle</packaging>
-    <name>Geronimo JASPI implementation</name>
+    <name>Apache Geronimo JASPI implementation</name>
 
     <description>Geronimo JASPI implementation using jaxb/sxc for simple xml persistence.</description>
 
