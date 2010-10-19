@@ -174,7 +174,7 @@
                         <Specification-Version>1.0</Specification-Version>
                         <Specification-Title>JASPIC</Specification-Title>
                         <Specification-Vendor>Sun Microsystems</Specification-Vendor>
-                        <Private-Package>org.apache.geronimo.osgi.locator</Private-Package>
+                        <Private-Package>org.apache.geronimo.osgi.locator;sxc*</Private-Package>
                         <Bundle-Activator>org.apache.geronimo.osgi.locator.Activator</Bundle-Activator>
                     </instructions>
                 </configuration>
