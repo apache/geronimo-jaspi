@@ -20,11 +20,14 @@
 
 package org.apache.geronimo.components.jaspi.model;
 
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.File;
+import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.io.FileWriter;
 import java.io.FileReader;
@@ -63,7 +66,7 @@ public class JaxbTest {
         JaspiType jaspi1 = loadJaspi(file);
         if (jaspi1.getConfigProvider().size() != count) throw new Exception("expected " + count + " configprovider, not this: " + jaspi1.getConfigProvider());
         File newFile = getWriteFile(file);
-        Writer writer = new FileWriter(newFile);
+        Writer writer = getWriter(newFile);
         JaspiXmlUtil.writeJaspi(jaspi1, writer);
         JaspiType jaspi2 = JaspiXmlUtil.loadJaspi(new FileReader(newFile));
         if (jaspi2.getConfigProvider().size() != count) throw new Exception("expected " + count + " configprovider, not this: " + jaspi2.getConfigProvider());
@@ -75,7 +78,7 @@ public class JaxbTest {
         JaspiType jaspi1 = loadJaspi(file);
         if (jaspi1.getConfigProvider().size() != count) throw new Exception("expected " + count + " configprovider, not this: " + jaspi1.getConfigProvider());
         File newFile = getWriteFile(file);
-        Writer writer = new FileWriter(newFile);
+        Writer writer = getWriter(newFile);
         JaspiXmlUtil.writeJaspi(jaspi1, writer);
         JaspiType jaspi2 = JaspiXmlUtil.loadJaspi(new FileReader(newFile));
         if (jaspi2.getConfigProvider().size() != count) throw new Exception("expected " + count + " configprovider, not this: " + jaspi2.getConfigProvider());
@@ -90,9 +93,9 @@ public class JaxbTest {
         return rbac;
     }
 
-    private Reader getReader(String file) {
+    private Reader getReader(String file) throws UnsupportedEncodingException {
         InputStream in = getClass().getClassLoader().getResourceAsStream("test-" + file + ".xml");
-        Reader reader = new InputStreamReader(in);
+        Reader reader = new InputStreamReader(in, "UTF-8");
         return reader;
     }
 
@@ -109,7 +112,7 @@ public class JaxbTest {
         ConfigProviderType jaspi1 = JaspiXmlUtil.loadConfigProvider(reader);
         jaspi1.initialize(callbackHandler);
         File newFile = getWriteFile(file);
-        Writer writer = new FileWriter(newFile);
+        Writer writer = getWriter(newFile);
         JaspiXmlUtil.writeConfigProvider(jaspi1, writer);
         ConfigProviderType jaspi2 = JaspiXmlUtil.loadConfigProvider(new FileReader(newFile));
 
@@ -124,7 +127,7 @@ public class JaxbTest {
         ClientAuthConfigType jaspi1 = JaspiXmlUtil.loadClientAuthConfig(reader);
         jaspi1.initialize(callbackHandler);
         File newFile = getWriteFile(file);
-        Writer writer = new FileWriter(newFile);
+        Writer writer = getWriter(newFile);
         JaspiXmlUtil.writeClientAuthConfig(jaspi1, writer);
         ClientAuthConfigType jaspi2 = JaspiXmlUtil.loadClientAuthConfig(new FileReader(newFile));
 
@@ -138,12 +141,17 @@ public class JaxbTest {
         Reader reader = getReader(file);
         ClientAuthContextType jaspi1 = JaspiXmlUtil.loadClientAuthContext(reader);
         File newFile = getWriteFile(file);
-        Writer writer = new FileWriter(newFile);
+        Writer writer = getWriter(newFile);
         JaspiXmlUtil.writeClientAuthContext(jaspi1, writer);
         ClientAuthContextType jaspi2 = JaspiXmlUtil.loadClientAuthContext(new FileReader(newFile));
 
         ClientAuthContext clientAuthConfig = jaspi1.newClientAuthContext(callbackHandler);
         clientAuthConfig.secureRequest(null, null);
+    }
+
+    private Writer getWriter(File newFile) throws IOException {
+        FileOutputStream out = new FileOutputStream(newFile);
+        return new OutputStreamWriter(out, "UTF-8");//new FileWriter(newFile);
     }
 
     @Test
@@ -152,7 +160,7 @@ public class JaxbTest {
         Reader reader = getReader(file);
         AuthModuleType<ClientAuthModule> jaspi1 = JaspiXmlUtil.loadClientAuthModule(reader);
         File newFile = getWriteFile(file);
-        Writer writer = new FileWriter(newFile);
+        Writer writer = getWriter(newFile);
         JaspiXmlUtil.writeClientAuthModule(jaspi1, writer);
         AuthModuleType jaspi2 = JaspiXmlUtil.loadClientAuthModule(new FileReader(newFile));
 

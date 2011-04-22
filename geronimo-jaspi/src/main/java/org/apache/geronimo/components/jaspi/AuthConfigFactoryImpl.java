@@ -30,9 +30,13 @@ import javax.xml.bind.JAXBException;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.XMLStreamException;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -260,7 +264,8 @@ public class AuthConfigFactoryImpl extends AuthConfigFactory {
     private void saveConfig() {
         if (configFile != null) {
             try {
-                FileWriter out = new FileWriter(configFile);
+                OutputStream outStream = new FileOutputStream(configFile);
+                Writer out = new OutputStreamWriter(outStream, "UTF-8");
                 try {
                     JaspiXmlUtil.writeJaspi(jaspiType, out);
                 } finally {
