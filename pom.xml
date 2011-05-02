@@ -16,7 +16,7 @@
     limitations under the License.
 -->
 
-<!-- $Rev$ $Date$ -->
+<!-- $Rev: 1032962 $ $Date: 2010-11-09 04:23:49 -0800 (Tue, 09 Nov 2010) $ -->
 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
@@ -31,11 +31,11 @@
 
     <groupId>org.apache.geronimo.components</groupId>
     <artifactId>geronimo-jaspi</artifactId>
-    <version>1.1.2-SNAPSHOT</version>
+    <version>2.0-SNAPSHOT</version>
     <packaging>bundle</packaging>
     <name>Apache Geronimo JASPI implementation</name>
 
-    <description>Geronimo JASPI implementation using jaxb/sxc for simple xml persistence.</description>
+    <description>Geronimo JASPI implementation using xml/jaxb for simple xml configuration.</description>
 
     <scm>
         <connection>scm:svn:http://svn.apache.org/repos/asf/geronimo/components/jaspi/trunk/geronimo-jaspi</connection>
@@ -89,12 +89,12 @@
             <version>3.6</version>
         </dependency>
 
-        <dependency>
-            <groupId>org.apache.geronimo.bundles</groupId>
-            <artifactId>sxc-jaxb</artifactId>
-            <!--<version>0.8-SNAPSHOT</version>-->
-            <version>0.7.2_1</version>
-        </dependency>
+        <!--<dependency>-->
+            <!--<groupId>org.apache.geronimo.bundles</groupId>-->
+            <!--<artifactId>sxc-jaxb</artifactId>-->
+            <!--&lt;!&ndash;<version>0.8-SNAPSHOT</version>&ndash;&gt;-->
+            <!--<version>0.7.2_1</version>-->
+        <!--</dependency>-->
 
         <!--<dependency>-->
             <!--<groupId>org.apache.geronimo.bundles</groupId>-->
@@ -108,12 +108,12 @@
             <!--<version>2.2_1</version>-->
         <!--</dependency>-->
 
-        <dependency>
-            <groupId>com.sun.xml.bind</groupId>
-            <artifactId>jaxb-xjc</artifactId>
-            <version>2.2</version>
-            <scope>provided</scope>
-        </dependency>
+        <!--<dependency>-->
+            <!--<groupId>com.sun.xml.bind</groupId>-->
+            <!--<artifactId>jaxb-xjc</artifactId>-->
+            <!--<version>2.2</version>-->
+            <!--<scope>provided</scope>-->
+        <!--</dependency>-->
 
         <dependency>
             <groupId>org.testng</groupId>
@@ -161,20 +161,22 @@
                 <version>2.3.4</version>
                 <configuration>
                     <instructions>
-                        <Export-Package>org.apache.geronimo.components.jaspi*;version=1.0</Export-Package>
+                        <Export-Package>
+                            org.apache.geronimo.components.jaspi;version=2.0,
+                            org.apache.geronimo.components.jaspi.model;version=2.0
+                        </Export-Package>
                         <Export-SPI-Provider>org.apache.geronimo.components.jaspi.AuthConfigFactoryImpl</Export-SPI-Provider>
                         <Import-Package>
-                            org.apache.geronimo.components.jaspi*;version="[1.0,1.1)",
-                            com.sun.xml.bind.*:resolution:=optional,
+                            !org.apache.geronimo.components.jaspi.*,
+                            org.apache.geronimo.osgi.registry.api;resolution:=optional,
                             *
                         </Import-Package>
-                        <!-- once a maven-bundle-plugin that can interpret the impl/uses version policy is released we can remove the explicit version ranges on import-package -->
                         <_versionpolicy-impl>[$(version;==;$(@)),$(version;=+;$(@)))</_versionpolicy-impl>
                         <_versionpolicy-uses>[$(version;==;$(@)),$(version;+;$(@)))</_versionpolicy-uses>
                         <Specification-Version>1.0</Specification-Version>
                         <Specification-Title>JASPIC</Specification-Title>
                         <Specification-Vendor>Sun Microsystems</Specification-Vendor>
-                        <Private-Package>org.apache.geronimo.osgi.locator;sxc*</Private-Package>
+                        <Private-Package>org.apache.geronimo.osgi.locator</Private-Package>
                         <Bundle-Activator>org.apache.geronimo.osgi.locator.Activator</Bundle-Activator>
                     </instructions>
                 </configuration>
@@ -190,7 +192,7 @@
                     <plugin>
                         <groupId>org.jvnet.jaxb2.maven2</groupId>
                         <artifactId>maven-jaxb2-plugin</artifactId>
-                        <version>0.5</version>
+                        <version>0.7.2</version>
                         <executions>
                             <execution>
                                 <goals>
@@ -199,13 +201,22 @@
                             </execution>
                         </executions>
                         <configuration>
-                            <schemaDirectory>src/main/xsd</schemaDirectory>
-                            <packageName>org.apache.geronimo.components.jaspi.model</packageName>
+                            <generatePackage>org.apache.geronimo.components.jaspi.model</generatePackage>
+                            <specVersion>2.1</specVersion>
                             <extension>true</extension>
+                            <episode>true</episode>
                         </configuration>
                     </plugin>
                 </plugins>
             </build>
+            <!--<dependencies>-->
+                <!--<dependency>-->
+                    <!--<groupId>com.sun.xml.bind</groupId>-->
+                    <!--<artifactId>jaxb-xjc</artifactId>-->
+                    <!--<version>2.2</version>-->
+                    <!--<scope>provided</scope>-->
+                <!--</dependency>-->
+            <!--</dependencies>-->
         </profile>
         <profile>
             <id>sxc-generate</id>

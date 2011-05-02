@@ -69,6 +69,7 @@ import org.apache.geronimo.osgi.locator.ProviderLocator;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "authModuleType", propOrder = {
     "className",
+    "classLoaderName",
     "requestPolicy",
     "responsePolicy",
     "options"
@@ -188,39 +189,6 @@ public class AuthModuleType<T>
 
     public void setClassLoaderName(String classLoaderName) {
         this.classLoaderName = classLoaderName;
-    }
-
-    public T newAuthModule(final CallbackHandler callbackHandler) throws AuthException {
-        T authModule;
-        try {
-            authModule = java.security.AccessController
-            .doPrivileged(new PrivilegedExceptionAction<T>() {
-                public T run() throws ClassNotFoundException, SecurityException, NoSuchMethodException, IllegalArgumentException, InstantiationException, IllegalAccessException, InvocationTargetException, AuthException {
-                    Class<? extends T> cl = (Class<? extends T>) ProviderLocator.loadClass(className, getClass(), Thread.currentThread().getContextClassLoader());
-                    Constructor<? extends T> cnst = cl.getConstructor();
-                    T authModule = cnst.newInstance();
-                    Method m = cl.getMethod("initialize", MessagePolicy.class, MessagePolicy.class, CallbackHandler.class, Map.class);
-                    MessagePolicy reqPolicy = requestPolicy == null? null:requestPolicy.newMessagePolicy();
-                    MessagePolicy respPolicy = responsePolicy == null? null: responsePolicy.newMessagePolicy();
-                    m.invoke(authModule, reqPolicy, respPolicy, callbackHandler, options);
-                    return authModule;
-                }
-            });
-        } catch (PrivilegedActionException e) {
-            Exception inner = e.getException();
-            if (inner instanceof InstantiationException) {
-                throw (AuthException) new AuthException("AuthConfigFactory error:"
-                                + inner.getCause().getMessage()).initCause(inner.getCause());
-            } else {
-                throw (AuthException) new AuthException("AuthConfigFactory error: " + inner).initCause(inner);
-            }
-        } catch (Exception e) {
-            throw (AuthException) new AuthException("AuthConfigFactory error: " + e).initCause(e);
-        }
-
-
-
-        return authModule;
     }
 
 }

@@ -21,7 +21,7 @@
 // Generated on: 2008.07.15 at 04:13:34 PM PDT 
 //
 /**
- * @version $Rev$ $Date$
+ * @version $Rev: 680565 $ $Date: 2008-07-28 16:33:51 -0700 (Mon, 28 Jul 2008) $
  */
 @javax.xml.bind.annotation.XmlSchema(namespace = "http://geronimo.apache.org/xml/ns/geronimo-jaspi", elementFormDefault = javax.xml.bind.annotation.XmlNsForm.QUALIFIED)
 package org.apache.geronimo.components.jaspi.model;

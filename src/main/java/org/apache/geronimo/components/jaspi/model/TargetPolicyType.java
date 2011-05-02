@@ -55,7 +55,7 @@ import javax.xml.bind.annotation.XmlType;
  * </pre>
  * 
  * 
- * @version $Rev$ $Date$
+ * @version $Rev: 939768 $ $Date: 2010-04-30 11:26:46 -0700 (Fri, 30 Apr 2010) $
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "targetPolicyType", propOrder = {
@@ -125,12 +125,4 @@ public class TargetPolicyType
         return this.target;
     }
 
-    public MessagePolicy.TargetPolicy newTargetPolicy() throws AuthException {
-        MessagePolicy.Target[] targets = new MessagePolicy.Target[getTarget().size()];
-        int i = 0;
-        for (TargetType targetType: getTarget()) {
-            targets[i++] = targetType.newTarget();
-        }
-        return new MessagePolicy.TargetPolicy(targets, protectionPolicy.newProtectionPolicy());
-    }
 }

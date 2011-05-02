@@ -23,7 +23,6 @@ package org.apache.geronimo.components.jaspi.model;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
-import java.util.Collections;
 
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.message.module.ClientAuthModule;
@@ -40,7 +39,7 @@ import javax.xml.stream.XMLStreamReader;
 import org.xml.sax.SAXException;
 
 /**
- * @version $Rev$ $Date$
+ * @version $Rev: 939768 $ $Date: 2010-04-30 11:26:46 -0700 (Fri, 30 Apr 2010) $
  */
 public class JaspiXmlUtil {
     public static final XMLInputFactory XMLINPUT_FACTORY = XMLInputFactory.newInstance();
@@ -49,8 +48,8 @@ public class JaspiXmlUtil {
 
     static {
         try {
-//            JASPI_CONTEXT = JAXBContext.newInstance(JaspiType.class);
-            JASPI_CONTEXT = com.envoisolutions.sxc.jaxb.JAXBContextImpl.newInstance(new Class[] {JaspiType.class, ConfigProviderType.class, ClientAuthConfigType.class, ClientAuthContextType.class, ServerAuthConfigType.class, ServerAuthContextType.class, AuthModuleType.class}, Collections.singletonMap("com.envoisolutions.sxc.generate", "false"));
+            JASPI_CONTEXT = JAXBContext.newInstance(JaspiType.class, ConfigProviderType.class, ClientAuthConfigType.class, ClientAuthContextType.class, ServerAuthConfigType.class, ServerAuthContextType.class, AuthModuleType.class);
+//            JASPI_CONTEXT = com.envoisolutions.sxc.jaxb.JAXBContextImpl.newInstance(new Class[] {JaspiType.class, ConfigProviderType.class, ClientAuthConfigType.class, ClientAuthContextType.class, ServerAuthConfigType.class, ServerAuthContextType.class, AuthModuleType.class}, Collections.singletonMap("com.envoisolutions.sxc.generate", "false"));
 
         } catch (JAXBException e) {
             throw new RuntimeException("Could not create jaxb contexts for plugin types", e);

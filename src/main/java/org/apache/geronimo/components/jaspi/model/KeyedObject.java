@@ -24,10 +24,8 @@ import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.message.AuthException;
 
 /**
- * @version $Rev$ $Date$
+ * @version $Rev: 939768 $ $Date: 2010-04-30 11:26:46 -0700 (Fri, 30 Apr 2010) $
  */
 public interface KeyedObject {
     String getKey();
-    void initialize(CallbackHandler callbackHandler) throws AuthException;
-    boolean isPersistent();
 }

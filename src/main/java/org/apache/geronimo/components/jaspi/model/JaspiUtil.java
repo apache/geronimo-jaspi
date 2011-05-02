@@ -21,16 +21,18 @@
 package org.apache.geronimo.components.jaspi.model;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 import javax.security.auth.message.AuthException;
 import javax.security.auth.message.config.AuthConfigProvider;
 import javax.security.auth.message.module.ClientAuthModule;
 import javax.security.auth.message.module.ServerAuthModule;
+import org.apache.geronimo.components.jaspi.impl.ConfigProviderImpl;
 
 /**
  * Convenience methods to wrap various jaspi objects into AuthConfigProvider instances, ready to be registered.
- * @version $Rev$ $Date$
+ * @version $Rev: 939768 $ $Date: 2010-04-30 11:26:46 -0700 (Fri, 30 Apr 2010) $
  */
 public class JaspiUtil {
 
@@ -38,12 +40,12 @@ public class JaspiUtil {
     }
 
     public static AuthConfigProvider wrapAuthConfigProvider(ConfigProviderType configProviderType) {
-        return new ConfigProviderType.ConfigProviderImpl(configProviderType.getClientAuthConfig(), configProviderType.getServerAuthConfig());
+        return new ConfigProviderImpl(configProviderType.getClientAuthConfig(), configProviderType.getServerAuthConfig());
     }
 
     public static AuthConfigProvider wrapClientAuthConfig(ClientAuthConfigType clientAuthConfigType) throws AuthException {
-        Map<String, ClientAuthConfigType> clientAuthConfig = Collections.singletonMap(clientAuthConfigType.getKey(), clientAuthConfigType);
-        return new ConfigProviderType.ConfigProviderImpl(clientAuthConfig, Collections.<String, ServerAuthConfigType>emptyMap());
+        List<ClientAuthConfigType> clientAuthConfig = Collections.singletonList(clientAuthConfigType);
+        return new ConfigProviderImpl(clientAuthConfig, Collections.<ServerAuthConfigType>emptyList());
     }
 
     public static AuthConfigProvider wrapClientAuthContext(ClientAuthContextType clientAuthContextType, boolean _protected) throws AuthException {
@@ -58,8 +60,8 @@ public class JaspiUtil {
 
 
     public static AuthConfigProvider wrapServerAuthConfig(ServerAuthConfigType serverAuthConfigType) throws AuthException {
-        Map<String, ServerAuthConfigType> serverAuthConfig = Collections.singletonMap(serverAuthConfigType.getKey(), serverAuthConfigType);
-        return new ConfigProviderType.ConfigProviderImpl(Collections.<String, ClientAuthConfigType>emptyMap(), serverAuthConfig);
+        List<ServerAuthConfigType> serverAuthConfig = Collections.singletonList(serverAuthConfigType);
+        return new ConfigProviderImpl(Collections.<ClientAuthConfigType>emptyList(), serverAuthConfig);
     }
 
     public static AuthConfigProvider wrapServerAuthContext(ServerAuthContextType serverAuthContextType, boolean _protected) throws AuthException {

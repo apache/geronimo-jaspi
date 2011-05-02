@@ -25,11 +25,12 @@
 package org.apache.geronimo.components.jaspi.model;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
-import javax.security.auth.Subject;
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.message.AuthException;
 import javax.security.auth.message.MessageInfo;
@@ -38,8 +39,9 @@ import javax.security.auth.message.config.ClientAuthContext;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import org.apache.geronimo.components.jaspi.impl.ClientAuthConfigImpl;
 
 
 /**
@@ -64,8 +66,9 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  * </pre>
  * 
  * 
- * @version $Rev$ $Date$
+ * @version $Rev: 939768 $ $Date: 2010-04-30 11:26:46 -0700 (Fri, 30 Apr 2010) $
  */
+@XmlRootElement(name = "clientAuthConfig", namespace = "http://geronimo.apache.org/xml/ns/geronimo-jaspi")
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "clientAuthConfigType", propOrder = {
     "messageLayer",
@@ -85,8 +88,8 @@ public class ClientAuthConfigType
     @XmlElement(name = "protected")
     protected boolean _protected;
     //TODO go back to a map
-    @XmlJavaTypeAdapter(KeyedObjectMapAdapter.class)
-    protected Map<String, ClientAuthContextType> clientAuthContext;
+//    @XmlJavaTypeAdapter(KeyedObjectMapAdapter.class)
+    protected List<ClientAuthContextType> clientAuthContext;
 
 
     public ClientAuthConfigType() {
@@ -96,7 +99,7 @@ public class ClientAuthConfigType
         this.messageLayer = clientAuthContextType.getMessageLayer();
         this.appContext = clientAuthContextType.getAppContext();
         this.authenticationContextID = clientAuthContextType.getAuthenticationContextID();
-        this.clientAuthContext = Collections.singletonMap(clientAuthContextType.getKey(), clientAuthContextType);
+        this.clientAuthContext = Collections.singletonList(clientAuthContextType);
         this._protected = _protected;
     }
 
@@ -216,11 +219,11 @@ public class ClientAuthConfigType
      *
      * @return map of id to client auth context
      */
-    public Map<String, ClientAuthContextType> getClientAuthContext() {
+    public List<ClientAuthContextType> getClientAuthContext() {
         if (clientAuthContext == null) {
-            clientAuthContext = new HashMap<String, ClientAuthContextType>();
+            clientAuthContext = new ArrayList<ClientAuthContextType>();
         }
-        return this.clientAuthContext;
+        return clientAuthContext;
     }
 
 
@@ -229,7 +232,7 @@ public class ClientAuthConfigType
         if (authenticationContextID != null) {
             return authenticationContextID;
         }
-        for (ClientAuthContextType clientAuthContextType: clientAuthContext.values()) {
+        for (ClientAuthContextType clientAuthContextType: clientAuthContext) {
             String authContextID = clientAuthContextType.getAuthenticationContextID(messageInfo);
             if (authContextID != null) {
                 return authContextID;
@@ -242,61 +245,4 @@ public class ClientAuthConfigType
         return ConfigProviderType.getRegistrationKey(messageLayer, appContext);
     }
 
-    public void initialize(CallbackHandler callbackHandler) throws AuthException {
-    }
-
-    public boolean isPersistent() {
-        return true;
-    }
-
-    public ClientAuthConfig newClientAuthConfig(String messageLayer, String appContext, CallbackHandler callbackHandler) throws AuthException {
-        Map<String, ClientAuthContext> authContextMap = new HashMap<String, ClientAuthContext>();
-        for (ClientAuthContextType clientAuthContextType: getClientAuthContext().values()) {
-            if (clientAuthContextType.match(messageLayer, appContext)) {
-                ClientAuthContext clientAuthContext = clientAuthContextType.newClientAuthContext(callbackHandler);
-                String authContextID = clientAuthContextType.getAuthenticationContextID();
-                if (authContextID == null) {
-                    authContextID = getAuthenticationContextID();
-                }
-                if (!authContextMap.containsKey(authContextID)) {
-                    authContextMap.put(authContextID,  clientAuthContext);
-                }
-            }
-        }
-        return new ClientAuthConfigImpl(this, authContextMap);
-    }
-
-    public static class ClientAuthConfigImpl implements ClientAuthConfig {
-
-        private final ClientAuthConfigType clientAuthConfigType;
-        private final Map<String, ClientAuthContext> clientAuthContextMap;
-
-        public ClientAuthConfigImpl(ClientAuthConfigType clientAuthConfigType, Map<String, ClientAuthContext> clientAuthContextMap) {
-            this.clientAuthConfigType = clientAuthConfigType;
-            this.clientAuthContextMap = clientAuthContextMap;
-        }
-
-        public ClientAuthContext getAuthContext(String authContextID, Subject clientSubject, Map properties) throws AuthException {
-            return clientAuthContextMap.get(authContextID);
-        }
-
-        public String getAppContext() {
-            return clientAuthConfigType.getAppContext();
-        }
-
-        public String getAuthContextID(MessageInfo messageInfo) throws IllegalArgumentException {
-            return clientAuthConfigType.getAuthContextID(messageInfo);
-        }
-
-        public String getMessageLayer() {
-            return clientAuthConfigType.getMessageLayer();
-        }
-
-        public boolean isProtected() {
-            return clientAuthConfigType.isProtected();
-        }
-
-        public void refresh() throws SecurityException {
-        }
-    }
 }

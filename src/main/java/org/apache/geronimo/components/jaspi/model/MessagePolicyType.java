@@ -55,7 +55,7 @@ import javax.xml.bind.annotation.XmlType;
  * </pre>
  * 
  * 
- * @version $Rev$ $Date$
+ * @version $Rev: 939768 $ $Date: 2010-04-30 11:26:46 -0700 (Fri, 30 Apr 2010) $
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "messagePolicyType", propOrder = {
@@ -124,16 +124,5 @@ public class MessagePolicyType
         this.mandatory = value;
     }
 
-    public MessagePolicy newMessagePolicy() throws AuthException {
-        if (targetPolicy == null || targetPolicy.size() == 0) {
-            return null;
-        }
-        MessagePolicy.TargetPolicy[] targetPolicies = new MessagePolicy.TargetPolicy[targetPolicy.size()];
-        int i = 0;
-        for (TargetPolicyType targetPolicyType: targetPolicy) {
-            targetPolicies[i++] = targetPolicyType.newTargetPolicy();
-        }
-        return new MessagePolicy(targetPolicies, mandatory);
-    }
 
 }
