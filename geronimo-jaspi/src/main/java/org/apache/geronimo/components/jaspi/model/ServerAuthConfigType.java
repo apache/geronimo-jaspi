@@ -25,8 +25,10 @@
 package org.apache.geronimo.components.jaspi.model;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.security.auth.Subject;
@@ -39,7 +41,7 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import org.apache.geronimo.components.jaspi.impl.ServerAuthConfigImpl;
 
 
 /**
@@ -64,7 +66,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  * </pre>
  * 
  * 
- * @version $Rev$ $Date$
+ * @version $Rev: 939768 $ $Date: 2010-04-30 11:26:46 -0700 (Fri, 30 Apr 2010) $
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "serverAuthConfigType", propOrder = {
@@ -84,8 +86,8 @@ public class ServerAuthConfigType
     protected String authenticationContextID;
     @XmlElement(name = "protected")
     protected boolean _protected;
-    @XmlJavaTypeAdapter(KeyedObjectMapAdapter.class)
-    protected Map<String, ServerAuthContextType> serverAuthContext;
+//    @XmlJavaTypeAdapter(KeyedObjectMapAdapter.class)
+    protected List<ServerAuthContextType> serverAuthContext;
 
     public ServerAuthConfigType() {
     }
@@ -94,7 +96,7 @@ public class ServerAuthConfigType
         this.messageLayer = serverAuthContextType.getMessageLayer();
         this.appContext = serverAuthContextType.getAppContext();
         this.authenticationContextID = serverAuthContextType.getAuthenticationContextID();
-        this.serverAuthContext = Collections.singletonMap(serverAuthContextType.getKey(), serverAuthContextType);
+        this.serverAuthContext = Collections.singletonList(serverAuthContextType);
         this._protected = _protected;
     }
 
@@ -138,7 +140,7 @@ public class ServerAuthConfigType
         if (authenticationContextID != null) {
             return authenticationContextID;
         }
-        for (ServerAuthContextType serverAuthContextType: serverAuthContext.values()) {
+        for (ServerAuthContextType serverAuthContextType: serverAuthContext) {
             String authContextID = serverAuthContextType.getAuthenticationContextID(messageInfo);
             if (authContextID != null) {
                 return authContextID;
@@ -227,81 +229,15 @@ public class ServerAuthConfigType
      *
      * @return map of id to Server auth config
      */
-    public Map<String, ServerAuthContextType> getServerAuthContext() {
+    public List<ServerAuthContextType> getServerAuthContext() {
         if (serverAuthContext == null) {
-            serverAuthContext = new HashMap<String, ServerAuthContextType>();
+            serverAuthContext = new ArrayList<ServerAuthContextType>();
         }
-        return this.serverAuthContext;
+        return serverAuthContext;
     }
 
-    public ServerAuthContext getAuthContext(String authContextID, Subject serviceSubject, Map properties) throws AuthException {
-        //see page 136  We are going to ignore the clientSubject and properties for now.
-        for (ServerAuthContextType serverAuthContext: getServerAuthContext().values()) {
-            if (serverAuthContext.getAuthenticationContextID().equals(authContextID)) {
-                return serverAuthContext.getServerAuthContext();
-            }
-        }
-        return null;
-    }
     public String getKey() {
         return ConfigProviderType.getRegistrationKey(messageLayer, appContext);
     }
 
-    public void initialize(CallbackHandler callbackHandler) throws AuthException {
-    }
-
-    public boolean isPersistent() {
-        return true;
-    }
-
-    public ServerAuthConfig newServerAuthConfig(String messageLayer, String appContext, CallbackHandler callbackHandler) throws AuthException {
-        Map<String, ServerAuthContext> authContextMap = new HashMap<String, ServerAuthContext>();
-        for (ServerAuthContextType serverAuthContextType: getServerAuthContext().values()) {
-            if (serverAuthContextType.match(messageLayer, appContext)) {
-                ServerAuthContext serverAuthContext = serverAuthContextType.newServerAuthContext(callbackHandler);
-                String authContextID = serverAuthContextType.getAuthenticationContextID();
-                if (authContextID == null) {
-                    authContextID = getAuthenticationContextID();
-                }
-                if (!authContextMap.containsKey(authContextID)) {
-                    authContextMap.put(authContextID,  serverAuthContext);
-                }
-            }
-        }
-        return new ServerAuthConfigImpl(this, authContextMap);
-    }
-
-    public static class ServerAuthConfigImpl implements ServerAuthConfig {
-
-        private final ServerAuthConfigType serverAuthConfigType;
-        private final Map<String, ServerAuthContext> serverAuthContextMap;
-
-        public ServerAuthConfigImpl(ServerAuthConfigType serverAuthConfigType, Map<String, ServerAuthContext> serverAuthContextMap) {
-            this.serverAuthConfigType = serverAuthConfigType;
-            this.serverAuthContextMap = serverAuthContextMap;
-        }
-
-        public ServerAuthContext getAuthContext(String authContextID, Subject serverSubject, Map properties) throws AuthException {
-            return serverAuthContextMap.get(authContextID);
-        }
-
-        public String getAppContext() {
-            return serverAuthConfigType.getAppContext();
-        }
-
-        public String getAuthContextID(MessageInfo messageInfo) throws IllegalArgumentException {
-            return serverAuthConfigType.getAuthContextID(messageInfo);
-        }
-
-        public String getMessageLayer() {
-            return serverAuthConfigType.getMessageLayer();
-        }
-
-        public boolean isProtected() {
-            return serverAuthConfigType.isProtected();
-        }
-
-        public void refresh() throws SecurityException {
-        }
-    }
 }

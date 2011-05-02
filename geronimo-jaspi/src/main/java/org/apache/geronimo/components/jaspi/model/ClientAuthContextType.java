@@ -29,17 +29,17 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import javax.security.auth.Subject;
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.message.AuthException;
-import javax.security.auth.message.AuthStatus;
 import javax.security.auth.message.MessageInfo;
 import javax.security.auth.message.config.ClientAuthContext;
 import javax.security.auth.message.module.ClientAuthModule;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
+import org.apache.geronimo.components.jaspi.impl.ClientAuthContextImpl;
 
 
 /**
@@ -62,8 +62,9 @@ import javax.xml.bind.annotation.XmlType;
  * &lt;/complexType>
  * </pre>
  *
- * @version $Rev$ $Date$
+ * @version $Rev: 939768 $ $Date: 2010-04-30 11:26:46 -0700 (Fri, 30 Apr 2010) $
  */
+@XmlRootElement(name = "clientAuthContext", namespace = "http://geronimo.apache.org/xml/ns/geronimo-jaspi")
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "clientAuthContextType", propOrder = {
         "messageLayer",
@@ -72,7 +73,7 @@ import javax.xml.bind.annotation.XmlType;
         "clientAuthModule"
         })
 public class ClientAuthContextType
-        implements Serializable, KeyedObject {
+        implements Serializable {
 
     private final static long serialVersionUID = 12343L;
     protected String messageLayer;
@@ -185,84 +186,5 @@ public class ClientAuthContextType
         return this.clientAuthModule;
     }
 
-
-    public String getKey() {
-        return ConfigProviderType.getRegistrationKey(messageLayer, appContext);
-    }
-
-    public void initialize(CallbackHandler callbackHandler) throws AuthException {
-    }
-
-    public boolean isPersistent() {
-        return true;
-    }
-
-    public ClientAuthContext newClientAuthContext(CallbackHandler callbackHandler) throws AuthException {
-        List<ClientAuthModule> clientAuthModules = new ArrayList<ClientAuthModule>();
-        for (AuthModuleType<ClientAuthModule> clientAuthModuleType: clientAuthModule) {
-            ClientAuthModule instance = clientAuthModuleType.newAuthModule(callbackHandler);
-            clientAuthModules.add(instance);
-        }
-        return new ClientAuthContextImpl(clientAuthModules);
-    }
-
-    public boolean match(String messageLayer, String appContext) {
-        if (messageLayer == null) throw new NullPointerException("messageLayer");
-        if (appContext == null) throw new NullPointerException("appContext");
-        if (messageLayer.equals(this.messageLayer)) {
-            return appContext.equals(this.appContext) || this.appContext == null;
-        }
-        if (this.messageLayer == null) {
-            return appContext.equals(this.appContext) || this.appContext == null;
-        }
-        return false;
-    }
-
-    public static class ClientAuthContextImpl implements ClientAuthContext {
-
-        private final List<ClientAuthModule> clientAuthModules;
-
-        public ClientAuthContextImpl(List<ClientAuthModule> clientAuthModules) {
-            this.clientAuthModules = clientAuthModules;
-        }
-
-        public void cleanSubject(MessageInfo messageInfo, Subject subject) throws AuthException {
-            for (ClientAuthModule clientAuthModule : clientAuthModules) {
-                clientAuthModule.cleanSubject(messageInfo, subject);
-            }
-        }
-
-        public AuthStatus secureRequest(MessageInfo messageInfo, Subject clientSubject) throws AuthException {
-            for (ClientAuthModule clientAuthModule : clientAuthModules) {
-                AuthStatus result = clientAuthModule.secureRequest(messageInfo, clientSubject);
-
-                //jaspi spec p 74
-                if (result == AuthStatus.SUCCESS) {
-                    continue;
-                }
-                if (result == AuthStatus.SEND_CONTINUE || result == AuthStatus.FAILURE) {
-                    return result;
-                }
-                throw new AuthException("Invalid AuthStatus " + result + " from client auth module: " + clientAuthModule);
-            }
-            return AuthStatus.SUCCESS;
-        }
-
-        public AuthStatus validateResponse(MessageInfo messageInfo, Subject clientSubject, Subject serviceSubject) throws AuthException {
-            for (ClientAuthModule clientAuthModule : clientAuthModules) {
-                AuthStatus result = clientAuthModule.validateResponse(messageInfo, clientSubject, serviceSubject);
-
-                //jaspi spec p 74
-                if (result == AuthStatus.SUCCESS) {
-                    continue;
-                }
-                if (result == AuthStatus.SEND_CONTINUE || result == AuthStatus.FAILURE) {
-                    return result;
-                }
-                throw new AuthException("Invalid AuthStatus " + result + " from client auth module: " + clientAuthModule);
-            }
-            return AuthStatus.SUCCESS;
-        }
-    }
 
 }

@@ -30,47 +30,43 @@ import javax.security.auth.callback.CallbackHandler;
 import javax.xml.bind.annotation.adapters.XmlAdapter;
 
 /**
- * @version $Rev$ $Date$
+ * @version $Rev: 939768 $ $Date: 2010-04-30 11:26:46 -0700 (Fri, 30 Apr 2010) $
  */
-public class KeyedObjectMapAdapter<T extends KeyedObject> extends XmlAdapter<T[], Map<String, T>> {
+public class KeyedObjectMapAdapter<T extends KeyedObject> extends XmlAdapter<List<T>, Map<String, T>> {
     public static CallbackHandler staticCallbackHandler;
     private final CallbackHandler callbackHandler;
-    private final Class<T> type;
+//    private final Class<T> type;
 
-    public KeyedObjectMapAdapter(CallbackHandler callbackHandler, Class<T> type) {
+    public KeyedObjectMapAdapter(CallbackHandler callbackHandler) {
         this.callbackHandler = callbackHandler;
-        this.type = type;
+//        this.type = type;
     }
 
-    public KeyedObjectMapAdapter(Class<T> type) {
-        this(staticCallbackHandler, type);
+    public KeyedObjectMapAdapter() {
+        this(staticCallbackHandler);
     }
 
-    public Map<String, T> unmarshal(T[] configProviderTypes) throws Exception {
+    public Map<String, T> unmarshal(List<T> configProviderTypes) throws Exception {
         Map<String, T> map = new HashMap<String, T>();
         if (configProviderTypes != null) {
             for (T configProviderType : configProviderTypes) {
                 if (configProviderType != null) {
                     String key = configProviderType.getKey();
                     map.put(key, configProviderType);
-                    configProviderType.initialize(callbackHandler);
                 }
             }
         }
         return map;
     }
 
-    public T[] marshal(Map<String, T> stringConfigProviderTypeMap) throws Exception {
+    public ArrayList<T> marshal(Map<String, T> stringConfigProviderTypeMap) throws Exception {
         if (stringConfigProviderTypeMap == null) {
             return null;
         }
-        List<T> list = new ArrayList<T>();
+        ArrayList<T> list = new ArrayList<T>();
         for (T configProviderType : stringConfigProviderTypeMap.values()) {
-            if (configProviderType.isPersistent()) {
-                list.add(configProviderType);
-            }
+            list.add(configProviderType);
         }
-        T[] array = (T[]) Array.newInstance(type, list.size());
-        return list.toArray(array);
+        return list;
     }
 }

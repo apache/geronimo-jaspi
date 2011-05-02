@@ -31,7 +31,7 @@ import javax.xml.bind.annotation.adapters.XmlAdapter;
 /**
  * jaxb helper class for maps
  *
- * @version $Rev$ $Date$
+ * @version $Rev: 939768 $ $Date: 2010-04-30 11:26:46 -0700 (Fri, 30 Apr 2010) $
  */
 public class StringMapAdapter extends XmlAdapter<String, Map<String, String>> {
     public Map<String, String> unmarshal(String s) throws Exception {

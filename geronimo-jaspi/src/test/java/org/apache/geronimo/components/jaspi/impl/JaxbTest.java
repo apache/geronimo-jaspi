@@ -18,16 +18,13 @@
  */
 
 
-package org.apache.geronimo.components.jaspi.model;
+package org.apache.geronimo.components.jaspi.impl;
 
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.File;
-import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.io.FileWriter;
 import java.io.FileReader;
@@ -46,11 +43,18 @@ import javax.security.auth.message.AuthException;
 import javax.security.auth.message.module.ClientAuthModule;
 import javax.security.auth.callback.CallbackHandler;
 
+import org.apache.geronimo.components.jaspi.AuthConfigFactoryImpl;
+import org.apache.geronimo.components.jaspi.model.AuthModuleType;
+import org.apache.geronimo.components.jaspi.model.ClientAuthConfigType;
+import org.apache.geronimo.components.jaspi.model.ClientAuthContextType;
+import org.apache.geronimo.components.jaspi.model.ConfigProviderType;
+import org.apache.geronimo.components.jaspi.model.JaspiType;
+import org.apache.geronimo.components.jaspi.model.JaspiXmlUtil;
 import org.testng.annotations.Test;
 import org.xml.sax.SAXException;
 
 /**
- * @version $Rev$ $Date$
+ * @version $Rev: 939768 $ $Date: 2010-04-30 11:26:46 -0700 (Fri, 30 Apr 2010) $
  */
 
 public class JaxbTest {
@@ -66,7 +70,7 @@ public class JaxbTest {
         JaspiType jaspi1 = loadJaspi(file);
         if (jaspi1.getConfigProvider().size() != count) throw new Exception("expected " + count + " configprovider, not this: " + jaspi1.getConfigProvider());
         File newFile = getWriteFile(file);
-        Writer writer = getWriter(newFile);
+        Writer writer = new FileWriter(newFile);
         JaspiXmlUtil.writeJaspi(jaspi1, writer);
         JaspiType jaspi2 = JaspiXmlUtil.loadJaspi(new FileReader(newFile));
         if (jaspi2.getConfigProvider().size() != count) throw new Exception("expected " + count + " configprovider, not this: " + jaspi2.getConfigProvider());
@@ -78,12 +82,15 @@ public class JaxbTest {
         JaspiType jaspi1 = loadJaspi(file);
         if (jaspi1.getConfigProvider().size() != count) throw new Exception("expected " + count + " configprovider, not this: " + jaspi1.getConfigProvider());
         File newFile = getWriteFile(file);
-        Writer writer = getWriter(newFile);
+        Writer writer = new FileWriter(newFile);
         JaspiXmlUtil.writeJaspi(jaspi1, writer);
         JaspiType jaspi2 = JaspiXmlUtil.loadJaspi(new FileReader(newFile));
         if (jaspi2.getConfigProvider().size() != count) throw new Exception("expected " + count + " configprovider, not this: " + jaspi2.getConfigProvider());
 
-        AuthConfigProvider configProvider = jaspi1.getConfigProvider().get(ConfigProviderType.getRegistrationKey("Http", "test-app1")).getProvider();
+        AuthConfigFactoryImpl authConfigFactory = new AuthConfigFactoryImpl(jaspi1, callbackHandler);
+
+        AuthConfigProvider configProvider = authConfigFactory.getConfigProvider("Http", "test-app1", null);
+//                adapter.unmarshal(jaspi1.getConfigProvider()).get(ConfigProviderType.getRegistrationKey("Http", "test-app1")).getProvider();
         checkConfigProvider(configProvider);
     }
 
@@ -93,9 +100,9 @@ public class JaxbTest {
         return rbac;
     }
 
-    private Reader getReader(String file) throws UnsupportedEncodingException {
+    private Reader getReader(String file) {
         InputStream in = getClass().getClassLoader().getResourceAsStream("test-" + file + ".xml");
-        Reader reader = new InputStreamReader(in, "UTF-8");
+        Reader reader = new InputStreamReader(in);
         return reader;
     }
 
@@ -110,13 +117,13 @@ public class JaxbTest {
         String file = "config-provider";
         Reader reader = getReader(file);
         ConfigProviderType jaspi1 = JaspiXmlUtil.loadConfigProvider(reader);
-        jaspi1.initialize(callbackHandler);
+//        jaspi1.initialize(callbackHandler);
         File newFile = getWriteFile(file);
-        Writer writer = getWriter(newFile);
+        Writer writer = new FileWriter(newFile);
         JaspiXmlUtil.writeConfigProvider(jaspi1, writer);
         ConfigProviderType jaspi2 = JaspiXmlUtil.loadConfigProvider(new FileReader(newFile));
 
-        AuthConfigProvider configProvider = jaspi1.getProvider();
+        AuthConfigProvider configProvider = ConfigProviderImpl.newConfigProvider(null, jaspi1);
         checkConfigProvider(configProvider);
     }
 
@@ -125,13 +132,13 @@ public class JaxbTest {
         String file = "client-auth-config";
         Reader reader = getReader(file);
         ClientAuthConfigType jaspi1 = JaspiXmlUtil.loadClientAuthConfig(reader);
-        jaspi1.initialize(callbackHandler);
+//        jaspi1.initialize(callbackHandler);
         File newFile = getWriteFile(file);
-        Writer writer = getWriter(newFile);
+        Writer writer = new FileWriter(newFile);
         JaspiXmlUtil.writeClientAuthConfig(jaspi1, writer);
         ClientAuthConfigType jaspi2 = JaspiXmlUtil.loadClientAuthConfig(new FileReader(newFile));
 
-        ClientAuthConfig clientAuthConfig = jaspi1.newClientAuthConfig("Http", "app", callbackHandler);
+        ClientAuthConfig clientAuthConfig = ConfigProviderImpl.newClientAuthConfig(jaspi1, "Http", "app", callbackHandler);
         checkClientAuthConfig(clientAuthConfig);
     }
 
@@ -141,17 +148,12 @@ public class JaxbTest {
         Reader reader = getReader(file);
         ClientAuthContextType jaspi1 = JaspiXmlUtil.loadClientAuthContext(reader);
         File newFile = getWriteFile(file);
-        Writer writer = getWriter(newFile);
+        Writer writer = new FileWriter(newFile);
         JaspiXmlUtil.writeClientAuthContext(jaspi1, writer);
         ClientAuthContextType jaspi2 = JaspiXmlUtil.loadClientAuthContext(new FileReader(newFile));
 
-        ClientAuthContext clientAuthConfig = jaspi1.newClientAuthContext(callbackHandler);
+        ClientAuthContext clientAuthConfig = ConfigProviderImpl.newClientAuthContext(jaspi1, callbackHandler);
         clientAuthConfig.secureRequest(null, null);
-    }
-
-    private Writer getWriter(File newFile) throws IOException {
-        FileOutputStream out = new FileOutputStream(newFile);
-        return new OutputStreamWriter(out, "UTF-8");//new FileWriter(newFile);
     }
 
     @Test
@@ -160,11 +162,11 @@ public class JaxbTest {
         Reader reader = getReader(file);
         AuthModuleType<ClientAuthModule> jaspi1 = JaspiXmlUtil.loadClientAuthModule(reader);
         File newFile = getWriteFile(file);
-        Writer writer = getWriter(newFile);
+        Writer writer = new FileWriter(newFile);
         JaspiXmlUtil.writeClientAuthModule(jaspi1, writer);
         AuthModuleType jaspi2 = JaspiXmlUtil.loadClientAuthModule(new FileReader(newFile));
 
-        ClientAuthModule clientAuthConfig = jaspi1.newAuthModule(callbackHandler);
+        ClientAuthModule clientAuthConfig =ConfigProviderImpl.newAuthModule(jaspi1, callbackHandler);
         clientAuthConfig.secureRequest(null, null);
     }
 

@@ -25,7 +25,9 @@
 package org.apache.geronimo.components.jaspi.model;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -52,7 +54,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  * </pre>
  * 
  * 
- * @version $Rev$ $Date$
+ * @version $Rev: 939768 $ $Date: 2010-04-30 11:26:46 -0700 (Fri, 30 Apr 2010) $
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "jaspiType", propOrder = {
@@ -63,9 +65,9 @@ public class JaspiType
 {
 
     private final static long serialVersionUID = 12343L;
-
-    @XmlJavaTypeAdapter(KeyedObjectMapAdapter.class)
-    protected Map<String, ConfigProviderType> configProvider;
+    protected List<ConfigProviderType> configProvider;
+//    @XmlJavaTypeAdapter(KeyedObjectMapAdapter.class)
+//    protected Map<String, ConfigProviderType> configProvider;
 
     /**
      * Gets the value of the configProvider property.
@@ -88,11 +90,11 @@ public class JaspiType
      * {@link ConfigProviderType }
      * 
      *
-     * @return map of id to Config Provider
+     * @return list of Config Provider
      */
-    public Map<String, ConfigProviderType> getConfigProvider() {
+     public List<ConfigProviderType> getConfigProvider() {
         if (configProvider == null) {
-            configProvider = new HashMap<String, ConfigProviderType>();
+            configProvider = new ArrayList<ConfigProviderType>();
         }
         return this.configProvider;
     }

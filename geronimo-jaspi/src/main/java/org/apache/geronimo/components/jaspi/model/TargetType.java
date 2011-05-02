@@ -57,7 +57,7 @@ import org.apache.geronimo.osgi.locator.ProviderLocator;
  * </pre>
  * 
  * 
- * @version $Rev$ $Date$
+ * @version $Rev: 939768 $ $Date: 2010-04-30 11:26:46 -0700 (Fri, 30 Apr 2010) $
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "targetType", propOrder = {
@@ -93,31 +93,6 @@ public class TargetType
      */
     public void setClassName(String value) {
         this.className = value;
-    }
-
-    public MessagePolicy.Target newTarget() throws AuthException {
-        try {
-            return java.security.AccessController
-            .doPrivileged(new PrivilegedExceptionAction<MessagePolicy.Target>() {
-                public MessagePolicy.Target run() throws ClassNotFoundException, SecurityException, NoSuchMethodException, IllegalArgumentException, InstantiationException, IllegalAccessException, InvocationTargetException {
-                    Class<? extends MessagePolicy.Target> cl = ProviderLocator.loadClass(className, getClass(), Thread.currentThread().getContextClassLoader()).asSubclass(MessagePolicy.Target.class);
-                    Constructor<? extends MessagePolicy.Target> cnst = cl.getConstructor();
-                    MessagePolicy.Target target = cnst.newInstance();
-                    return target;
-                }
-            });
-        } catch (PrivilegedActionException e) {
-            Exception inner = e.getException();
-            if (inner instanceof InstantiationException) {
-                throw (AuthException) new AuthException("AuthConfigFactory error:"
-                                + inner.getCause().getMessage()).initCause(inner.getCause());
-            } else {
-                throw (AuthException) new AuthException("AuthConfigFactory error: " + inner).initCause(inner);
-            }
-        } catch (Exception e) {
-            throw (AuthException) new AuthException("AuthConfigFactory error: " + e).initCause(e);
-        }
-        
     }
 
 }

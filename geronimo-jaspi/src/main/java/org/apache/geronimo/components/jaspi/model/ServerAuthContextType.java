@@ -29,10 +29,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import javax.security.auth.Subject;
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.message.AuthException;
-import javax.security.auth.message.AuthStatus;
 import javax.security.auth.message.MessageInfo;
 import javax.security.auth.message.config.ServerAuthContext;
 import javax.security.auth.message.module.ServerAuthModule;
@@ -40,6 +38,7 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
+import org.apache.geronimo.components.jaspi.impl.ServerAuthContextImpl;
 
 
 /**
@@ -63,7 +62,7 @@ import javax.xml.bind.annotation.XmlType;
  * </pre>
  *
  * 
- * @version $Rev$ $Date$
+ * @version $Rev: 939768 $ $Date: 2010-04-30 11:26:46 -0700 (Fri, 30 Apr 2010) $
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "serverAuthContextType", propOrder = {
@@ -73,17 +72,13 @@ import javax.xml.bind.annotation.XmlType;
         "serverAuthModule"
         })
 public class ServerAuthContextType
-        implements Serializable, KeyedObject {
+        implements Serializable {
 
     private final static long serialVersionUID = 12343L;
     protected String messageLayer;
     protected String appContext;
     protected String authenticationContextID;
     protected List<AuthModuleType<ServerAuthModule>> serverAuthModule;
-
-    @XmlTransient
-    private ServerAuthContext serverAuthContext;
-
 
     public ServerAuthContextType() {
     }
@@ -185,96 +180,6 @@ public class ServerAuthContextType
             serverAuthModule = new ArrayList<AuthModuleType<ServerAuthModule>>();
         }
         return this.serverAuthModule;
-    }
-
-    public String getKey() {
-        return ConfigProviderType.getRegistrationKey(messageLayer, appContext);
-    }
-
-    public void initialize(CallbackHandler callbackHandler) throws AuthException {
-        List<ServerAuthModule> serverAuthModules = new ArrayList<ServerAuthModule>();
-        for (AuthModuleType<ServerAuthModule> serverAuthModuleType: serverAuthModule) {
-            ServerAuthModule instance = serverAuthModuleType.newAuthModule(callbackHandler);
-            serverAuthModules.add(instance);
-        }
-        serverAuthContext = new ServerAuthContextImpl(serverAuthModules);
-    }
-
-    public boolean isPersistent() {
-        return true;
-    }
-
-    public ServerAuthContext getServerAuthContext() {
-        return serverAuthContext;
-    }
-
-    public ServerAuthContext newServerAuthContext(CallbackHandler callbackHandler) throws AuthException {
-        List<ServerAuthModule> serverAuthModules = new ArrayList<ServerAuthModule>();
-        for (AuthModuleType<ServerAuthModule> serverAuthModuleType: serverAuthModule) {
-            ServerAuthModule instance = serverAuthModuleType.newAuthModule(callbackHandler);
-            serverAuthModules.add(instance);
-        }
-        return new ServerAuthContextImpl(serverAuthModules);
-    }
-
-    public boolean match(String messageLayer, String appContext) {
-        if (messageLayer == null) throw new NullPointerException("messageLayer");
-        if (appContext == null) throw new NullPointerException("appContext");
-        if (messageLayer.equals(this.messageLayer)) {
-            return appContext.equals(this.appContext) || this.appContext == null;
-        }
-        if (this.messageLayer == null) {
-            return appContext.equals(this.appContext) || this.appContext == null;
-        }
-        return false;
-    }
-
-    public static class ServerAuthContextImpl implements ServerAuthContext {
-
-        private final List<ServerAuthModule> serverAuthModules;
-
-        public ServerAuthContextImpl(List<ServerAuthModule> serverAuthModules) {
-            this.serverAuthModules = serverAuthModules;
-        }
-
-        public void cleanSubject(MessageInfo messageInfo, Subject subject) throws AuthException {
-            for (ServerAuthModule serverAuthModule : serverAuthModules) {
-                serverAuthModule.cleanSubject(messageInfo, subject);
-            }
-        }
-
-        public AuthStatus secureResponse(MessageInfo messageInfo, Subject serviceSubject) throws AuthException {
-            for (ServerAuthModule serverAuthModule : serverAuthModules) {
-                AuthStatus result = serverAuthModule.secureResponse(messageInfo, serviceSubject);
-
-                //jaspi spec p 86
-                if (result == AuthStatus.SEND_SUCCESS) {
-                    continue;
-                }
-                if (result == AuthStatus.SEND_CONTINUE || result == AuthStatus.SEND_FAILURE) {
-                    return result;
-                }
-                throw new AuthException("Invalid AuthStatus " + result + " from server auth module secureResponse: " + serverAuthModule);
-            }
-            return AuthStatus.SEND_SUCCESS;
-        }
-
-        public AuthStatus validateRequest(MessageInfo messageInfo, Subject clientSubject, Subject serviceSubject) throws AuthException {
-            for (ServerAuthModule serverAuthModule : serverAuthModules) {
-                AuthStatus result = serverAuthModule.validateRequest(messageInfo, clientSubject, serviceSubject);
-
-                //jaspi spec p 88
-                if (result == AuthStatus.SUCCESS) {
-                    continue;
-                }
-                if (result == AuthStatus.SEND_SUCCESS || result == AuthStatus.SEND_CONTINUE || result == AuthStatus.FAILURE) {
-                    return result;
-                }
-                throw new AuthException("Invalid AuthStatus " + result + " from server auth module validateRequest: " + serverAuthModule);
-            }
-            return AuthStatus.SUCCESS;
-        }
-
     }
 
 }
