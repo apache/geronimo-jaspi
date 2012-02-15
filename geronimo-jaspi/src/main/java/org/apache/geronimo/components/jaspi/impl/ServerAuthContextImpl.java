@@ -70,7 +70,7 @@ public class ServerAuthContextImpl implements ServerAuthContext {
             if (result == AuthStatus.SUCCESS) {
                 continue;
             }
-            if (result == AuthStatus.SEND_SUCCESS || result == AuthStatus.SEND_CONTINUE || result == AuthStatus.FAILURE) {
+            if (result == AuthStatus.SEND_SUCCESS || result == AuthStatus.SEND_CONTINUE || result == AuthStatus.SEND_FAILURE) {
                 return result;
             }
             throw new AuthException("Invalid AuthStatus " + result + " from server auth module validateRequest: " + serverAuthModule);
