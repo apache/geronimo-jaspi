@@ -54,7 +54,7 @@ public class AuthConfigFactoryImpl extends AuthConfigFactory {
 
     private static ClassLoader contextClassLoader;
 
-    private Map<String, ConfigProviderInfo> configProviders = Collections.emptyMap();
+    private Map<String, ConfigProviderInfo> configProviders = new HashMap<String, ConfigProviderInfo>();
 
     private final CallbackHandler callbackHandler;
     private final File configFile;

@@ -16,7 +16,7 @@
     limitations under the License.
 -->
 
-<!-- $Rev: 1032962 $ $Date: 2010-11-09 04:23:49 -0800 (Tue, 09 Nov 2010) $ -->
+<!-- $Rev$ $Date$ -->
 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
@@ -176,7 +176,7 @@
                         <Specification-Version>1.0</Specification-Version>
                         <Specification-Title>JASPIC</Specification-Title>
                         <Specification-Vendor>Sun Microsystems</Specification-Vendor>
-                        <Private-Package>org.apache.geronimo.osgi.locator</Private-Package>
+                        <Private-Package>org.apache.geronimo.osgi.locator,org.apache.geronimo.components.jaspi.impl</Private-Package>
                         <Bundle-Activator>org.apache.geronimo.osgi.locator.Activator</Bundle-Activator>
                     </instructions>
                 </configuration>
